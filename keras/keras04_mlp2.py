@@ -15,7 +15,7 @@ x=x.T
 #2. 모델구성
 
 model=Sequential()
-model.add(Dense(8,input_dim=3))
+model.add(Dense(50,input_dim=3))
 model.add(Dense(100))
 model.add(Dense(80))
 model.add(Dense(60))
@@ -27,7 +27,7 @@ model.add(Dense(1))
 #3. 컴파일, 훈련
 
 model.compile(loss='mse',optimizer='adam')
-model.fit(x,y, epochs=100, batch_size=3)
+model.fit(x,y, epochs=800, batch_size=3)
 
 #4. 결과예측
 loss=model.evaluate(x,y)
@@ -36,5 +36,5 @@ print("로스 :",loss)
 print("[10,1.3,0]의 예측값 : ",result)
 
 
-# 로스 : 0.0009193670703098178                          8,100,80,60,40,20,1/ epochs=100 batch_size=3
-# [10,1.3,0]의 예측값 :  [[10.001851]]
+# 로스 : 3.17562444251962e-06                           8,100,80,60,40,20,1/ epochs=100 batch_size=3
+# 11과 2의 예측값 : [[10.999652   1.9996151]]

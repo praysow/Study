@@ -33,7 +33,7 @@ model.fit(x,y, epochs=100,batch_size=3)
 loss=model.evaluate(x,y)
 result = model.predict([[10,1.3]])
 print("로스 :", loss)
-print("[[10, 1.3]]의 예측값:",result)
+print("11의 예측값:",result)
 
 # 로스 : 2.459689767420059e-06
 # [[10, 1.3]]의 예측값: [[10.001245]]       5,100,70,50,30,1, epoch=100, batch=3
