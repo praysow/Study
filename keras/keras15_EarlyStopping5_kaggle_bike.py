@@ -5,7 +5,6 @@ from keras.layers import Dense
 import numpy as np
 import pandas as pd
 
-
 #1. 데이터
 
 path= "c:\_data\kaggle\\bike\\"
@@ -20,39 +19,11 @@ sampleSubmission_csv = pd.read_csv(path+"sampleSubmission.csv")
 x= train_csv.drop(['count','casual','registered'], axis=1)
 y= train_csv['count']
 
-x_train,x_test,y_train,y_test=train_test_split(x,y, train_size=0.7,shuffle=False, random_state=156)
+x_train,x_test,y_train,y_test=train_test_split(x,y, train_size=0.7, random_state=6)
 
-
-# import matplotlib.pyplot as plt
-# import random
-# import time
-# plt.ion()
-# fig, ax= plt.subplots()
-# ax.plot(x_test,y_test)
-# plt.show()
-# plt.pause(0.1)
 #2.모델구성
-
 model=Sequential()
 model.add(Dense(10,input_dim=8,activation='relu'))
-# model.add(Dense(20,activation='relu'))
-# model.add(Dense(30,activation='relu'))
-# model.add(Dense(40,activation='relu'))
-# model.add(Dense(50,activation='relu'))
-# model.add(Dense(60,activation='relu'))
-# model.add(Dense(70,activation='relu'))
-# model.add(Dense(80,activation='relu'))
-# model.add(Dense(90,activation='relu'))
-# model.add(Dense(100,activation='relu'))
-# model.add(Dense(90,activation='relu'))
-# model.add(Dense(80,activation='relu'))
-# model.add(Dense(70,activation='relu'))
-# model.add(Dense(60,activation='relu'))
-# model.add(Dense(50,activation='relu'))
-# model.add(Dense(40,activation='relu'))
-# model.add(Dense(30,activation='relu'))
-# model.add(Dense(20,activation='relu'))
-# model.add(Dense(10,activation='relu'))
 model.add(Dense(9,activation='relu'))
 model.add(Dense(8,activation='relu'))
 model.add(Dense(7,activation='relu'))
@@ -65,8 +36,17 @@ model.add(Dense(1))
 
 
 #3.컴파일 훈련
+from keras.callbacks import EarlyStopping
+es = EarlyStopping(monitor='val_loss',
+                   mode='min',
+                   patience=500,
+                   verbose=1,
+                   restore_best_weights=True
+                   )
 model.compile(loss='mse',optimizer='adam')
-hist=model.fit(x_train,y_train, epochs=300, batch_size=200,verbose=2,validation_split=0.3)
+hist=model.fit(x_train,y_train, epochs=500, batch_size=200,verbose=2,validation_split=0.3,
+            callbacks=[es]
+               )
 
 #4.결과예측
 loss=model.evaluate(x_test,y_test)
@@ -75,7 +55,7 @@ y_submit=model.predict(test_csv)
 
 sampleSubmission_csv['count'] = y_submit
 print(sampleSubmission_csv)
-sampleSubmission_csv.to_csv(path +"sampleSubmission_15.csv", index=False)
+sampleSubmission_csv.to_csv(path +"sampleSubmission_16.csv", index=False)
 # print("로스 :",loss)
 # print("음수 개수:",sampleSubmission_csv[sampleSubmission_csv['count']<0].count())
 
@@ -89,7 +69,6 @@ def RMSE(y_test, y_predict):
     return np.sqrt(mean_squared_error(y_test,y_predict))
 rmse=RMSE(y_test,y_predict)
 print("RMSE :",rmse)
-
 import matplotlib.pyplot as plt
 from matplotlib import font_manager, rc
 font_path = "c:\windows\Fonts\gulim.ttc"
@@ -100,7 +79,7 @@ rc('font', family=font)
 plt.figure(figsize=(65,6))
 # plt.scatter(hist.history['loss'])
 plt.plot(hist.history['loss'],c='red', label='loss',marker='.')
-plt.plot(hist.history['val_loss'],c='blue', label='val_loss',marker='.')
+plt.plot(hist.history['val_loss'],c='blue', label='loss',marker='.')
 # plt.plot(hist.history['r2'],c='pink', label='loss',marker='.')
 plt.legend(loc='upper right')
 plt.title('케글 로스')
@@ -108,3 +87,15 @@ plt.xlabel('epochs')
 plt.ylabel('loss')
 plt.grid()
 plt.show()
+
+'''
+
+R2 score 0.33524081871060485        patience=50
+로스 : 21393.99609375               epochs=1000, batch_size=200,verbose=2,validation_split=0.3
+음수 개수: datetime    0            15,20,100,150,80,40,20,1
+count       0
+dtype: int64
+RMSE : 146.2668516736104
+
+
+'''

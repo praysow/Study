@@ -14,11 +14,11 @@ y_test = np.array([8,9,10])
 #2. 모델구성
 model=Sequential()
 model.add(Dense(10, input_dim=1))
-model.add(Dense(70))
-model.add(Dense(100))
-model.add(Dense(70))
-model.add(Dense(50))
-model.add(Dense(1))
+# model.add(Dense(70))
+# model.add(Dense(100))
+# model.add(Dense(70))
+# model.add(Dense(50))
+# model.add(Dense(1))
 
 #3.컴파일 훈련
 model.compile(loss='mse',optimizer='adam')
@@ -31,12 +31,12 @@ print("8,9,10의 예측값 :", result)
 
 
 '''
-verbos= 01 침묵
+verbos= 0 침묵
 verbos= 1 디폴트
 verbos= 2 프로그래스바 삭제
-verbos= 3 ?
-verbos= 4 ?
-verbos= 5 ?
+verbos= 3 epoch만 나옴
+verbos= 4 epoch만 나옴
+verbos= 5 epoch만 나옴
 검증은 사람 평가는 기계
 
 

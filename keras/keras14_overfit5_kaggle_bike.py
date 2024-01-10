@@ -5,7 +5,6 @@ from keras.layers import Dense
 import numpy as np
 import pandas as pd
 
-
 #1. 데이터
 
 path= "c:\_data\kaggle\\bike\\"
@@ -22,51 +21,21 @@ y= train_csv['count']
 
 x_train,x_test,y_train,y_test=train_test_split(x,y, train_size=0.7,shuffle=False, random_state=156)
 
-
-# import matplotlib.pyplot as plt
-# import random
-# import time
-# plt.ion()
-# fig, ax= plt.subplots()
-# ax.plot(x_test,y_test)
-# plt.show()
-# plt.pause(0.1)
 #2.모델구성
-
 model=Sequential()
-model.add(Dense(10,input_dim=8,activation='relu'))
-# model.add(Dense(20,activation='relu'))
-# model.add(Dense(30,activation='relu'))
-# model.add(Dense(40,activation='relu'))
-# model.add(Dense(50,activation='relu'))
-# model.add(Dense(60,activation='relu'))
-# model.add(Dense(70,activation='relu'))
-# model.add(Dense(80,activation='relu'))
-# model.add(Dense(90,activation='relu'))
-# model.add(Dense(100,activation='relu'))
-# model.add(Dense(90,activation='relu'))
-# model.add(Dense(80,activation='relu'))
-# model.add(Dense(70,activation='relu'))
-# model.add(Dense(60,activation='relu'))
-# model.add(Dense(50,activation='relu'))
-# model.add(Dense(40,activation='relu'))
-# model.add(Dense(30,activation='relu'))
-# model.add(Dense(20,activation='relu'))
-# model.add(Dense(10,activation='relu'))
-model.add(Dense(9,activation='relu'))
-model.add(Dense(8,activation='relu'))
-model.add(Dense(7,activation='relu'))
-model.add(Dense(6,activation='relu'))
-model.add(Dense(5,activation='relu'))
-model.add(Dense(4,activation='relu'))
-model.add(Dense(3,activation='relu'))
-model.add(Dense(2,activation='relu'))
+model.add(Dense(80,input_dim=8,activation='relu'))
+model.add(Dense(90,activation='relu'))
+model.add(Dense(100,activation='relu'))
+model.add(Dense(150,activation='relu'))
+model.add(Dense(80,activation='relu'))
+model.add(Dense(40,activation='relu'))
+model.add(Dense(20,activation='relu'))
 model.add(Dense(1))
 
 
 #3.컴파일 훈련
 model.compile(loss='mse',optimizer='adam')
-hist=model.fit(x_train,y_train, epochs=300, batch_size=200,verbose=2,validation_split=0.3)
+hist=model.fit(x_train,y_train, epochs=204, batch_size=200,verbose=2,validation_split=0.3)
 
 #4.결과예측
 loss=model.evaluate(x_test,y_test)
@@ -108,3 +77,10 @@ plt.xlabel('epochs')
 plt.ylabel('loss')
 plt.grid()
 plt.show()
+'''
+R2 score 0.33713632961133244 epochs=203 14번
+로스 : 21332.986328125       random_state=156
+음수 개수: datetime    0
+
+
+'''

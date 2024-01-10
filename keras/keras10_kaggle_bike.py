@@ -33,11 +33,17 @@ x_train,x_test,y_train,y_test=train_test_split(x,y, train_size=0.8, random_state
 
 #2.모델구성
 model=Sequential()
-model.add(Dense(80,input_dim=8,activation='relu'))
-model.add(Dense(100,activation='relu'))
-model.add(Dense(80,activation='relu'))
-model.add(Dense(60,activation='relu'))
-model.add(Dense(40,activation='relu'))
+model.add(Dense(10,input_dim=8,activation='relu'))
+model.add(Dense(10,activation='relu'))
+model.add(Dense(1,activation='relu'))
+model.add(Dense(20,activation='relu'))
+model.add(Dense(50,activation='relu'))
+model.add(Dense(200,activation='relu'))
+model.add(Dense(50,activation='relu'))
+model.add(Dense(20,activation='relu'))
+model.add(Dense(1,activation='relu'))
+model.add(Dense(10,activation='relu'))
+model.add(Dense(10,activation='relu'))
 model.add(Dense(1))
 
 
@@ -52,7 +58,7 @@ y_submit=model.predict(test_csv)
 
 sampleSubmission_csv['count'] = y_submit
 print(sampleSubmission_csv)
-sampleSubmission_csv.to_csv(path +"sampleSubmission_12.csv", index=False)
+sampleSubmission_csv.to_csv(path +"sampleSubmission_13.csv", index=False)
 print("로스 :",loss)
 print("음수 개수:",sampleSubmission_csv[sampleSubmission_csv['count']<0].count())
 
@@ -70,25 +76,10 @@ def RMSLE(y_test, y_predict):
 rmsle=RMSLE(y_test,y_predict)
 print("RMSLE :", rmsle)
 '''
-
-로스 : 21523.55078125
+로스 : 22757.763671875
 음수 개수: datetime    0
 count       0
 dtype: int64
-69/69 [==============================] - 0s 476us/step
-RMSLE : 1.262370009138048 8번 random=7
-
-로스 : 30374.533203125
-음수 개수: datetime    0
-count       0
-dtype: int64
-69/69 [==============================] - 0s 244us/step
-RMSE : 174.2829108149316 random=7
-
-로스 : 21255.24609375
-음수 개수: datetime    0
-count       0
-dtype: int64
-69/69 [==============================] - 0s 515us/step
-RMSLE : 1.3035229603667782      random=450
+69/69 [==============================] - 0s 331us/step
+RMSLE : 1.2888789343348863
 '''
