@@ -34,7 +34,7 @@ x_train,x_test,y_train,y_test=train_test_split(x,y, train_size=0.8, random_state
 #2. 모델구성
 model=Sequential()
 model.add(Dense(15,input_dim=9,activation='relu'))
-model.add(Dense(20,activation='relu'))
+model.add(Dense(20,activatin='reluo'))
 model.add(Dense(100,activation='relu'))
 model.add(Dense(150,activation='relu'))
 model.add(Dense(80,activation='relu'))

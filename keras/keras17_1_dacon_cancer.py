@@ -19,8 +19,10 @@ print("sub",sampleSubmission_csv.shape) #(116,2)
 
 x= train_csv.drop(['Outcome'], axis=1)
 y= train_csv['Outcome']
+x_train,x_test,y_train,y_test=train_test_split(x,y, train_size=0.9, random_state=8)
 
-x_train,x_test,y_train,y_test=train_test_split(x,y, train_size=0.87, random_state=50)
+
+
 
 #2.모델구성
 model=Sequential()
@@ -38,18 +40,19 @@ model.add(Dense(10))
 model.add(Dense(1,activation='sigmoid'))
 
 
-#3.컴파일 훈련
+# 3.컴파일 훈련
 from keras.callbacks import EarlyStopping
-es = EarlyStopping(monitor='val_loss',
-                   mode='min',
-                   patience=50,                   
+es = EarlyStopping(monitor='val_accuracy',
+                   mode='max',
+                   patience=10,                   
                    verbose=1,
                    restore_best_weights=True
                    )
 model.compile(loss='binary_crossentropy',optimizer='adam',metrics=['accuracy'])
+
 hist=model.fit(x_train,y_train, epochs=1000, batch_size=10,verbose=2,
-          validation_split=0.35, callbacks=[es]
-          )
+               validation_split=0.3, callbacks=[es]
+               )
 
 #4.결과예측
 loss=model.evaluate(x_test,y_test)
@@ -58,7 +61,7 @@ y_submit=model.predict(test_csv)
 
 sampleSubmission_csv['Outcome'] = np.round(y_submit)
 print(sampleSubmission_csv)
-sampleSubmission_csv.to_csv(path +"제출_11.csv", index=False)
+sampleSubmission_csv.to_csv(path +"제출_12.csv", index=False)
 # print("로스 :",loss)
 # print("음수 개수:",sampleSubmission_csv[sampleSubmission_csv['count']<0].count())
 
@@ -71,6 +74,8 @@ def ACC(x_train,y_train):
 acc = ACC(y_test,y_predcit)
 print("ACC :",acc)
 print("로스 :",loss)
+
+
 # print(y_test)
 # print(y_predcit)
 # import matplotlib.pyplot as plt
@@ -105,4 +110,5 @@ ACC : 0.8235294117647058        train=0.87    제출8번
 
 ACC : 0.8                       train=0.87  validation=0.35
 로스 : 0.4697054624557495       9번
+
 '''

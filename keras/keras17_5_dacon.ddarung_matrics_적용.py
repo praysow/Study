@@ -29,9 +29,22 @@ y= train_csv['count']
 
 
 
-x_train,x_test,y_train,y_test=train_test_split(x,y, train_size=0.88, random_state=50)
+x_train,x_test,y_train,y_test=train_test_split(x,y, train_size=0.89, random_state=50)
 
 #2. 모델구성
+# model=Sequential()
+# model.add(Dense(1,input_dim=9))
+# model.add(Dense(100))
+# model.add(Dense(1))
+# model.add(Dense(100))
+# model.add(Dense(1))
+# model.add(Dense(100))
+# model.add(Dense(1))
+# model.add(Dense(100))
+# model.add(Dense(1))
+
+
+
 
 model=Sequential()
 model.add(Dense(40,input_dim=9,activation='relu'))
@@ -54,7 +67,7 @@ es = EarlyStopping(monitor='val_loss',
                   restore_best_weights=True
                    )
 model.compile(loss='mse',optimizer='adam',metrics=['mae'])
-hist = model.fit(x_train, y_train, epochs=1000, batch_size=23,
+hist = model.fit(x_train, y_train, epochs=5500, batch_size=23,
                  validation_split=0.311,
                  verbose=2,callbacks=[es])
 
@@ -79,24 +92,24 @@ def RMSE(y_test, y_predict):
 rmse=RMSE(y_test,y_predict)
 print("RMSE :",rmse)
 
-# import matplotlib.pyplot as plt
-# from matplotlib import font_manager, rc
-# font_path = "c:\windows\Fonts\gulim.ttc"
-# font = font_manager.FontProperties(fname=font_path).get_name()
-# rc('font', family=font)
+import matplotlib.pyplot as plt
+from matplotlib import font_manager, rc
+font_path = "c:\windows\Fonts\gulim.ttc"
+font = font_manager.FontProperties(fname=font_path).get_name()
+rc('font', family=font)
 
 
-# plt.figure(figsize=(65,6))
-# # plt.scatter(hist.history['loss'])
-# plt.plot(hist.history['loss'],c='red', label='loss',marker='.')
-# plt.plot(hist.history['val_loss'],c='blue', label='loss',marker='.')
-# # plt.plot(hist.history['r2'],c='pink', label='loss',marker='.')
-# plt.legend(loc='upper right')
-# plt.title('데이콘 로스')
-# plt.xlabel('epochs')
-# plt.ylabel('loss')
-# plt.grid()
-# plt.show()
+plt.figure(figsize=(65,6))
+# plt.scatter(hist.history['loss'])
+plt.plot(hist.history['loss'],c='red', label='loss',marker='.')
+plt.plot(hist.history['val_loss'],c='blue', label='loss',marker='.')
+# plt.plot(hist.history['r2'],c='pink', label='loss',marker='.')
+plt.legend(loc='upper right')
+plt.title('데이콘 로스')
+plt.xlabel('epochs')
+plt.ylabel('loss')
+plt.grid()
+plt.show()
 
 '''
 R2 score 0.6451265365645753
