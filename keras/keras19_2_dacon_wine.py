@@ -5,9 +5,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 import numpy as np
 import pandas as pd
-from keras.optimizers import Adam
-from keras.layers import BatchNormalization
-from keras.layers import Dropout
 
 #1. 데이터
 path= "c:\_data\dacon\wine\\"
@@ -40,69 +37,64 @@ test_csv['type'] =lb.transform(test_csv['type'])
 
 r=int(np.random.uniform(1000,2000))
 train=np.random.uniform(0.9,0.99)
-x_train,x_test,y_train,y_test=train_test_split(x,y_ohe, train_size=train, random_state=1417,
+x_train,x_test,y_train,y_test=train_test_split(x,y_ohe, train_size=train, random_state=r,
                                             stratify=y_ohe)
 
 x_train=np.asarray(x_train).astype(np.float32)
 x_test=np.asarray(x_test).astype(np.float32)
 test_csv = np.asarray(test_csv).astype(np.float32)
 
-# r1=int(np.random.uniform(1,100))
-# r2=int(np.random.uniform(50,150))
-# r3=int(np.random.uniform(80,180))
-# r4=int(np.random.uniform(80,180))
-# r5=int(np.random.uniform(90,190))
-# r6=int(np.random.uniform(1,200))
-# r7=int(np.random.uniform(1,200))
-# r8=int(np.random.uniform(1,200))
-# r9=int(np.random.uniform(150,200))
-# r10=int(np.random.uniform(150,200))
+r1=int(np.random.uniform(1,100))
+r2=int(np.random.uniform(50,150))
+r3=int(np.random.uniform(80,180))
+r4=int(np.random.uniform(80,180))
+r5=int(np.random.uniform(90,190))
+r6=int(np.random.uniform(1,200))
+r7=int(np.random.uniform(1,200))
+r8=int(np.random.uniform(1,200))
+r9=int(np.random.uniform(150,200))
+r10=int(np.random.uniform(150,200))
 
-# r0=int(np.random.uniform(1,1000))
+r0=int(np.random.uniform(1,1000))
 
 
 #2.모델구성
 model=Sequential()
-# model.add(Dense(34,input_dim=12,activation='relu'))
+model.add(Dense(34,input_dim=12,activation='relu'))
 # model.add(Dense(116,activation='relu'))
-# model.add(BatchNormalization())
+# model.add(Dense(112,activation='relu'))
 # model.add(Dense(83,activation='relu'))
-# model.add(BatchNormalization())
+# model.add(Dense(157,activation='relu'))
 # model.add(Dense(188,activation='relu'))
-# model.add(BatchNormalization())
+# model.add(Dense(34,activation='relu'))
 # model.add(Dense(3,activation='relu'))
-# model.add(BatchNormalization())
+# model.add(Dense(174,activation='relu'))
 # model.add(Dense(157,activation='relu'))
 # model.add(Dense(7,activation='softmax'))
 
-
-
-model.add(Dense(50,input_dim=12,activation='relu'))
-model.add(Dense(80,activation='relu'))
-model.add(Dropout(0.5))
-model.add(BatchNormalization())
-model.add(Dense(120,activation='relu'))
-model.add(Dropout(0.5))
-model.add(BatchNormalization())
-model.add(Dense(160,activation='relu'))
-model.add(Dropout(0.5))
-model.add(BatchNormalization())
-model.add(Dense(200,activation='relu'))
-model.add(Dropout(0.5))
-model.add(BatchNormalization())
-model.add(Dense(240,activation='relu'))
+model.add(Dense(r1,input_dim=12,activation='relu'))
+model.add(Dense(r2))
+model.add(Dense(r3))
+model.add(Dense(r4))
+model.add(Dense(r5))
+model.add(Dense(r6))
+model.add(Dense(r7))
+model.add(Dense(r8))
+model.add(Dense(r9))
+model.add(Dense(r10,activation='relu'))
 model.add(Dense(7,activation='softmax'))
+
 
 #3. 컴파일 훈련
 from keras.callbacks import EarlyStopping
 es = EarlyStopping(monitor='val_loss',
                 mode='min',
-                patience=30,
+                patience=50,
                 verbose=1,
                 restore_best_weights=True
                 )
-model.compile(loss='categorical_crossentropy', optimizer=Adam(lr=0.001),metrics='accuracy')
-hist=model.fit(x_train,y_train,epochs=1000,validation_split=0.1,batch_size=100,verbose=2,
+model.compile(loss='categorical_crossentropy',optimizer='adam',metrics='accuracy')
+hist=model.fit(x_train,y_train,epochs=1000,validation_split=0.1,batch_size=50,verbose=2,
         callbacks=[es]
         )
 #4.결과예측
@@ -127,18 +119,18 @@ def ACC(x_train,y_train):
 acc = ACC(y_test,y_predict)
 print("ACC :",acc)
 print("로스 :",loss)
-# print("t",train)
-# print("random",r)
-# print("r1",r1)
-# print("r2",r2)
-# print("r3",r3)
-# print("r4",r4)
-# print("r5",r5)
-# print("r6",r6)
-# print("r7",r7)
-# print("r8",r8)
-# print("r9",r9)
-# print("r10",r10)
+print("t",train)
+print("random",r)
+print("r1",r1)
+print("r2",r2)
+print("r3",r3)
+print("r4",r4)
+print("r5",r5)
+print("r6",r6)
+print("r7",r7)
+print("r8",r8)
+print("r9",r9)
+print("r10",r10)
 
 import matplotlib.pyplot as plt
 from matplotlib import font_manager, rc
@@ -157,3 +149,85 @@ plt.xlabel('epochs')
 plt.ylabel('loss')
 plt.grid()
 plt.show()
+
+
+'''
+ACC : 0.5381818181818182                                    
+로스 : [1.0868550539016724, 0.5381818413734436
+
+
+ACC : 0.5636363636363636
+로스 : [0.9978894591331482, 0.5636363625526428]
+t 0.8536757757734588
+random 1417
+r1 52
+r2 105
+r3 147
+r4 85
+r5 102
+r6 120
+r7 117
+r8 123
+r9 164
+r10 186
+
+ACC : 0.5818181818181818
+로스 : [1.0011345148086548, 0.581818163394928]
+t 0.7758250529061579
+random 5301
+r1 87
+r2 121
+r3 128
+r4 113
+r5 134
+r6 170
+r7 40
+r8 82
+r9 181
+r10 189
+
+ACC : 0.6181818181818182                            submission_3
+로스 : [1.016262412071228, 0.6181818246841431]
+t 0.7393273943806894
+random 1109
+r1 85
+r2 77
+r3 132
+r4 113
+r5 178
+r6 29
+r7 128
+r8 101
+r9 189
+r10 169
+
+ACC : 0.6727272727272727                    sub_4
+로스 : [1.0520681142807007, 0.6727272868156433]
+t 0.8047959881892568
+random 1831
+r1 57
+r2 92
+r3 93
+r4 106
+r5 125
+r6 162
+r7 98
+r8 63
+r9 172
+r10 159
+
+ACC : 0.43636363636363634
+로스 : [1.2733917236328125, 0.4363636374473572]
+t 0.845499177783265
+random 7886
+r1 34
+r2 116
+r3 112
+r4 83
+r5 157
+r6 188
+r7 34
+r8 3
+r9 174
+r10 157
+'''

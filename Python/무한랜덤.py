@@ -22,26 +22,26 @@ y= train_csv['Outcome']
 while True:
     random=int(np.random.uniform(1,10000))
     train=np.random.uniform(0.7,0.99)
-    x_train,x_test,y_train,y_test=train_test_split(x,y, train_size=0.9, random_state=random)
+    x_train,x_test,y_train,y_test=train_test_split(x,y, train_size=train, random_state=random)
 
-    r1=int(np.random.uniform(1,200))
-    r2=int(np.random.uniform(1,200))
-    r3=int(np.random.uniform(1,200))
-    r4=int(np.random.uniform(1,200))
-    r5=int(np.random.uniform(1,200))
-    r6=int(np.random.uniform(1,200))
-    r0=int(np.random.uniform(1,300))
+    r1=int(np.random.uniform(1,100))
+    r2=int(np.random.uniform(50,150))
+    r3=int(np.random.uniform(80,180))
+    r4=int(np.random.uniform(80,180))
+    r5=int(np.random.uniform(90,190))
+    r6=int(np.random.uniform(150,200))
+    r0=int(np.random.uniform(1,1000))
 
 
 #2.모델구성
     model=Sequential()
     model.add(Dense(r1,input_dim=8))
-    model.add(Dense(r2))
-    model.add(Dense(r2))
-    model.add(Dense(r3))
-    model.add(Dense(r4))
-    model.add(Dense(r5))
-    model.add(Dense(r6))
+    model.add(Dense(r2,activation='relu'))
+    model.add(Dense(r2,activation='relu'))
+    model.add(Dense(r3,activation='relu'))
+    model.add(Dense(r4,activation='relu'))
+    model.add(Dense(r5,activation='relu'))
+    model.add(Dense(r6,activation='relu'))
     model.add(Dense(1,activation='sigmoid'))
 
 
@@ -56,8 +56,10 @@ while True:
             )
     model.compile(loss='binary_crossentropy',optimizer='adam',metrics=['accuracy'])
 
+    vd=np.random.uniform(0.1,0.3)
+    
 # model.fit()을 실행하여 학습
-    hist = model.fit(x_train, y_train, epochs=r0, batch_size=10, verbose=2, validation_split=0.3,
+    hist = model.fit(x_train, y_train, epochs=r0, batch_size=10, verbose=2, validation_split=vd,
                 callbacks=[es]
                 )
 
@@ -65,7 +67,7 @@ while True:
     accuracy = hist.history['val_accuracy'][-1]
 
     # 특정 조건을 만족하면 루프 종료
-    if accuracy > 0.83:  
+    if accuracy > 0.79:  
         break
 
 # hist=model.fit(x_train,y_train, epochs=1000, batch_size=10,verbose=2,
@@ -73,9 +75,9 @@ while True:
 #           )
 
 #4.결과예측
-# loss=model.evaluate(x_test,y_test)
-# y_submit=model.predict(test_csv)
-# y_submit=abs(model.predict(test_csv))
+loss=model.evaluate(x_test,y_test)
+y_submit=model.predict(test_csv)
+y_submit=abs(model.predict(test_csv))
 
 sampleSubmission_csv['Outcome'] = np.round(y_submit)
 print(sampleSubmission_csv)

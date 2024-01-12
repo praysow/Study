@@ -93,6 +93,10 @@ y_predict= np.argmax(y_predict,axis=1)
 
 from sklearn.metrics import accuracy_score
 acc = accuracy_score(y_predict,y_test)
+
+
+
+
 print("accuracy_score :", acc)
 print("로스 :", result[0])
 print("acc :",result[1])
@@ -104,3 +108,19 @@ print("r3",r3)
 print("r4",r4)
 print("r5",r5)
 print("r0",r0)
+
+'''
+0.88
+
+accuracy_score : 0.8691327973248753
+로스 : 0.322381854057312
+acc : 0.8691328167915344
+random값 : 124
+r1 160
+r2 199
+r3 86
+r4 33
+r5 153
+r0 216
+
+'''

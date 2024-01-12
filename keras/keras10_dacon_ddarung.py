@@ -45,8 +45,8 @@ x= train_csv.drop(['count'],axis=1)
 y= train_csv['count']
 
 
-#####결측치 처리 1. 제거######
-# print(train_csv.isna().sum())
+#####결측치확인######
+# print(train_csv.isna().sum())         isna 어디에 nan값이 있나
 # print(train_csv.isna().sum())
 # print(train_csv.info())
 # print(train_csv.shape)      (1328, 10)

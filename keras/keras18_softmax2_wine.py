@@ -26,7 +26,7 @@ print(y_ohe1)
 #2    48
 # #pandas
 y_ohe2 = pd.get_dummies(y)
-# # print(y_ohe2)       (178, 3)
+print(y_ohe2)      # (178, 3)
 # # print(y_ohe2.shape)
 
 # # 사이킷런
@@ -37,7 +37,7 @@ ohe = OneHotEncoder()
 y_ohe3= ohe.fit_transform(y).toarray()
 
 # print(y_ohe3.shape)     (178, 3)
-'''
+
 r = int(np.random.uniform(1, 1000))
 x_train, x_test, y_train, y_test = train_test_split(x, y_ohe1, train_size=0.8,
                                                     random_state=r,        
@@ -86,4 +86,4 @@ print("로스 :", result[0])
 print("acc :",result[1])
 print("random값 :", r)
 
-'''
+
