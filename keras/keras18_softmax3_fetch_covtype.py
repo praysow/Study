@@ -42,6 +42,8 @@ ohe = OneHotEncoder()
 y_ohe3= ohe.fit_transform(y).toarray()
 #print(y_ohe3.shape)     (581012, 7)
 
+print(y_ohe3)
+
 r = int(np.random.uniform(1, 1000))
 x_train, x_test, y_train, y_test = train_test_split(x, y_ohe1, train_size=0.86,
                                                     random_state=5,        #346
