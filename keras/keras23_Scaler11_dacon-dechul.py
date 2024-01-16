@@ -1,9 +1,9 @@
 import numpy as np
 import pandas as pd
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense,Dropout,BatchNormalization
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler, MinMaxScaler, RobustScaler, MaxAbsScaler
 from sklearn.metrics import accuracy_score, f1_score
 from keras.utils import to_categorical
 #1.데이터
@@ -13,6 +13,7 @@ test_csv=pd.read_csv(path+"test.csv",index_col=0)
 sample_csv=pd.read_csv(path+"sample_submission.csv")
 x= train_csv.drop(['대출등급'],axis=1)
 y= train_csv['대출등급']
+
 
 # print(train_csv,train_csv.shape)        (96294, 14)
 # print(test_csv,test_csv.shape)          (64197, 13)
@@ -52,8 +53,28 @@ test_csv['주택소유상태'] =lb.transform(test_csv['주택소유상태'])
 lb.fit(test_csv['대출목적'])
 test_csv['대출목적'] =lb.transform(test_csv['대출목적'])
 
-x_train,x_test,y_train,y_test=train_test_split(x,y_ohe,train_size=0.8,random_state=40,stratify=y_ohe)
+train_csv = train_csv.dropna()
+#train_csv=train_csv.fillna(train_csv.mean())                         #test는 dropna를 하면 안되고 결측치를 변경해줘야한다
+# train_csv=train_csv.fillna(0)
+test_csv=test_csv.fillna(test_csv.mean())                         #test는 dropna를 하면 안되고 결측치를 변경해줘야한다
+#test_csv=test_csv.fillna(0)
 
+
+x_train,x_test,y_train,y_test=train_test_split(x,y_ohe,train_size=0.9,random_state=48,
+                                               stratify=y_ohe
+                                               )
+
+scaler = MinMaxScaler()
+scaler.fit(x_train)
+x_train = scaler.transform(x_train)
+x_test = scaler.transform(x_test)
+test_csv = scaler.transform(test_csv)
+
+
+# scaler = StandardScaler()
+# x_train_scaled = scaler.fit_transform(x_train)
+# x_test_scaled = scaler.transform(x_test)
+# test_csv_scaled = scaler.transform(test_csv)
 # print(x_train,x_test)
 # print(y_train,y_test)
 
@@ -62,22 +83,25 @@ x_train,x_test,y_train,y_test=train_test_split(x,y_ohe,train_size=0.8,random_sta
 # test_csv = np.asarray(test_csv).astype(np.float32)
 
 
-#2.모델구성
+# #2.모델구성
 model=Sequential()
-model.add(Dense(20,input_shape=(13,),activation='relu'))
-model.add(Dense(40))
-model.add(Dense(60))
-model.add(Dense(80))
-model.add(Dense(100))
-model.add(Dense(120))
-model.add(Dense(140))
+model.add(Dense(80,input_shape=(13,),activation='relu'))
+model.add(Dense(70,activation='relu'))
+model.add(Dense(60,activation='relu'))
+model.add(Dense(50,activation='relu'))
+model.add(Dense(40,activation='relu'))
+model.add(Dense(30,activation='relu'))
+model.add(Dense(20,activation='relu'))
+model.add(Dense(10,activation='relu'))
 model.add(Dense(7,activation='softmax'))
 
+
 #3.컴파일 훈련
+
 from keras.callbacks import EarlyStopping
-es= EarlyStopping(monitor='val_loss',mode='min',patience=100,verbose=1,restore_best_weights=True)
+es= EarlyStopping(monitor='val_loss',mode='min',patience=1000,verbose=1,restore_best_weights=True)
 model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
-hist= model.fit(x_train, y_train, epochs=3000,batch_size=10000, validation_split=0.2,verbose=2,
+hist= model.fit(x_train, y_train, epochs=15000,batch_size=1000, validation_split=0.1,verbose=2,
           callbacks=[es]
             )
 
@@ -102,7 +126,7 @@ y_submit = ohe.inverse_transform(y_submit)
 y_submit = pd.DataFrame(y_submit)
 sample_csv["대출등급"]=y_submit
 
-sample_csv.to_csv(path + "sample_submission_2.csv", index=False)
+sample_csv.to_csv(path + "sample_submission_4.csv", index=False)
 
 y_pred= model.predict(x_test)
 y_pred= ohe.inverse_transform(y_pred)
@@ -121,27 +145,23 @@ font_path = "c:\windows\Fonts\gulim.ttc"
 font = font_manager.FontProperties(fname=font_path).get_name()
 rc('font', family=font)
 
-plt.figure(figsize=(9,6))
-plt.plot(hist.history['val_loss'],c='red', label='loss',marker='.')
-plt.plot(hist.history['val_accuracy'],c='blue', label='acc',marker='.')
-plt.legend(loc='upper right')
-plt.title('wine loss')
-plt.xlabel('epochs')
-plt.ylabel('loss')
-plt.grid()
-plt.show()
+# plt.figure(figsize=(9,6))
+# plt.plot(hist.history['val_loss'],c='red', label='loss',marker='.')
+# plt.plot(hist.history['val_accuracy'],c='blue', label='acc',marker='.')
+# plt.legend(loc='upper right')
+# plt.title('wine loss')
+# plt.xlabel('epochs')
+# plt.ylabel('loss')
+# plt.grid()
+# plt.show()
 
 
 '''
+f1 0.8581358602101147           2번 랜덤8
+로스: 0.36359861493110657
+acc 0.8704049587249756
 
-
-f1 0.381682505032396
-로스: 18.757368087768555
-acc 0.4139363467693329
-
-
-
-
-
-
+f1 0.8802529884531378           3번 랜덤48
+로스: 0.332682728767395
+acc 0.8941848278045654
 '''

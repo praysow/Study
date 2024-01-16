@@ -37,16 +37,9 @@ model.add(Dense(1))
 
 #3.컴파일 훈련
 from keras.callbacks import EarlyStopping
-es = EarlyStopping(monitor='val_loss',
-                   mode='min',
-                   patience=500,
-                   verbose=1,
-                   restore_best_weights=True
-                   )
+es = EarlyStopping(monitor='val_loss',mode='min',patience=500,verbose=1,restore_best_weights=True)
 model.compile(loss='mse',optimizer='adam')
-hist=model.fit(x_train,y_train, epochs=500, batch_size=200,verbose=2,validation_split=0.3,
-            callbacks=[es]
-               )
+hist=model.fit(x_train,y_train, epochs=500, batch_size=200,verbose=2,validation_split=0.3,callbacks=[es])
 
 #4.결과예측
 loss=model.evaluate(x_test,y_test)
