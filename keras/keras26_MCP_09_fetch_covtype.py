@@ -67,16 +67,28 @@ model.add(Dense(7, activation='softmax'))
 
 # 3.컴파일 훈련
 from keras.callbacks import EarlyStopping, ModelCheckpoint
+
+import datetime
+date= datetime.datetime.now()
+print(date)     
+date = date.strftime("%m-%d_%H-%M")
+print(date) 
+print(type(date)) 
+
+path='..//_data//_save//MCP/k26/'
+filename= "{epoch:04d}-{val_loss:.4f}.hdf5"  
+filepath = "".join([path,'09_fetch_covtype_',date,'_',filename])
+
 mcp = ModelCheckpoint(
     monitor='val_loss',
     mode='auto',
     verbose=1,
     save_best_only=True,
-    filepath='..\_data\_save\MCP\keras26_MCP_fetch_covtype.hdf5'
+    filepath=filepath
     )
 es= EarlyStopping(monitor='val_loss',mode='min',patience=100,verbose=1,restore_best_weights=True)
 model.compile(loss='categorical_crossentropy',optimizer='adam',metrics='accuracy')
-hist= model.fit(x_train, y_train, epochs=1000,batch_size=100000, validation_split=0.1,verbose=2,
+hist= model.fit(x_train, y_train, epochs=100,batch_size=100000, validation_split=0.1,verbose=2,
           callbacks=[es,mcp])
 
 model.save("c:\_data\_save\\fetch_covtype_1.h5")

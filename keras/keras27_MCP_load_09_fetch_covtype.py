@@ -44,7 +44,6 @@ y_ohe3= ohe.fit_transform(y).toarray()
 
 print(y_ohe3)
 
-r = int(np.random.uniform(1, 1000))
 x_train, x_test, y_train, y_test = train_test_split(x, y_ohe1, train_size=0.86,
                                                     random_state=5,        #346
                                                     # stratify=y_ohe1            
@@ -84,9 +83,9 @@ x_test = scaler.transform(x_test)
 
 
 
-model = load_model("c:\_data\_save\\fetch_covtype_1.h5")
+model = load_model("c:\_data\_save\MCP\k26\\09_fetch_covtype_01-17_15-07_0100-0.5463.hdf5")
 
-model.summary()
+# model.summary()
 #4.결과예측
 result = model.evaluate(x_test, y_test)
 y_predict = model.predict(x_test)
@@ -103,17 +102,18 @@ from sklearn.metrics import accuracy_score
 acc = accuracy_score(y_predict,y_test)
 
 
-
-
 print("accuracy_score :", acc)
 print("로스 :", result[0])
 print("acc :",result[1])
-print("random값 :", r)
 
 '''
-accuracy_score : 0.841262816257284
-로스 : 0.3754711449146271
-acc : 0.8412628173828125
-random값 : 892
+accuracy_score : 0.7659265815937646
+로스 : 0.5476933717727661
+acc : 0.7659265995025635                    save
+
+accuracy_score : 0.7659265815937646
+로스 : 0.5476933717727661
+acc : 0.7659265995025635                    load
+
 
 '''

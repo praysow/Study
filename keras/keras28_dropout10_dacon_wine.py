@@ -1,5 +1,5 @@
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, Dropout
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
@@ -34,10 +34,7 @@ lb.fit(x['type'])
 x['type'] =lb.transform(x['type'])
 test_csv['type'] =lb.transform(test_csv['type'])
 
-
-r=int(np.random.uniform(1000,2000))
-train=np.random.uniform(0.9,0.99)
-x_train,x_test,y_train,y_test=train_test_split(x,y_ohe, train_size=train, random_state=r,
+x_train,x_test,y_train,y_test=train_test_split(x,y_ohe, train_size= 0.9193904973982694, random_state=1909,
                                             stratify=y_ohe)
 
 from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler, MaxAbsScaler
@@ -52,44 +49,27 @@ x_train=np.asarray(x_train).astype(np.float32)
 x_test=np.asarray(x_test).astype(np.float32)
 test_csv = np.asarray(test_csv).astype(np.float32)
 
-r1=int(np.random.uniform(1,100))
-r2=int(np.random.uniform(50,150))
-r3=int(np.random.uniform(80,180))
-r4=int(np.random.uniform(80,180))
-r5=int(np.random.uniform(90,190))
-r6=int(np.random.uniform(1,200))
-r7=int(np.random.uniform(1,200))
-r8=int(np.random.uniform(1,200))
-r9=int(np.random.uniform(150,200))
-r10=int(np.random.uniform(150,200))
-
-r0=int(np.random.uniform(1,1000))
 
 
 #2.모델구성
 model=Sequential()
 model.add(Dense(34,input_dim=12,activation='relu'))
-# model.add(Dense(116,activation='relu'))
-# model.add(Dense(112,activation='relu'))
-# model.add(Dense(83,activation='relu'))
-# model.add(Dense(157,activation='relu'))
-# model.add(Dense(188,activation='relu'))
-# model.add(Dense(34,activation='relu'))
-# model.add(Dense(3,activation='relu'))
-# model.add(Dense(174,activation='relu'))
-# model.add(Dense(157,activation='relu'))
-# model.add(Dense(7,activation='softmax'))
 
-model.add(Dense(r1,input_dim=12,activation='relu'))
-model.add(Dense(r2))
-model.add(Dense(r3))
-model.add(Dense(r4))
-model.add(Dense(r5))
-model.add(Dense(r6))
-model.add(Dense(r7))
-model.add(Dense(r8))
-model.add(Dense(r9))
-model.add(Dense(r10,activation='relu'))
+
+model.add(Dense(25,input_dim=12,activation='relu'))
+model.add(Dense(139))
+model.add(Dense(151))
+model.add(Dropout(0.1))
+model.add(Dense(97))
+model.add(Dense(127))
+model.add(Dropout(0.1))
+model.add(Dense(57))
+model.add(Dense(88))
+model.add(Dense(164))
+model.add(Dense(151))
+model.add(Dropout(0.1))
+model.add(Dense(154,activation='relu'))
+model.add(Dropout(0.1))
 model.add(Dense(7,activation='softmax'))
 
 
@@ -144,15 +124,11 @@ def ACC(x_train,y_train):
 acc = ACC(y_test,y_predict)
 print("ACC :",acc)
 print("로스 :",loss)
-print("t",train)
-print("random",r)
-print("r1",r1)
-print("r2",r2)
-print("r3",r3)
-print("r4",r4)
-print("r5",r5)
-print("r6",r6)
-print("r7",r7)
-print("r8",r8)
-print("r9",r9)
-print("r10",r10)
+'''
+ACC : 0.5833333333333334
+로스 : [1.0416243076324463, 0.5833333134651184]         load
+
+
+ACC : 0.6216216216216216
+로스 : [0.9659953117370605, 0.6216216087341309]     아래하나
+'''

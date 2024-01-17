@@ -1,7 +1,7 @@
 from sklearn.metrics import r2_score, mean_squared_error, mean_squared_log_error
 from sklearn.model_selection import train_test_split
-from keras.models import Sequential,load_model
-from keras.layers import Dense
+from keras.models import Sequential
+from keras.layers import Dense,Dropout
 import numpy as np
 import pandas as pd
 from sklearn.metrics import accuracy_score
@@ -28,41 +28,49 @@ x_train = scaler.transform(x_train)
 x_test = scaler.transform(x_test)
 
 #2.모델구성
-# model=Sequential()
-# model.add(Dense(10,input_dim=8))
-# model.add(Dense(40))
-# model.add(Dense(70))
-# model.add(Dense(100))
-# model.add(Dense(130))
-# model.add(Dense(200))
-# model.add(Dense(130))
-# model.add(Dense(100))
-# model.add(Dense(70))
-# model.add(Dense(40))
-# model.add(Dense(10))
-# model.add(Dense(1,activation='sigmoid'))
+model=Sequential()
+model.add(Dense(10,input_dim=8))
+model.add(Dense(40))
+model.add(Dense(70))
+model.add(Dense(100))
+model.add(Dense(130))
+model.add(Dense(200))
+model.add(Dense(130))
+model.add(Dense(100))
+model.add(Dense(70))
+model.add(Dense(40))
+model.add(Dense(10))
+model.add(Dense(1,activation='sigmoid'))
 
 
-# # 3.컴파일 훈련
-# from keras.callbacks import EarlyStopping, ModelCheckpoint
-# mcp = ModelCheckpoint(
-#     monitor='val_loss',
-#     mode='auto',
-#     verbose=1,
-#     save_best_only=True,
-#     filepath='..\_data\_save\MCP\keras26_MCP_dacon_diabets.hdf5'
-#     )
-# es= EarlyStopping(monitor='val_loss',mode='min',patience=100,verbose=1,restore_best_weights=True)
-# model.compile(loss='binary_crossentropy',optimizer='adam',metrics='accuracy')
-# hist= model.fit(x_train, y_train, epochs=10000,batch_size=1000, validation_split=0.1,verbose=2,
-#           callbacks=[es,mcp])
+# 3.컴파일 훈련
+from keras.callbacks import EarlyStopping, ModelCheckpoint
 
-# model.save("c:\_data\_save\dacon_diabets_1.h5")
 
-model = load_model("c:\_data\_save\MCP\k26\\07dacon-diabets_01-17_14-41_0062-0.4413.hdf5")
+import datetime
+date= datetime.datetime.now()
+print(date)     
+date = date.strftime("%m-%d_%H-%M")
+print(date) 
+print(type(date)) 
 
-model.summary()
+path='..//_data//_save//MCP/k27/'
+filename= "{epoch:04d}-{val_loss:.4f}.hdf5"  
+filepath = "".join([path,'07dacon-diabets_',date,'_',filename])
 
+mcp = ModelCheckpoint(
+    monitor='val_loss',
+    mode='auto',
+    verbose=1,
+    save_best_only=True,
+    filepath=filepath
+    )
+es= EarlyStopping(monitor='val_loss',mode='min',patience=100,verbose=1,restore_best_weights=True)
+model.compile(loss='binary_crossentropy',optimizer='adam',metrics='accuracy')
+hist= model.fit(x_train, y_train, epochs=1000,batch_size=1000, validation_split=0.1,verbose=2,
+          callbacks=[es,mcp])
+
+model.save("c:\_data\_save\dacon_diabets_1.h5")
 
 #4.결과예측
 loss=model.evaluate(x_test,y_test)
@@ -71,7 +79,7 @@ y_submit=model.predict(test_csv)
 
 sampleSubmission_csv['Outcome'] = np.round(y_submit)
 print(sampleSubmission_csv)
-sampleSubmission_csv.to_csv(path +"제출_12.csv", index=False)
+sampleSubmission_csv.to_csv(path +"제출_13.csv", index=False)
 # print("로스 :",loss)
 # print("음수 개수:",sampleSubmission_csv[sampleSubmission_csv['count']<0].count())
 
@@ -87,8 +95,8 @@ print("로스 :",loss)
 
 '''
 ACC : 0.7121212121212122
-로스 : 0.4879426658153534       save
+로스 : 0.47388777136802673
 
-ACC : 0.7121212121212122
-로스 : 0.4879426658153534       load
+ACC : 0.7727272727272727
+로스 : 0.4568730294704437   전부있음
 '''

@@ -3,7 +3,7 @@ import pandas as pd
 from keras.models import Sequential
 from keras.layers import Dense,Dropout,BatchNormalization
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler, MinMaxScaler
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler, MinMaxScaler, Normalizer, RobustScaler
 from sklearn.metrics import accuracy_score, f1_score
 from keras.utils import to_categorical
 #1.데이터
@@ -61,8 +61,12 @@ x_train,x_test,y_train,y_test=train_test_split(x,y_ohe,train_size=0.9,random_sta
 scaler = StandardScaler()
 scaler.fit(x_train)
 x_train = scaler.transform(x_train)
+
+
 x_test = scaler.transform(x_test)
 test_csv = scaler.transform(test_csv)
+
+
 
 
 # scaler = StandardScaler()
@@ -72,46 +76,46 @@ test_csv = scaler.transform(test_csv)
 # print(x_train,x_test)
 # print(y_train,y_test)
 
-# x_train=np.asarray(x_train).astype(np.float32)
-# x_test=np.asarray(x_test).astype(np.float32)
-# test_csv = np.asarray(test_csv).astype(np.float32)
-
-
-# #2.모델구성
-# r1=int(np.random.uniform(1,50))
-# r2=int(np.random.uniform(1,50))
-# r3=int(np.random.uniform(1,50))
-# r4=int(np.random.uniform(1,50))
-# r5=int(np.random.uniform(1,50))
-# r6=int(np.random.uniform(1,50))
-# r0=int(np.random.uniform(1,1000))
 
 
 #2.모델구성
 model=Sequential()
-model.add(Dense(10,input_shape=(13,),activation='relu'))
-model.add(Dense(25,activation='relu'))
-model.add(Dense(5,activation='relu'))
-model.add(Dense(12,activation='relu'))
-model.add(Dense(10,activation='relu'))
-model.add(Dense(8,activation='relu'))
+model.add(Dense(7,input_shape=(13,),activation='relu'))
+model.add(Dense(44,activation='relu'))
+model.add(Dense(44,activation='relu'))
+model.add(Dense(30,activation='relu'))
+model.add(Dense(24,activation='relu'))
+model.add(Dense(2,activation='relu'))
+model.add(Dense(48,activation='relu'))
 model.add(Dense(7,activation='softmax'))
 
 
 #3.컴파일 훈련
 
 from keras.callbacks import EarlyStopping,ModelCheckpoint
-es= EarlyStopping(monitor='val_loss',mode='min',patience=1000,verbose=1,restore_best_weights=True)
+
+import datetime
+date= datetime.datetime.now()
+print(date)     
+date = date.strftime("%m-%d_%H-%M")
+print(date) 
+print(type(date)) 
+
+path='..//_data//_save//MCP/k26/'
+filename= "{epoch:04d}-{val_loss:.4f}.hdf5"  
+filepath = "".join([path,'dacon_dechul_',date,'_',filename])
+
+es= EarlyStopping(monitor='val_loss',mode='min',patience=10,verbose=1,restore_best_weights=True)
 mcp = ModelCheckpoint(
     monitor='val_loss',
     mode='auto',
     verbose=1,
     save_best_only=True,
-    filepath='..\_data\_save\MCP\keras25_MCP2.hdf5'
+    filepath=filepath
     )
 
 model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
-hist= model.fit(x_train, y_train, epochs=20000,batch_size=3000, validation_split=0.1,verbose=3,
+hist= model.fit(x_train, y_train, epochs=100,batch_size=3000, validation_split=0.1,verbose=3,
           callbacks=[es,mcp]
             )
 
@@ -181,6 +185,16 @@ r3 9
 r4 7
 r5 18
 r6 30
+
+f1 0.8894838905746612         5번
+로스: 0.2839607000350952      random=4
+acc 0.9067497253417969
+r1 7                        c:\_data\_save\dechul_3
+r2 44                         MCP 3번
+r3 30
+r4 24
+r5 2
+r6 48
 
 '''
 

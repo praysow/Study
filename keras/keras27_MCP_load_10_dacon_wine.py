@@ -37,7 +37,7 @@ test_csv['type'] =lb.transform(test_csv['type'])
 
 r=int(np.random.uniform(1000,2000))
 train=np.random.uniform(0.9,0.99)
-x_train,x_test,y_train,y_test=train_test_split(x,y_ohe, train_size=train, random_state=r,
+x_train,x_test,y_train,y_test=train_test_split(x,y_ohe, train_size=0.9193904973982694, random_state=1909,
                                             stratify=y_ohe)
 
 from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler, MaxAbsScaler
@@ -109,9 +109,9 @@ test_csv = np.asarray(test_csv).astype(np.float32)
 
 # model.save("c:\_data\_save\dacon_wine_1.h5")
 
-model = load_model("c:\_data\_save\dacon_wine_1.h5")
+model = load_model("c:\_data\_save\MCP\k26\\10_dacon_wine_01-17_14-47_0148-0.9632.hdf5")
 
-model.summary()
+# model.summary()
 
 
 #4.결과예측
@@ -138,3 +138,24 @@ print("ACC :",acc)
 print("로스 :",loss)
 print("t",train)
 print("random",r)
+
+'''
+ACC : 0.5833333333333334
+로스 : [1.0416243076324463, 0.5833333134651184]         save
+t 0.9193904973982694
+random 1909
+r1 25
+r2 139
+r3 151
+r4 97
+r5 127
+r6 57
+r7 88
+r8 164
+r9 151
+r10 154
+
+ACC : 0.5833333333333334
+로스 : [1.0416243076324463, 0.5833333134651184]         load
+
+'''

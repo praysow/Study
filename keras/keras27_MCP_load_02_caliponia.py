@@ -48,9 +48,9 @@ x_test = scaler.transform(x_test)
 # hist= model.fit(x_train, y_train, epochs=10000,batch_size=1000, validation_split=0.1,verbose=2,
 #           callbacks=[es,mcp])
 
-model = load_model("c:\_data\_save\\caliponia_1.h5")
+model = load_model("c:\_data\_save\MCP\k26\\02_califonia_01-17_14-03_4551-0.6411.hdf5")
 
-model.summary()
+# model.summary()
 
 #4.결과예측
 loss=model.evaluate(x_test,y_test)
@@ -63,8 +63,9 @@ r2=r2_score(y_test,y_predict)
 print("로스:",loss)
 print("R2 score",r2)
 '''
-로스: 0.5679296255111694
-R2 score 0.5717274569573302
+로스: 0.589813768863678
+R2 score 0.5552247301391444     save
 
-
+로스: 0.589813768863678
+R2 score 0.5552247301391444     load
 '''

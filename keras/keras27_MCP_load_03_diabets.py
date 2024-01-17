@@ -53,7 +53,8 @@ x_test = scaler.transform(x_test)
 
 # model.save("c:\_data\_save\diabets_1.h5")
 
-model = load_model("c:\_data\_save\\diabets_1.h5")
+model = load_model("c:\_data\_save\MCP\k26\\03_diabets_01-17_14-22_0159-4207.8745.hdf5")
+
 
 model.summary()
 
@@ -69,8 +70,9 @@ print("로스 ,",loss)
 print("R2 score :",r2)
 
 '''
-로스 , 2246.01953125
-R2 score : 0.6280751199789454
+로스 , 4241.7373046875
+R2 score : 0.29759848907230024      save
 
-
+로스 , 4241.7373046875
+R2 score : 0.29759848907230024      load
 '''

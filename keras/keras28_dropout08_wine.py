@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 from sklearn.datasets import load_wine
 from sklearn.model_selection import train_test_split
-from keras.models import Sequential,load_model
-from keras.layers import Dense
+from keras.models import Sequential
+from keras.layers import Dense, Dropout
 from keras.utils import to_categorical
 from sklearn.preprocessing import OneHotEncoder
 
@@ -40,7 +40,7 @@ y_ohe3= ohe.fit_transform(y).toarray()
 
 r = int(np.random.uniform(1, 1000))
 x_train, x_test, y_train, y_test = train_test_split(x, y_ohe1, train_size=0.8,
-                                                    random_state=r,        
+                                                    random_state=383,        
                                                     # stratify=y_ohe1            
                                                     )
 
@@ -52,35 +52,41 @@ x_test = scaler.transform(x_test)
 
 
 #2.모델구성
-# model=Sequential()
-# model.add(Dense(50,input_dim=13))
-# model.add(Dense(60))
-# model.add(Dense(70))
-# model.add(Dense(60))
-# model.add(Dense(100))
-# model.add(Dense(3, activation='softmax'))
+model=Sequential()
+model.add(Dense(50,input_dim=13))
+model.add(Dense(60))
+model.add(Dense(70))
+model.add(Dense(60))
+model.add(Dense(100))
+model.add(Dense(3, activation='softmax'))
 
-# # 3.컴파일 훈련
-# from keras.callbacks import EarlyStopping, ModelCheckpoint
-# mcp = ModelCheckpoint(
-#     monitor='val_loss',
-#     mode='auto',
-#     verbose=1,
-#     save_best_only=True,
-#     filepath='..\_data\_save\MCP\keras26_MCP_wine.hdf5'
-#     )
-# es= EarlyStopping(monitor='val_loss',mode='min',patience=100,verbose=1,restore_best_weights=True)
-# model.compile(loss='categorical_crossentropy',optimizer='adam',metrics='accuracy')
-# hist= model.fit(x_train, y_train, epochs=10000,batch_size=1000, validation_split=0.1,verbose=2,
-#           callbacks=[es,mcp])
+# 3.컴파일 훈련
+from keras.callbacks import EarlyStopping, ModelCheckpoint
 
-# model.save("c:\_data\_save\wine_1.h5")
+import datetime
+date= datetime.datetime.now()
+print(date)     
+date = date.strftime("%m-%d_%H-%M")
+print(date) 
+print(type(date)) 
 
-model = load_model("c:\_data\_save\MCP\k26\\08wine_01-17_14-42_1000-0.0001.hdf5")
+path='..//_data//_save//MCP/k27/'
+filename= "{epoch:04d}-{val_loss:.4f}.hdf5"  
+filepath = "".join([path,'08wine_',date,'_',filename])
 
-# model.summary()
+mcp = ModelCheckpoint(
+    monitor='val_loss',
+    mode='auto',
+    verbose=1,
+    save_best_only=True,
+    filepath=filepath
+    )
+es= EarlyStopping(monitor='val_loss',mode='min',patience=100,verbose=1,restore_best_weights=True)
+model.compile(loss='categorical_crossentropy',optimizer='adam',metrics='accuracy')
+hist= model.fit(x_train, y_train, epochs=1000,batch_size=1000, validation_split=0.1,verbose=2,
+          callbacks=[es,mcp])
 
-
+model.save("c:\_data\_save\wine_1.h5")
 #4.결과예측
 result = model.evaluate(x_test, y_test)
 y_predict = model.predict(x_test)
@@ -101,11 +107,11 @@ print("acc :",result[1])
 print("random값 :", r)
 
 '''
-accuracy_score : 1.0
-로스 : 0.001546825747936964
-acc : 1.0                           save
+accuracy_score : 0.9444444444444444
+로스 : 0.11515446752309799
+acc : 0.9444444179534912
 
 accuracy_score : 1.0
-로스 : 0.0005240384489297867
-acc : 1.0                           load
+로스 : 0.015490112826228142
+acc : 1.0                       아래두개
 '''

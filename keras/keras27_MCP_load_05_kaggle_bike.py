@@ -55,9 +55,9 @@ x_test = scaler.transform(x_test)
 
 # model.save("c:\_data\_save\kaggle_bike_1.h5")
 
-model = load_model("c:\_data\_save\\kaagle_bike_1.h5")
+model = load_model("c:\_data\_save\MCP\k26\\05_kaggle_bike_01-17_14-25_0384-35003.4219.hdf5")
 
-model.summary()
+# model.summary()
 
 
 #4.결과예측
@@ -65,9 +65,9 @@ loss=model.evaluate(x_test,y_test)
 y_submit=model.predict(test_csv)
 # y_submit=abs(model.predict(test_csv))
 
-sampleSubmission_csv['count'] = y_submit
-print(sampleSubmission_csv)
-sampleSubmission_csv.to_csv(path +"sampleSubmission_13.csv", index=False)
+# sampleSubmission_csv['count'] = y_submit
+# print(sampleSubmission_csv)
+# sampleSubmission_csv.to_csv(path +"sampleSubmission_13.csv", index=False)
 print("로스 :",loss)
 print("음수 개수:",sampleSubmission_csv[sampleSubmission_csv['count']<0].count())
 
@@ -86,12 +86,19 @@ rmsle=RMSLE(y_test,y_predict)
 print("RMSLE :", rmsle)
 
 '''
-로스 : 32414.482421875
+로스 : 32414.935546875
 음수 개수: datetime    0
 count       0
 dtype: int64
-69/69 [==============================] - 0s 524us/step
-RMSLE : 1.5823909639816276
+69/69 [==============================] - 0s 526us/step
+RMSLE : 1.5825564098314306                                   save
+
+로스 : 32414.935546875                                       load
+음수 개수: datetime    0
+count       0
+dtype: int64
+69/69 [==============================] - 0s 539us/step
+RMSLE : 1.5825564098314306
 
 
 '''

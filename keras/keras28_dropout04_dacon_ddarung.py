@@ -3,7 +3,7 @@
 from sklearn.metrics import r2_score, mean_squared_error
 from sklearn.model_selection import train_test_split
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense,Dropout
 import numpy as np
 import pandas as pd
 
@@ -47,13 +47,16 @@ x_test = scaler.transform(x_test)
 
 #2. 모델구성
 model=Sequential()
-model.add(Dense(15,input_dim=9))
-model.add(Dense(20))
-model.add(Dense(100))
-model.add(Dense(150))
-model.add(Dense(80))
-model.add(Dense(40))
-model.add(Dense(10))
+model.add(Dense(15,input_dim=9,activation='relu'))
+model.add(Dropout(0.1))
+model.add(Dense(20,activation='relu'))
+model.add(Dropout(0.1))
+model.add(Dense(100,activation='relu'))
+model.add(Dropout(0.1))
+model.add(Dense(150,activation='relu'))
+model.add(Dense(80,activation='relu'))
+model.add(Dense(40,activation='relu'))
+model.add(Dense(10,activation='relu'))
 model.add(Dense(1))
 
 
@@ -68,7 +71,7 @@ date = date.strftime("%m-%d_%H-%M")
 print(date) 
 print(type(date)) 
 
-path='..//_data//_save//MCP/k26/'
+path='..//_data//_save//MCP/k27/'
 filename= "{epoch:04d}-{val_loss:.4f}.hdf5"  
 filepath = "".join([path,'04_dacon_ddarung_',date,'_',filename])
 
@@ -98,5 +101,5 @@ print("로스 :",loss)
 '''
 로스 : 2618.900634765625
 
-
+로스 : 2619.63134765625     위에 세줄
 '''

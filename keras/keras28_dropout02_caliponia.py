@@ -1,5 +1,3 @@
-#r2 0.55 ~0.6이상
-
 from sklearn.datasets import fetch_california_housing
 import time
 #1.데이터
@@ -13,7 +11,7 @@ y =datasets.target
 #print(datasets.feature_names)  #['MedInc', 'HouseAge', 'AveRooms', 'AveBedrms', 'Population', 'AveOccup', 'Latitude', 'Longitude']
 from sklearn.model_selection import train_test_split
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense,Dropout
 import numpy as np
 
 x_train, x_test, y_train, y_test = train_test_split(x,y, train_size=0.7, random_state=130)
@@ -27,6 +25,7 @@ x_test = scaler.transform(x_test)
 #2. 모델구성
 model=Sequential()
 model.add(Dense(1,input_dim=8))
+model.add(Dropout(0.1))
 model.add(Dense(100))
 model.add(Dense(1))
 model.add(Dense(100))
@@ -43,7 +42,7 @@ date = date.strftime("%m-%d_%H-%M")
 print(date) 
 print(type(date)) 
 
-path='..//_data//_save//MCP/k26/'
+path='..//_data//_save//MCP/k27/'
 filename= "{epoch:04d}-{val_loss:.4f}.hdf5"  
 filepath = "".join([path,'02_califonia_',date,'_',filename])
 
@@ -76,5 +75,6 @@ print("R2 score",r2)
 로스: 0.5679296255111694
 R2 score 0.5717274569573302
 
-
+로스: 0.5642915368080139
+R2 score 0.5744709251732929     아래 두줄
 '''

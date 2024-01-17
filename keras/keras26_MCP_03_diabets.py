@@ -39,12 +39,24 @@ model.add(Dense(1))
 
 #3.컴파일 훈련
 from keras.callbacks import EarlyStopping, ModelCheckpoint
+
+import datetime
+date= datetime.datetime.now()
+print(date)     
+date = date.strftime("%m-%d_%H-%M")
+print(date) 
+print(type(date)) 
+
+path='..//_data//_save//MCP/k26/'
+filename= "{epoch:04d}-{val_loss:.4f}.hdf5"  
+filepath = "".join([path,'03_diabets_',date,'_',filename])
+
 mcp = ModelCheckpoint(
     monitor='val_loss',
     mode='auto',
     verbose=1,
     save_best_only=True,
-    filepath='..\_data\_save\MCP\keras26_MCP_diabets.hdf5'
+    filepath=filepath
     )
 es= EarlyStopping(monitor='val_loss',mode='min',patience=100,verbose=1,restore_best_weights=True)
 model.compile(loss='mse',optimizer='adam')

@@ -62,7 +62,7 @@ x_test = scaler.transform(x_test)
 
 # model.save("c:\_data\_save\cancer_1.h5")
 
-model = load_model("c:\_data\_save\\cancer_1.h5")
+model = load_model("c:\_data\_save\MCP\k26\\06cancer_01-17_14-28_0191-0.0443.hdf5")
 
 model.summary()
 
@@ -81,9 +81,11 @@ print("accuracy :",accuracy)
 
 
 '''
-로스: 0.03969423845410347
-R2 score 0.9509863651497981
-accuracy : 0.991228044033050
+로스: 0.022365087643265724
+R2 score 0.9731414984792953
+accuracy : 0.9912280440330505       save
 
-
+로스: 0.022365087643265724
+R2 score 0.9731414984792953
+accuracy : 0.9912280440330505       load
 '''

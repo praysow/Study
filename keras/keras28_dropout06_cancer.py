@@ -3,7 +3,7 @@ from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
 import pandas as pd
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense,Dropout
 from sklearn.metrics import accuracy_score
 #1. 데이터
 datasets= load_breast_cancer()
@@ -35,14 +35,11 @@ x_test = scaler.transform(x_test)
 #2.모델구성
 model=Sequential()
 model.add(Dense(10,input_dim=30))
+model.add(Dropout(0.1))
 model.add(Dense(100))
 model.add(Dense(110))
 model.add(Dense(120))
 model.add(Dense(130))
-# model.add(Dense(5))
-# model.add(Dense(4))
-# model.add(Dense(3))
-# model.add(Dense(2))
 model.add(Dense(1, activation='sigmoid'))
 
 
@@ -56,7 +53,7 @@ date = date.strftime("%m-%d_%H-%M")
 print(date) 
 print(type(date)) 
 
-path='..//_data//_save//MCP/k26/'
+path='..//_data//_save//MCP/k27/'
 filename= "{epoch:04d}-{val_loss:.4f}.hdf5"  
 filepath = "".join([path,'06cancer_',date,'_',filename])
 
@@ -90,5 +87,9 @@ print("accuracy :",accuracy)
 로스: 0.022365087643265724
 R2 score 0.9731414984792953
 accuracy : 0.9912280440330505
+
+로스: 0.03639177232980728
+R2 score 0.9599780516645485
+accuracy : 0.9912280440330505   아래하나
 
 '''

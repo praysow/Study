@@ -74,7 +74,7 @@ x_test = scaler.transform(x_test)
 
 # model.save("c:\_data\_save\dacon_ddarung_1.h5")
 
-model = load_model("c:\_data\_save\\dacon_ddarung_1.h5")
+model = load_model("c:\_data\_save\MCP\k26\\04_dacon_ddarung_01-17_14-24_0097-2913.1611.hdf5")
 
 model.summary()
 #4.결과예측
@@ -87,6 +87,6 @@ submission_csv.to_csv(path + "submission_21.csv", index=False)
 print("로스 :",loss)
 
 '''
-로스 : 2618.900634765625
-
+로스 : 2613.635498046875        save
+로스 : 2613.635498046875        load
 '''

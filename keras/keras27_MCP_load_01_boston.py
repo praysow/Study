@@ -48,7 +48,7 @@ x_test = scaler.transform(x_test)
 
 # model.save("c:\_data\_save\boston_1.h5")
 
-model = load_model("c:\_data\_save\\boston_1.h5")
+model = load_model("c:\_data\_save\MCP\k26\\01_boston_01-17_13-07_1000-43.1987.hdf5")
 
 model.summary()
 
@@ -70,7 +70,9 @@ print("R2 score",r2)
 
 
 '''
-로스 : 17.540735244750977
-R2 score 0.7783621802665801
+로스 : 44.932708740234375       save
+R2 score 0.4322480405148875
 
+로스 : 44.932708740234375       load
+R2 score 0.4322480405148875
 '''

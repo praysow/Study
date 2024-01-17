@@ -1,7 +1,7 @@
 from sklearn.metrics import r2_score, mean_squared_error, mean_squared_log_error
 from sklearn.model_selection import train_test_split
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, Dropout
 import numpy as np
 import pandas as pd
 
@@ -26,6 +26,7 @@ x_test = scaler.transform(x_test)
 #2.모델구성
 model=Sequential()
 model.add(Dense(10,input_dim=8,activation='relu'))
+model.add(Dropout(0.1))
 model.add(Dense(10,activation='relu'))
 model.add(Dense(1,activation='relu'))
 model.add(Dense(20,activation='relu'))
@@ -49,7 +50,7 @@ date = date.strftime("%m-%d_%H-%M")
 print(date) 
 print(type(date)) 
 
-path='..//_data//_save//MCP/k26/'
+path='..//_data//_save//MCP/k27/'
 filename= "{epoch:04d}-{val_loss:.4f}.hdf5"  
 filepath = "".join([path,'05_kaggle_bike_',date,'_',filename])
 
@@ -74,7 +75,7 @@ y_submit=model.predict(test_csv)
 
 sampleSubmission_csv['count'] = y_submit
 print(sampleSubmission_csv)
-sampleSubmission_csv.to_csv(path +"sampleSubmission_13.csv", index=False)
+sampleSubmission_csv.to_csv(path +"sampleSubmission_15.csv", index=False)
 print("로스 :",loss)
 print("음수 개수:",sampleSubmission_csv[sampleSubmission_csv['count']<0].count())
 
@@ -99,5 +100,11 @@ dtype: int64
 69/69 [==============================] - 0s 524us/step
 RMSLE : 1.5823909639816276
 
-
+[6493 rows x 2 columns]
+로스 : 22648.681640625
+음수 개수: datetime    0
+count       0
+dtype: int64
+69/69 [==============================] - 0s 383us/step
+RMSLE : 1.3435691723506198                  위에하나 15번
 '''
