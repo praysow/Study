@@ -54,7 +54,7 @@ lb.fit(test_csv['대출목적'])
 test_csv['대출목적'] =lb.transform(test_csv['대출목적'])
 
 
-x_train,x_test,y_train,y_test=train_test_split(x,y_ohe,train_size=0.9,random_state=6,
+x_train,x_test,y_train,y_test=train_test_split(x,y_ohe,train_size=0.9,random_state=3 ,
                                                stratify=y_ohe
                                                )
 
@@ -75,37 +75,34 @@ test_csv = scaler.transform(test_csv)
 #2.모델구성
 model=Sequential()
 model.add(Dense(7,input_shape=(13,),activation='relu'))
-model.add(BatchNormalization(axis=1))
 model.add(Dense(44,activation='relu'))
+model.add(Dense(40,activation='relu'))
+model.add(Dense(34,activation='relu'))
+model.add(Dense(26,activation='relu'))
 model.add(BatchNormalization(axis=1))
-model.add(Dense(44,activation='relu'))
-model.add(BatchNormalization(axis=1))
+model.add(Dense(20,activation='relu'))
 model.add(Dense(30,activation='relu'))
-model.add(BatchNormalization(axis=1))
-model.add(Dense(24,activation='relu'))
-model.add(Dense(2,activation='relu'))
-model.add(Dense(48,activation='relu'))
 model.add(Dense(7,activation='softmax'))
 
 # model= load_model("c:\_data\_save\대출모델9.h5")
 #3.컴파일 훈련
 
 from keras.callbacks import EarlyStopping,ModelCheckpoint
-es= EarlyStopping(monitor='val_loss',mode='min',patience=2000,verbose=1,restore_best_weights=True)
+es= EarlyStopping(monitor='val_loss',mode='min',patience=1000,verbose=1,restore_best_weights=True)
 mcp = ModelCheckpoint(
     monitor='val_loss',
     mode='auto',
     verbose=1,
     save_best_only=True,
-    filepath='..\_data\_save\MCP\keras25_MCP15.hdf5'
+    filepath='..\_data\_save\MCP\keras25_MCP19.hdf5'
     )
 
 model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
-hist= model.fit(x_train, y_train, epochs=100000,batch_size=3000, validation_split=0.1,verbose=3,
+hist= model.fit(x_train, y_train, epochs=100000,batch_size=3000, validation_split=0.1,verbose=2,
           callbacks=[es,mcp]
             )
 # model=load_model("c:\_data\_save\dechul_8.h5")
-model.save("c:\_data\_save\dechul_15.h5")
+model.save("c:\_data\_save\dechul_19.h5")
 
 
 # ... (이전 코드)
@@ -126,7 +123,7 @@ y_submit = ohe.inverse_transform(y_submit)
 y_submit = pd.DataFrame(y_submit)
 sample_csv["대출등급"]=y_submit
 
-sample_csv.to_csv(path + "sample_submission_15.csv", index=False)
+sample_csv.to_csv(path + "sample_submission_19.csv", index=False)
 
 y_pred= model.predict(x_test)
 y_pred= ohe.inverse_transform(y_pred)
@@ -139,23 +136,14 @@ print("로스:", loss[0])
 print("acc", loss[1])
 
 '''
-f1 0.9356422333704654           10번
-로스: 0.2123161405324936         MCP9
-acc 0.9262720942497253          dechul 9
 
 f1 0.9143798222511382         8번               train =0.9
 로스: 0.2211541086435318      MCP8
 acc 0.9261682033538818
 
-f1 0.9182908571127791         11번        train_size=0.76
-로스: 0.2155047357082367         MCP8
-acc 0.9274803996086121           dechul 11
-
-f1 0.9019488405045184         13번              model.add(BatchNormalization())4개
-로스: 0.1996907740831375       MCP13        
-acc 0.9275181889533997        dechul 13
-
-f1 0.9181942985900887           14번            train   =0.98
-로스: 0.21459367871284485       MCP14
-acc 0.9190031290054321          dechul 14
+f1 0.9116423251268361         18번
+로스: 0.18478693068027496
+acc 0.9340602159500122
 '''
+
+

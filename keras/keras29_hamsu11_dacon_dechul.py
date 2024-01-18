@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
-from keras.models import Sequential, load_model
-from keras.layers import Dense,Dropout,BatchNormalization
+from keras.models import Sequential, load_model ,Model
+from keras.layers import Dense,Dropout,BatchNormalization, Input
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler, MinMaxScaler, Normalizer, RobustScaler
 from sklearn.metrics import accuracy_score, f1_score
@@ -53,18 +53,16 @@ test_csv['주택소유상태'] =lb.transform(test_csv['주택소유상태'])
 lb.fit(test_csv['대출목적'])
 test_csv['대출목적'] =lb.transform(test_csv['대출목적'])
 
-while True:
-    random=int(np.random.uniform(1,100))
-    train=np.random.uniform(0.7,0.9)
-    x_train,x_test,y_train,y_test=train_test_split(x,y_ohe,train_size=train,random_state=random,
-                                                stratify=y_ohe
-                                                )
 
-    scaler = RobustScaler()
-    scaler.fit(x_train)
-    x_train = scaler.transform(x_train)
-    x_test = scaler.transform(x_test)
-    test_csv = scaler.transform(test_csv)
+x_train,x_test,y_train,y_test=train_test_split(x,y_ohe,train_size=0.9,random_state=3 ,
+                                               stratify=y_ohe
+                                               )
+
+scaler = RobustScaler()
+scaler.fit(x_train)
+x_train = scaler.transform(x_train)
+x_test = scaler.transform(x_test)
+test_csv = scaler.transform(test_csv)
 
 
 # scaler = StandardScaler()
@@ -75,45 +73,50 @@ while True:
 # print(y_train,y_test)
 
 #2.모델구성
-    model=Sequential()
+# model=Sequential()
 # model.add(Dense(7,input_shape=(13,),activation='relu'))
-# model.add(BatchNormalization(axis=1))
 # model.add(Dense(44,activation='relu'))
+# model.add(Dense(40,activation='relu'))
+# model.add(Dense(34,activation='relu'))
+# model.add(Dense(26,activation='relu'))
 # model.add(BatchNormalization(axis=1))
-# model.add(Dense(44,activation='relu'))
-# model.add(BatchNormalization(axis=1))
+# model.add(Dense(20,activation='relu'))
 # model.add(Dense(30,activation='relu'))
-# model.add(BatchNormalization(axis=1))
-# model.add(Dense(24,activation='relu'))
-# model.add(Dense(2,activation='relu'))
-# model.add(Dense(48,activation='relu'))
 # model.add(Dense(7,activation='softmax'))
+#2.함수모델
+input1= Input(shape=(13,))
+dense1= Dense(7,activation='relu')(input1)
+dense2= Dense(44,activation='relu')(dense1)
+dense3= Dense(40,activation='relu')(dense2)
+dense4= Dense(34,activation='relu')(dense3)
+dense5= Dense(26,activation='relu')(dense4)
+drop1=BatchNormalization(axis=1)(dense5)
+dense6= Dense(20,activation='relu')(dense5)
+dense7= Dense(30,activation='relu')(dense6)
+output= Dense(7,activation='softmax')(dense7)
+model = Model(inputs=input1,outputs=output)
 
-# # model= load_model("c:\_data\_save\대출모델9.h5")
-# #3.컴파일 훈련
+# model= load_model("c:\_data\_save\대출모델9.h5")
+#3.컴파일 훈련
 
-# from keras.callbacks import EarlyStopping,ModelCheckpoint
-# es= EarlyStopping(monitor='val_loss',mode='min',patience=3000,verbose=1,restore_best_weights=True)
-# mcp = ModelCheckpoint(
-#     monitor='val_loss',
-#     mode='auto',
-#     verbose=1,
-#     save_best_only=True,
-#     filepath='..\_data\_save\MCP\keras25_MCP15.hdf5'
-#     )
+from keras.callbacks import EarlyStopping,ModelCheckpoint
+es= EarlyStopping(monitor='val_loss',mode='min',patience=1000,verbose=1,restore_best_weights=True)
+mcp = ModelCheckpoint(
+    monitor='val_loss',
+    mode='auto',
+    verbose=1,
+    save_best_only=True,
+    filepath='..\_data\_save\MCP\keras25_MCP19.hdf5'
+    )
 
-# model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
-# hist= model.fit(x_train, y_train, epochs=100000,batch_size=3000, validation_split=0.1,verbose=2,
-#           callbacks=[es,mcp]
-#             )
-    model=load_model("c:\_data\_save\dechul_8.h5")
-    model.save("c:\_data\_save\dechul_17.h5")
+model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
+hist= model.fit(x_train, y_train, epochs=100000,batch_size=3000, validation_split=0.1,verbose=2,
+          callbacks=[es,mcp]
+            )
+# model=load_model("c:\_data\_save\dechul_8.h5")
+model.save("c:\_data\_save\dechul_19.h5")
 
-    loss = hist.history['val_loss'][-1]
 
-    # 특정 조건을 만족하면 루프 종료
-    if loss <= 0.17:  
-        break
 # ... (이전 코드)
 
 # 4.결과예측
@@ -132,7 +135,7 @@ y_submit = ohe.inverse_transform(y_submit)
 y_submit = pd.DataFrame(y_submit)
 sample_csv["대출등급"]=y_submit
 
-sample_csv.to_csv(path + "sample_submission_15.csv", index=False)
+sample_csv.to_csv(path + "sample_submission_19.csv", index=False)
 
 y_pred= model.predict(x_test)
 y_pred= ohe.inverse_transform(y_pred)
@@ -143,3 +146,16 @@ f1=f1_score(y_test,y_pred, average='macro')
 print("f1",f1)
 print("로스:", loss[0])
 print("acc", loss[1])
+
+'''
+
+f1 0.9143798222511382         8번               train =0.9
+로스: 0.2211541086435318      MCP8
+acc 0.9261682033538818
+
+f1 0.9116423251268361         18번
+로스: 0.18478693068027496
+acc 0.9340602159500122
+'''
+
+

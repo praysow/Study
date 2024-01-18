@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 from sklearn.datasets import fetch_covtype
 from sklearn.model_selection import train_test_split
-from keras.models import Sequential
-from keras.layers import Dense, Dropout
+from keras.models import Sequential, Model
+from keras.layers import Dense, Dropout, Input
 from keras.utils import to_categorical
 from sklearn.preprocessing import OneHotEncoder
 
@@ -57,16 +57,28 @@ x_test = scaler.transform(x_test)
 
 
 #2.모델구성
-model=Sequential()
-model.add(Dense(30,input_dim=54,activation='relu'))
-model.add(Dropout(0.1))
-model.add(Dense(70,activation='relu'))
-model.add(Dropout(0.1))
-model.add(Dense(80,activation='relu'))
-model.add(Dropout(0.1))
-model.add(Dense(90,activation='relu'))
-model.add(Dense(100,activation='relu'))
-model.add(Dense(7, activation='softmax'))
+# model=Sequential()
+# model.add(Dense(30,input_dim=54,activation='relu'))
+# model.add(Dropout(0.1))
+# model.add(Dense(70,activation='relu'))
+# model.add(Dropout(0.1))
+# model.add(Dense(80,activation='relu'))
+# model.add(Dropout(0.1))
+# model.add(Dense(90,activation='relu'))
+# model.add(Dense(100,activation='relu'))
+# model.add(Dense(7, activation='softmax'))
+
+input1= Input(shape=(54,))
+dense1= Dense(30,activation='relu')(input1)
+drop1=Dropout(0.1)(dense1)
+dense2= Dense(70,activation='relu')(dense1)
+drop1=Dropout(0.1)(dense2)
+dense3= Dense(80,activation='relu')(dense2)
+drop1=Dropout(0.1)(dense3)
+dense4= Dense(90,activation='relu')(dense3)
+dense5= Dense(100,activation='relu')(dense4)
+output= Dense(7, activation='softmax')(dense5)
+model = Model(inputs=input1,outputs=output)
 
 # 3.컴파일 훈련
 from keras.callbacks import EarlyStopping, ModelCheckpoint
@@ -125,4 +137,7 @@ accuracy_score : 0.841262816257284
 acc : 0.8412628173828125
 random값 : 892
 
+accuracy_score : 0.7687418553760664
+로스 : 0.5514593124389648
+acc : 0.7687418460845947
 '''
