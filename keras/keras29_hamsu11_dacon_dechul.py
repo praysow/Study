@@ -54,7 +54,7 @@ lb.fit(test_csv['대출목적'])
 test_csv['대출목적'] =lb.transform(test_csv['대출목적'])
 
 
-x_train,x_test,y_train,y_test=train_test_split(x,y_ohe,train_size=0.9,random_state=3 ,
+x_train,x_test,y_train,y_test=train_test_split(x,y_ohe,train_size=0.9,random_state=333 ,
                                                stratify=y_ohe
                                                )
 
@@ -73,28 +73,32 @@ test_csv = scaler.transform(test_csv)
 # print(y_train,y_test)
 
 #2.모델구성
-# model=Sequential()
-# model.add(Dense(7,input_shape=(13,),activation='relu'))
-# model.add(Dense(44,activation='relu'))
-# model.add(Dense(40,activation='relu'))
-# model.add(Dense(34,activation='relu'))
-# model.add(Dense(26,activation='relu'))
-# model.add(BatchNormalization(axis=1))
-# model.add(Dense(20,activation='relu'))
-# model.add(Dense(30,activation='relu'))
-# model.add(Dense(7,activation='softmax'))
+model=Sequential()
+model.add(Dense(7,input_shape=(13,),activation='relu'))
+model.add(BatchNormalization(axis=1))
+model.add(Dense(44,activation='relu'))
+model.add(BatchNormalization(axis=1))
+model.add(Dense(44,activation='relu'))
+model.add(BatchNormalization(axis=1))
+model.add(Dense(30,activation='relu'))
+model.add(BatchNormalization(axis=1))
+model.add(Dense(24,activation='relu'))
+model.add(BatchNormalization(axis=1))
+model.add(Dense(2,activation='relu'))
+model.add(Dense(48,activation='relu'))
+model.add(Dense(7,activation='softmax'))
 #2.함수모델
-input1= Input(shape=(13,))
-dense1= Dense(7,activation='relu')(input1)
-dense2= Dense(44,activation='relu')(dense1)
-dense3= Dense(40,activation='relu')(dense2)
-dense4= Dense(34,activation='relu')(dense3)
-dense5= Dense(26,activation='relu')(dense4)
-drop1=BatchNormalization(axis=1)(dense5)
-dense6= Dense(20,activation='relu')(dense5)
-dense7= Dense(30,activation='relu')(dense6)
-output= Dense(7,activation='softmax')(dense7)
-model = Model(inputs=input1,outputs=output)
+# input1= Input(shape=(13,))
+# dense1= Dense(7,activation='relu')(input1)
+# dense2= Dense(44,activation='relu')(dense1)
+# dense3= Dense(44,activation='relu')(dense2)
+# dense4= Dense(30,activation='relu')(dense3)
+# dense5= Dense(24,activation='relu')(dense4)
+# drop1=BatchNormalization(axis=1)(dense5)
+# dense6= Dense(2,activation='relu')(dense5)
+# dense7= Dense(48,activation='relu')(dense6)
+# output= Dense(7,activation='softmax')(dense7)
+# model = Model(inputs=input1,outputs=output)
 
 # model= load_model("c:\_data\_save\대출모델9.h5")
 #3.컴파일 훈련
@@ -110,7 +114,7 @@ mcp = ModelCheckpoint(
     )
 
 model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
-hist= model.fit(x_train, y_train, epochs=100000,batch_size=3000, validation_split=0.1,verbose=2,
+hist= model.fit(x_train, y_train, epochs=100000,batch_size=1000, validation_split=0.1,verbose=2,
           callbacks=[es,mcp]
             )
 # model=load_model("c:\_data\_save\dechul_8.h5")
@@ -156,6 +160,9 @@ acc 0.9261682033538818
 f1 0.9116423251268361         18번
 로스: 0.18478693068027496
 acc 0.9340602159500122
+
+
+
 '''
 
 
