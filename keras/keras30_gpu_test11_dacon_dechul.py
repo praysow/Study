@@ -5,7 +5,6 @@ from keras.layers import Dense,Dropout,BatchNormalization, Input
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler, MinMaxScaler, Normalizer, RobustScaler
 from sklearn.metrics import accuracy_score, f1_score
-from keras.utils import to_categorical
 import time
 #1.데이터
 path= "c:\_data\dacon\dechul\\"
@@ -19,7 +18,7 @@ y= train_csv['대출등급']
 # print(train_csv,train_csv.shape)        (96294, 14)
 # print(test_csv,test_csv.shape)          (64197, 13)
 # print(sample_csv,sample_csv.shape)      (64197, 2)
-print(np.unique(y,return_counts=True))
+# print(np.unique(y,return_counts=True))
 
 
 
@@ -64,7 +63,6 @@ x_train = scaler.transform(x_train)
 x_test = scaler.transform(x_test)
 test_csv = scaler.transform(test_csv)
 
-
 # scaler = StandardScaler()
 # x_train_scaled = scaler.fit_transform(x_train)
 # x_test_scaled = scaler.transform(x_test)
@@ -72,20 +70,23 @@ test_csv = scaler.transform(test_csv)
 # print(x_train,x_test)
 # print(y_train,y_test)
 
+
+
+'''
 #2.모델구성
 model=Sequential()
-model.add(Dense(7,input_shape=(13,),activation='relu'))
+model.add(Dense(8,input_shape=(13,),activation='relu'))
 model.add(BatchNormalization(axis=1))
 model.add(Dense(44,activation='relu'))
 model.add(BatchNormalization(axis=1))
 model.add(Dense(40,activation='relu'))
 model.add(BatchNormalization(axis=1))
-model.add(Dense(34,activation='relu'))
-model.add(BatchNormalization(axis=1))
-model.add(Dense(26,activation='relu'))
-model.add(BatchNormalization(axis=1))
-model.add(Dense(20,activation='relu'))
 model.add(Dense(30,activation='relu'))
+model.add(BatchNormalization(axis=1))
+model.add(Dense(24,activation='relu'))
+model.add(BatchNormalization(axis=1))
+model.add(Dense(2,activation='relu'))
+model.add(Dense(48,activation='relu'))
 model.add(Dense(7,activation='softmax'))
 
 # model= load_model("c:\_data\_save\대출모델9.h5")
@@ -104,8 +105,8 @@ mcp = ModelCheckpoint(
 model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
 start_time = time.time()
 
-hist= model.fit(x_train, y_train, epochs=1000,batch_size=5000, validation_split=0.1,verbose=2,
-          #callbacks=[es,mcp]
+hist= model.fit(x_train, y_train, epochs=100000,batch_size=2000, validation_split=0.1,verbose=3,
+          callbacks=[es,mcp]
             )
 # model=load_model("c:\_data\_save\dechul_8.h5")
 end_time = time.time()
@@ -143,7 +144,7 @@ print("f1",f1)
 print("로스:", loss[0])
 print("acc", loss[1])
 print("걸린시간 :",round(end_time - start_time))
-
+'''
 '''
 f1 0.8002436934022501         gpu
 로스: 0.46971189975738525

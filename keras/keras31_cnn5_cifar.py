@@ -1,7 +1,8 @@
 import time
+import numpy as np
 from keras.datasets import cifar10
 from keras.models import Sequential
-from keras.layers import Dense, Conv2D, Flatten, BatchNormalization, MaxPooling2D,Dropout
+from keras.layers import Dense, Conv2D, Flatten, BatchNormalization, MaxPooling2D,Dropout,AveragePooling2D
 from keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
 
@@ -20,13 +21,14 @@ y_test = to_categorical(y_test)
 # 모델 생성
 model = Sequential()
 model.add(Conv2D(32, (3, 3), input_shape=(32, 32, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(AveragePooling2D(pool_size=(2, 2)))
 model.add(Dropout(0.5))
 model.add(Conv2D(64, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(AveragePooling2D(pool_size=(2, 2)))
 model.add(Dropout(0.5))
 model.add(Conv2D(128, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(AveragePooling2D(pool_size=(2, 2)))
+model.add(Dropout(0.5))
 model.add(Flatten())
 model.add(Dense(512, activation='relu'))
 model.add(BatchNormalization())
@@ -45,6 +47,10 @@ end_t= time.time()
 
 # 모델 평가
 result = model.evaluate(x_test, y_test)
+y_submit= model.predict(x_test)
+y_test_indices = np.argmax(y_test, axis=1)
+y_submit_indices = np.argmax(y_submit, axis=1)
+
 print("Loss:", result[0])
 print("Accuracy:", result[1])
 print("걸린 시간:", round(end_t - start_t))
@@ -54,4 +60,8 @@ Loss: 0.7987858057022095
 Accuracy: 0.7537999749183655
 걸린 시간: 82
 
+Loss: 0.6911240816116333
+Accuracy: 0.7680000066757202
+걸린 시간: 120
 '''
+
