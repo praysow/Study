@@ -14,7 +14,7 @@ y_train = to_categorical(y_train)
 y_test = to_categorical(y_test)
 
 model = Sequential()
-model.add(Conv2D(10, (2, 2), input_shape=(28, 28, 1)))      #(2,2)를 사용했더니 (28,28,1)이 input의 4를 더해서 (n,27,27,4)가 된다
+model.add(Conv2D(10, (2, 2), input_shape=(28, 28, 1),strides=2,padding='same'))      #(2,2)를 사용했더니 (28,28,1)이 input의 4를 더해서 (n,27,27,4)가 된다
 model.add(Conv2D(20, (3, 3),activation='relu'))
 model.add(Conv2D(30, (4, 4),activation='relu'))
 model.add(Conv2D(30, (4, 4),activation='relu'))
@@ -54,4 +54,8 @@ print("걸린시간 :",round(end_time - start_time))
 loss 0.9844655990600586
 acc 0.661899983882904
 걸린시간 : 240
+
+loss 0.04153173044323921
+acc 0.9904000163078308
+걸린시간 : 67
 '''

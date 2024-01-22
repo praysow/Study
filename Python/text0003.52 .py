@@ -1,136 +1,63 @@
+
+import time
 import numpy as np
-import pandas as pd
+from keras.datasets import cifar100
 from keras.models import Sequential
-from keras.layers import Dense,Dropout,BatchNormalization
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler, MinMaxScaler
-from sklearn.metrics import accuracy_score, f1_score
+from keras.layers import Dense,Conv3D,Conv2D,BatchNormalization,AveragePooling3D, MaxPooling2D,Dropout,Flatten,MaxPooling3D
 from keras.utils import to_categorical
-#1.데이터
-path= "c:\_data\dacon\dechul\\"
-train_csv=pd.read_csv(path+"train.csv",index_col=0)
-test_csv=pd.read_csv(path+"test.csv",index_col=0)
-sample_csv=pd.read_csv(path+"sample_submission.csv")
-x= train_csv.drop(['대출등급'],axis=1)
-y= train_csv['대출등급']
+from sklearn.model_selection import train_test_split
+import pandas as pd
+(x_train, y_train), (x_test,y_test) = cifar100.load_data()
 
 
-# print(train_csv,train_csv.shape)        (96294, 14)
-# print(test_csv,test_csv.shape)          (64197, 13)
-# print(sample_csv,sample_csv.shape)      (64197, 2)
-print(np.unique(y,return_counts=True))
+# print(x_train.shape,y_train.shape)  #(50000, 32, 32, 3) (50000, 1)
+# print(x_test.shape,y_test.shape)   # (10000, 32, 32, 3) (10000, 1)
+# print(pd.value_counts(y_train))
+# print(np.unique(y_train,return_counts=True))
+
+
+x_train,x_test,y_train,y_test = train_test_split(x_train,y_train,train_size=0.9,random_state=3)
+
+#1.데이터 전처리
+
+x_train = x_train.astype('float32') /255.0
+x_test = x_test.astype('float32') /255.0
+# x_train = x_train.reshape(50000,32,32,3)
+# x_test = x_test.reshape(10000,32,32,3)
+x_train =x_train.reshape(x_train.shape[0],x_train.shape[1],x_train.shape[2],x_train.shape[3])
+x_test =x_test.reshape(x_test.shape[0], x_test.shape[1],x_test.shape[2],x_test.shape[3])
+x_train = to_categorical(x_train,100)
+y_test = to_categorical(x_test,100)
 
 
 
-y=y.values.reshape(-1,1)
-
-ohe = OneHotEncoder(sparse=False)
-ohe = OneHotEncoder()
-y_ohe = ohe.fit_transform(y).toarray()
-
-# print(y_ohe,y_ohe.shape)
 
 
-lb=LabelEncoder()
-lb.fit(x['대출기간'])
-x['대출기간'] = lb.transform(x['대출기간'])
-lb.fit(x['근로기간'])
-x['근로기간'] = lb.transform(x['근로기간'])
-lb.fit(x['주택소유상태'])
-x['주택소유상태'] = lb.transform(x['주택소유상태'])
-lb.fit(x['대출목적'])
-x['대출목적'] = lb.transform(x['대출목적'])
 
-lb.fit(test_csv['대출기간'])
-test_csv['대출기간'] =lb.transform(test_csv['대출기간'])
-
-lb.fit(test_csv['근로기간'])
-test_csv['근로기간'] =lb.transform(test_csv['근로기간'])
-
-lb.fit(test_csv['주택소유상태'])
-test_csv['주택소유상태'] =lb.transform(test_csv['주택소유상태'])
-
-lb.fit(test_csv['대출목적'])
-test_csv['대출목적'] =lb.transform(test_csv['대출목적'])
-
-
-x_train,x_test,y_train,y_test=train_test_split(x,y_ohe,train_size=0.9,random_state=3,
-                                               stratify=y_ohe
-                                               )
-
-scaler = StandardScaler()
-scaler.fit(x_train)
-x_train = scaler.transform(x_train)
-x_test = scaler.transform(x_test)
-test_csv = scaler.transform(test_csv)
-
-# #2.모델구성
-r1=int(np.random.uniform(1,50))
-r2=int(np.random.uniform(1,50))
-r3=int(np.random.uniform(1,50))
-r4=int(np.random.uniform(1,50))
-r5=int(np.random.uniform(1,50))
-r6=int(np.random.uniform(1,50))
-r0=int(np.random.uniform(1,1000))
-
-
-#2.모델구성
-model=Sequential()
-model.add(Dense(r1,input_shape=(13,),activation='relu'))
-model.add(Dense(r2,activation='relu'))
-model.add(Dense(r2,activation='relu'))
-model.add(Dense(r3,activation='relu'))
-model.add(Dense(r4,activation='relu'))
-model.add(Dense(r5,activation='relu'))
-model.add(Dense(r6,activation='relu'))
-model.add(Dense(7,activation='softmax'))
-
-
-#3.컴파일 훈련
+#2. 모델생성 
+model = Sequential()
+model.add(Conv3D(32, (3,3,3),input_shape=(32,32,3,2),activation='relu'))
+model.add(AveragePooling3D(pool_size=(1,1,1)))
+model.add(Dropout(0.5))
+model.add(Flatten())
+model.add(Dense(30,activation='relu'))
+model.add(Dense(100,activation='softmax'))
 
 from keras.callbacks import EarlyStopping,ModelCheckpoint
-es= EarlyStopping(monitor='f1_score',mode='max',patience=100,verbose=1,restore_best_weights=True)
-mcp = ModelCheckpoint(
-    monitor='f1_score',
-    mode='auto',
-    verbose=1,
-    save_best_only=True,
-    filepath='..\_data\_save\MCP\keras25_MCP1.hdf5'
-    )
-
+es= EarlyStopping(monitor='val_loss',mode='auto',patience=100,verbose=1,restore_best_weights=True)
+mcp = ModelCheckpoint(monitor='val_loss',mode='auto',verbose=1,save_best_only=True,
+                      filepath='../_data/_save/MCP/keras31-1.hdf5')
 model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
-hist= model.fit(x_train, y_train, epochs=15000,batch_size=3000, validation_split=0.3,verbose=3,
-          callbacks=[es,mcp]
-            )
+start_t = time.time()
+model.fit(x_train,y_train,epochs=10, batch_size=32, verbose=2, validation_split=0.1,callbacks=[es,mcp])
+end_t= time.time()
 
-model.save("c:\_data\_save\dechul_1.h5")
-
-
-# ... (이전 코드)
-
-#4.결과예측
-loss = model.evaluate(x_test, y_test)
-y_submit = model.predict(test_csv)
+# 모델 평가
+result = model.evaluate(x_test, y_test)
+y_submit= model.predict(x_test)
 y_test_indices = np.argmax(y_test, axis=1)
 y_submit_indices = np.argmax(y_submit, axis=1)
 
-# 할당 전에 길이 확인
-# print(len(y_test_indices), len(y_submit_indices), len(sample_csv))
-
-# y_test_indices = np.argmax(y_test, axis=1)                        (argmax는 숫자가 제일 큰곳의 인덱스를 알려줌)
-# y_submit_indices = np.argmax(y_submit, axis=1)
-
-y_submit = ohe.inverse_transform(y_submit)
-y_submit = pd.DataFrame(y_submit)
-sample_csv["대출등급"]=y_submit
-
-sample_csv.to_csv(path + "sample_submission_5.csv", index=False)
-
-y_pred= model.predict(x_test)
-y_pred= ohe.inverse_transform(y_pred)
-y_test = ohe.inverse_transform(y_test)
-f1=f1_score(y_test,y_pred, average='macro')
-
-print("f1",f1)
-print("로스:", loss[0])
-print("acc", loss[1])
+print("Loss:", result[0])
+print("Accuracy:", result[1])
+print("걸린 시간:", round(end_t - start_t))

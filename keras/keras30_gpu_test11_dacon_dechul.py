@@ -72,7 +72,7 @@ test_csv = scaler.transform(test_csv)
 
 
 
-'''
+
 #2.모델구성
 model=Sequential()
 model.add(Dense(8,input_shape=(13,),activation='relu'))
@@ -144,7 +144,7 @@ print("f1",f1)
 print("로스:", loss[0])
 print("acc", loss[1])
 print("걸린시간 :",round(end_time - start_time))
-'''
+
 '''
 f1 0.8002436934022501         gpu
 로스: 0.46971189975738525

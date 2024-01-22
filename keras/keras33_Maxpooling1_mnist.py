@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from keras.datasets import mnist
-from keras.layers import Dense, Conv2D, Flatten     #Flatten: 평탄화시키다,데이터들을 전부다 펴주는 역할
+from keras.layers import Dense, Conv2D, Flatten,MaxPooling2D
 from keras.models import Sequential
 from keras.utils import to_categorical
 import time
@@ -14,8 +14,9 @@ y_train = to_categorical(y_train)
 y_test = to_categorical(y_test)
 
 model = Sequential()
-model.add(Conv2D(10, (2, 2), input_shape=(28, 28, 1)))      #(2,2)를 사용했더니 (28,28,1)이 input의 4를 더해서 (n,27,27,4)가 된다
+model.add(Conv2D(10, (2, 2), input_shape=(28, 28, 1),strides=2,padding='same'))      #(2,2)를 사용했더니 (28,28,1)이 input의 4를 더해서 (n,27,27,4)가 된다
 model.add(Conv2D(20, (3, 3),activation='relu'))
+model.add(MaxPooling2D())
 model.add(Conv2D(30, (4, 4),activation='relu'))
 model.add(Conv2D(30, (4, 4),activation='relu'))
 model.add(Conv2D(30, (4, 4),activation='relu'))
@@ -54,4 +55,8 @@ print("걸린시간 :",round(end_time - start_time))
 loss 0.9844655990600586
 acc 0.661899983882904
 걸린시간 : 240
+
+loss 0.04153173044323921
+acc 0.9904000163078308
+걸린시간 : 67
 '''

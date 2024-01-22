@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from keras.models import Sequential, load_model ,Model
-from keras.layers import Dense,Dropout,BatchNormalization, Input
+from keras.layers import Dense,Dropout,BatchNormalization, Input,Conv1D,MaxPooling1D,Flatten
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler, MinMaxScaler, Normalizer, RobustScaler
 from sklearn.metrics import accuracy_score, f1_score
@@ -73,32 +73,35 @@ test_csv = scaler.transform(test_csv)
 # print(y_train,y_test)
 
 #2.모델구성
-model=Sequential()
-model.add(Dense(7,input_shape=(13,),activation='relu'))
-model.add(BatchNormalization(axis=1))
-model.add(Dense(44,activation='relu'))
-model.add(BatchNormalization(axis=1))
-model.add(Dense(44,activation='relu'))
-model.add(BatchNormalization(axis=1))
-model.add(Dense(30,activation='relu'))
-model.add(BatchNormalization(axis=1))
-model.add(Dense(24,activation='relu'))
-model.add(BatchNormalization(axis=1))
-model.add(Dense(2,activation='relu'))
-model.add(Dense(48,activation='relu'))
-model.add(Dense(7,activation='softmax'))
-#2.함수모델
-# input1= Input(shape=(13,))
-# dense1= Dense(7,activation='relu')(input1)
-# dense2= Dense(44,activation='relu')(dense1)
-# dense3= Dense(44,activation='relu')(dense2)
-# dense4= Dense(30,activation='relu')(dense3)
-# dense5= Dense(24,activation='relu')(dense4)
-# drop1=BatchNormalization(axis=1)(dense5)
-# dense6= Dense(2,activation='relu')(dense5)
-# dense7= Dense(48,activation='relu')(dense6)
-# output= Dense(7,activation='softmax')(dense7)
-# model = Model(inputs=input1,outputs=output)
+# model=Sequential()
+# model.add(Dense(7,input_shape=(13,),activation='relu'))
+# model.add(BatchNormalization(axis=1))
+# model.add(Dense(44,activation='relu'))
+# model.add(BatchNormalization(axis=1))
+# model.add(Dense(44,activation='relu'))
+# model.add(BatchNormalization(axis=1))
+# model.add(Dense(30,activation='relu'))
+# model.add(BatchNormalization(axis=1))
+# model.add(Dense(24,activation='relu'))
+# model.add(BatchNormalization(axis=1))
+# model.add(Dense(2,activation='relu'))
+# model.add(Dense(48,activation='relu'))
+# model.add(Dense(7,activation='softmax'))
+# 2.함수모델
+input1= Input(shape=(13,1))
+dense1= Dense(7,activation='relu')(input1)
+conv1 = Conv1D(32,3,activation='relu')(input1)
+pool1 = MaxPooling1D(2)(conv1)
+flat1=Flatten()(pool1)
+dense2= Dense(44,activation='relu')(flat1)
+dense3= Dense(44,activation='relu')(dense2)
+dense4= Dense(30,activation='relu')(dense3)
+dense5= Dense(24,activation='relu')(dense4)
+drop1=BatchNormalization(axis=1)(dense5)
+dense6= Dense(2,activation='relu')(drop1)
+dense7= Dense(48,activation='relu')(dense6)
+output= Dense(7,activation='softmax')(dense7)
+model = Model(inputs=input1,outputs=output)
 
 # model= load_model("c:\_data\_save\대출모델9.h5")
 #3.컴파일 훈련
