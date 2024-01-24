@@ -23,13 +23,13 @@ test_datagen = ImageDataGenerator(rescale=1./255)
 
 path_train= "c:/_data/image/brain/train"
 path_test= "c:/_data/image/brain/test"
-xy_train=train_dategen.flow_from_directory(path_train,target_size=(200,200),batch_size=160,class_mode='binary')         #batch_size을 최대로 하면 x데이터를 통으로 가져올수있다
+xy_train=train_dategen.flow_from_directory(path_train,target_size=(200,200),batch_size=160,class_mode='binary',color_mode='grayscale')         #batch_size을 최대로 하면 x데이터를 통으로 가져올수있다,batch란 이미지를 얼만큼 자를것인가
 from sklearn.datasets import load_diabetes
 daeasets= load_diabetes()
 
 
 print(xy_train)
-xy_test=test_datagen.flow_from_directory(path_test,target_size=(200,200),batch_size=160,class_mode='binary')
+xy_test=test_datagen.flow_from_directory(path_test,target_size=(200,200),batch_size=160,class_mode='binary',color_mode='rgb')       #rgb는 red,green,blue
 print(xy_train.next())
 print(xy_train[0])
 # print(xy_train[16])         #에러 이유 : 전체데이터/batch_size =160/10= 16개인데

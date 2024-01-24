@@ -8,14 +8,14 @@ import time
 from sklearn.preprocessing import OneHotEncoder
 train_dategen=ImageDataGenerator(
      rescale=1.255,                      #앞에 1.에서 .은 부동소수점 계산하겠다는 것이다
-     horizontal_flip=True,           #수평 뒤집기
-     vertical_flip=True,             #수직 뒤집기
-     width_shift_range=0.1,           #평행이동 0.1=10%이동
-     height_shift_range=0.1,          #
-     rotation_range=5,               #정해진 각도 만큼 이미지를 회전 (5도 회전)
-     zoom_range=1.2,                 #1.2배 확대혹은 축소
-     shear_range=0.7,                 #좌표 하나를 고정시키고 다른 몇개의 좌표를 이동시키는 변환
-     fill_mode='nearest'
+     # horizontal_flip=True,           #수평 뒤집기
+     # vertical_flip=True,             #수직 뒤집기
+     # width_shift_range=0.1,           #평행이동 0.1=10%이동
+     # height_shift_range=0.1,          #
+     # rotation_range=5,               #정해진 각도 만큼 이미지를 회전 (5도 회전)
+     # zoom_range=1.2,                 #1.2배 확대혹은 축소
+     # shear_range=0.7,                 #좌표 하나를 고정시키고 다른 몇개의 좌표를 이동시키는 변환
+     # fill_mode='nearest'
      )
 
 test_datagen = ImageDataGenerator(rescale=1./255)
@@ -60,7 +60,7 @@ model.compile(loss='binary_crossentropy',optimizer='adam',metrics=['accuracy'])
 start_t = time.time()
 model.fit(x_train,y_train,epochs=1000, batch_size=100, verbose=2,
           validation_data=(x_test, y_test),
-           callbacks=[es,mcp]
+          callbacks=[es,mcp]
         )
 end_t= time.time()
 

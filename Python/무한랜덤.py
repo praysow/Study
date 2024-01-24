@@ -1,108 +1,81 @@
-from sklearn.metrics import r2_score, mean_squared_error, mean_squared_log_error
+#테스트폴더 쓰진말고 train폴더로
+#변환시간도 체크하기
+
+from keras.preprocessing.image import ImageDataGenerator
+from keras.models import Sequential, load_model
+from keras.layers import Conv2D, Dense, Flatten, Dropout, MaxPooling2D, BatchNormalization
+from keras.callbacks import EarlyStopping
 from sklearn.model_selection import train_test_split
-from keras.models import Sequential
-from keras.layers import Dense
 import numpy as np
-import pandas as pd
-from sklearn.metrics import accuracy_score
+import time
 
-#1. 데이터
+start_time = time.time()
+path = "C:\\_data\\kaggle\\cat-and-dog-classification-harper2022\\"
+train_path = path+"train\\"
+test_path = path+"test\\"
 
-path= "c:\_data\dacon\cancer\\"
-train_csv = pd.read_csv(path+"train.csv",index_col=0)
-test_csv = pd.read_csv(path+"test.csv",index_col=0)
-sampleSubmission_csv = pd.read_csv(path+"sample_Submission.csv")
+BATCH_SIZE = int(1000)
+IMAGE_SIZE = int(130)
 
-print("train",train_csv.shape)      #(652,9)
-print("test",test_csv.shape)       #(116, 8)
-print("sub",sampleSubmission_csv.shape) #(116,2)
+train_data_gen = ImageDataGenerator(
+    rescale=1./255,
+    # horizontal_flip=True,
+    # vertical_flip=True,
+    # width_shift_range=0.1,
+    # height_shift_range=0.1,
+    # rotation_range=5,
+    # zoom_range=1.2,
+    # shear_range=0.7,
+    # fill_mode='nearest'
+)
 
-x= train_csv.drop(['Outcome'], axis=1)
-y= train_csv['Outcome']
-while True:
-    random=int(np.random.uniform(1,10000))
-    train=np.random.uniform(0.7,0.99)
-    x_train,x_test,y_train,y_test=train_test_split(x,y, train_size=train, random_state=random)
+xy_train_data = train_data_gen.flow_from_directory(
+    train_path,
+    target_size=(IMAGE_SIZE,IMAGE_SIZE),
+    batch_size=BATCH_SIZE,        #batch_size 너무 크게주면 에러나옴
+    class_mode='binary',
+    shuffle=False
+)
 
-    r1=int(np.random.uniform(1,100))
-    r2=int(np.random.uniform(50,150))
-    r3=int(np.random.uniform(80,180))
-    r4=int(np.random.uniform(80,180))
-    r5=int(np.random.uniform(90,190))
-    r6=int(np.random.uniform(150,200))
-    r0=int(np.random.uniform(1,1000))
+test_data_gen = ImageDataGenerator(
+    rescale=1./255
+)
 
+test_data = test_data_gen.flow_from_directory(
+    test_path,
+    target_size=(IMAGE_SIZE,IMAGE_SIZE),
+    batch_size=99999,
+    class_mode='binary',
+    shuffle=False
+)
 
-#2.모델구성
-    model=Sequential()
-    model.add(Dense(r1,input_dim=8))
-    model.add(Dense(r2,activation='relu'))
-    model.add(Dense(r2,activation='relu'))
-    model.add(Dense(r3,activation='relu'))
-    model.add(Dense(r4,activation='relu'))
-    model.add(Dense(r5,activation='relu'))
-    model.add(Dense(r6,activation='relu'))
-    model.add(Dense(1,activation='sigmoid'))
+x = []
+y = []
+failed_i = []
 
+for i in range(int(20000 / BATCH_SIZE)):
+    try: 
+        xy_data = xy_train_data.next()
+        new_x = xy_data[0]
+        new_y = xy_data[1]
+        if i==0:
+            x = np.array(new_x)
+            y = np.array(new_y)
+            continue
+        
+        x = np.vstack([x,new_x])
+        y = np.hstack([y,new_y])
+        print("i: ",i)
+        print(f"{x.shape=}\n{y.shape=}")
+    except:
+        print("failed i: ",i)
+        failed_i.append(i)
+        
+print(failed_i) # [70, 115]
 
-# 3.컴파일 훈련
+print(f"{x.shape=}\n{y.shape=}")    # x.shape=(1000, 200, 200, 3) y.shape=(1000,)
 
-    from keras.callbacks import EarlyStopping
-    es = EarlyStopping(monitor='val_accuracy',
-            mode='max',
-            patience=50,                   
-            verbose=1,
-            restore_best_weights=True
-            )
-    model.compile(loss='binary_crossentropy',optimizer='adam',metrics=['accuracy'])
-
-    vd=np.random.uniform(0.1,0.3)
-    
-# model.fit()을 실행하여 학습
-    hist = model.fit(x_train, y_train, epochs=r0, batch_size=10, verbose=2, validation_split=vd,
-                callbacks=[es]
-                )
-
-    # 학습 이력에서 검증 손실을 가져옴
-    accuracy = hist.history['val_accuracy'][-1]
-
-    # 특정 조건을 만족하면 루프 종료
-    if accuracy > 0.79:  
-        break
-
-# hist=model.fit(x_train,y_train, epochs=1000, batch_size=10,verbose=2,
-#           validation_split=0.3, callbacks=[es]
-#           )
-
-#4.결과예측
-loss=model.evaluate(x_test,y_test)
-y_submit=model.predict(test_csv)
-y_submit=abs(model.predict(test_csv))
-
-sampleSubmission_csv['Outcome'] = np.round(y_submit)
-print(sampleSubmission_csv)
-sampleSubmission_csv.to_csv(path +"제출_12.csv", index=False)
-# print("로스 :",loss)
-# print("음수 개수:",sampleSubmission_csv[sampleSubmission_csv['count']<0].count())
-
-loss,accuracy=model.evaluate(x_test,y_test)
-y_predcit=model.predict([x_test])
-result=model.predict(x)
-
-def ACC(x_train,y_train):
-    return accuracy_score(y_test,np.round(y_predcit))
-acc = ACC(y_test,y_predcit)
-print("ACC :",acc)
-print("로스 :",loss)
-print("random",random)
-print("r1",r1)
-print("r2",r2)
-print("r3",r3)
-print("r4",r4)
-print("r5",r5)
-print("r6",r6)
-print("r0",r0)
-print("t",train)
-
-
-#문제점 에폭의 횟수가 계속 같은횟수로 훈련함
+save_path = path+f"data_{IMAGE_SIZE}px"
+np.save(save_path+"_x.npy",arr=x)
+np.save(save_path+"_y.npy",arr=y)
+np.save(save_path+"_test.npy",arr=test_data[0][0])
