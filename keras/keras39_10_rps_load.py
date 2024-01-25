@@ -14,16 +14,16 @@ test_datagen = ImageDataGenerator(rescale=1./255)
 # print(xy_train)
 # test=test_datagen.flow_from_directory(path_test,target_size=(100,100),batch_size=1600,class_mode='binary')            #원본데이터는 최대한 건드리지 말자,원본데이터는 각각다르니 target_size를 통해서 사이즈를 동일화시킨다
 # print(np.unique(xy_train,return_counts=True))
-path_test= "c:/_data/image/rps/"
+path_test= "c:/_data/image/rps/test/"
 test=test_datagen.flow_from_directory(path_test,target_size=(150,150),batch_size=200,class_mode='binary',color_mode='rgb')            #원본데이터는 최대한 건드리지 말자,원본데이터는 각각다르니 target_size를 통해서 사이즈를 동일화시킨다
 
 
 
-test=pd.get_dummies(test)
 
 np_path='c:/_data/_save_npy/'
 x=np.load(np_path + 'keras39_1_paper_train.npy')
 y=np.load(np_path + 'keras39_1_rock_train.npy')
+y=pd.get_dummies(y)
 
 x_train,x_test,y_train,y_test=train_test_split(x,y,train_size=0.8,random_state=1)
 
@@ -61,16 +61,15 @@ end_t= time.time()
 #4. 모델 평가
 result = model.evaluate(x_test, y_test)
 y_submit= model.predict(test)
-# if 0.5<y_submit:
-#         print('남')
-# if 0.5>y_submit:
-#         print('여')
-
+if 0.33333<=y_submit:
+        print('보')
+if 0.33333>=y_submit:
+        print('가위')
+if 0.66666>=y_submit:
+        print('주먹')
 print("Loss:", result[0])
 print("Accuracy:", result[1])
 print("걸린 시간:", round(end_t - start_t))
 
-'''
 
 
-'''

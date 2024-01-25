@@ -14,7 +14,7 @@ train_dategen=ImageDataGenerator(
      # horizontal_flip=True,           #수평 뒤집기
      # vertical_flip=True,             #수직 뒤집기
      # width_shift_range=0.1,           #평행이동 0.1=10%이동
-     # height_shift_range=0.1,          #
+     # height_shift_range=0.1,          #높이 방향만큼 이동
      # rotation_range=5,               #정해진 각도 만큼 이미지를 회전 (5도 회전)
      # zoom_range=1.0,                 #1.2배 확대혹은 축소
      # shear_range=0.9,                 #좌표 하나를 고정시키고 다른 몇개의 좌표를 이동시키는 변환

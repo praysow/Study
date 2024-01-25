@@ -41,18 +41,18 @@ x_train,x_test,y_train,y_test=train_test_split(x,y,train_size=0.8,random_state=1
 model = Sequential()
 model.add(Conv2D(30, (3, 3), input_shape=(300, 300, 1)))
 model.add(MaxPooling2D())
-model.add(Dropout(0.4))
 model.add(Conv2D(20, (2, 2)))
-model.add(MaxPooling2D())
-model.add(Dropout(0.4))
+# model.add(MaxPooling2D())
 model.add(Flatten())
 model.add(Dense(300))
 model.add(Dropout(0.4))
 model.add(Dense(32))
 model.add(BatchNormalization())
-model.add(Dense(4))
-model.add(Dropout(0.4))
+model.add(Dense(40))
 model.add(Dense(2, activation='softmax'))
+
+model.summary()
+
 
 #3. 모델 컴파일 및 학습
 from keras.callbacks import EarlyStopping,ModelCheckpoint
@@ -61,7 +61,7 @@ mcp = ModelCheckpoint(monitor='val_loss',mode='auto',verbose=1,save_best_only=Tr
                       filepath='../_data/_save/MCP/keras31-2.hdf5')
 model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
 # start_t = time.time()
-model.fit(x_train,y_train,epochs=1000, batch_size=5, verbose=2,
+model.fit(x_train,y_train,epochs=10, batch_size=5, verbose=2,
           validation_data=(x_test, y_test),
            callbacks=[es,mcp]
         )

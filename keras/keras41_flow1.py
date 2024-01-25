@@ -30,6 +30,11 @@ img = np.expand_dims(arr, axis=0)
 datagen = ImageDataGenerator(
     horizontal_flip=True,
     vertical_flip=True,
+    width_shift_range=0.2,
+    height_shift_range=0.5,
+    zoom_range=0.5,
+    shear_range=0.7,
+    fill_mode='nearest'
 )
 it = datagen.flow(img, 
                   batch_size=1,
@@ -43,12 +48,12 @@ it = datagen.flow(img,
 #     ax[i].axis('off')
 # plt.show()
 
-fig, ax = plt.subplots(nrows=1, ncols=5, figsize=(10, 10))      #ax도 2행5열로 바꿔야한다
+fig, ax = plt.subplots(nrows=2, ncols=5, figsize=(10, 10))
 
-for i in range(5):
+for i in range(10):
     batch = it.next()
     image = batch[0].astype('uint8')  # imshow 함수는 uint8 형식의 이미지를 기대하므로 형변환 추가
-    ax[i].imshow(image)
-    ax[i].axis('off')
+    ax[int(i/5)][i%5].imshow(image)
+    ax[int(i/5)][i%5].axis('off')
 
 plt.show()
