@@ -86,10 +86,14 @@ end_t= time.time()
 
 #4. 모델 평가
 result = model.evaluate(x_test, y_test)
-y_submit= model.predict(xy_test)
-# sample_csv=y_submit
+y_submit= model.predict(test)
 
-# sample_csv.to_csv(path_train + "sample_submission_19.csv", index=False)
+
+if 0.5<y_submit:
+        print('남')
+if 0.5>y_submit:
+        print('여') 
+
 
 print("Loss:", result[0])
 print("Accuracy:", result[1])

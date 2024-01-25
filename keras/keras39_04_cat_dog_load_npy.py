@@ -18,18 +18,18 @@ y_train=np.load(np_path + 'keras39_3_y_train.npy')
 test_datagen = ImageDataGenerator(rescale=1./255)
 
 path_test= "c:/_data/image/cat_and_dog/test/"
-test=test_datagen.flow_from_directory(path_test,target_size=(100,100),batch_size=1600,class_mode='binary',color_mode='grayscale')            #원본데이터는 최대한 건드리지 말자,원본데이터는 각각다르니 target_size를 통해서 사이즈를 동일화시킨다
+test=test_datagen.flow_from_directory(path_test,target_size=(200,200),batch_size=100,class_mode='binary',color_mode='grayscale')            #원본데이터는 최대한 건드리지 말자,원본데이터는 각각다르니 target_size를 통해서 사이즈를 동일화시킨다
 
 
 # print(x_train)
 # print(x_train.shape)(1600, 100, 100, 1)
 # print(y_train.shape)(1600,)
 # print(test.shape)
-x_train,x_test,y_train,y_test=train_test_split(x_train,y_train,train_size=0.8,random_state=1,stratify=y_train)
+x_train,x_test,y_train,y_test=train_test_split(x_train,y_train,train_size=0.9,random_state=1,stratify=y_train)
 
 #2. 모델구성
 model = Sequential()
-model.add(Conv2D(30, (3, 3), input_shape=(100, 100,1)))
+model.add(Conv2D(30, (3, 3), input_shape=(200, 200,1)))
 model.add(MaxPooling2D())
 model.add(Dropout(0.4))
 model.add(Conv2D(20, (2, 2)))
@@ -51,7 +51,7 @@ mcp = ModelCheckpoint(monitor='val_loss',mode='auto',verbose=1,save_best_only=Tr
                       filepath='../_data/_save/MCP/keras31-2.hdf5')
 model.compile(loss='binary_crossentropy',optimizer='adam',metrics=['accuracy'])
 # start_t = time.time()
-model.fit(x_train,y_train,epochs=100, batch_size=5, verbose=2,
+model.fit(x_train,y_train,epochs=1000, batch_size=5, verbose=2,
           validation_data=(x_test, y_test),
            callbacks=[es,mcp]
         )
@@ -65,17 +65,21 @@ from PIL import Image
 import os
 sample_npy=y_prediect
 path='c:/_data/kaggle/catdog/제출/'
+image_path= 'C:/_data/image/cat_and_dog//test/Test'
 
-y_prediect = np.around(y_prediect.reshape(-1))
-model.save(path+f"model_save\\acc_{loss[1]:.6f}.h5")
-y_submit = pd.DataFrame({'id':range(5000),'Target':y_prediect})
-forder_dir= 'C:\_data\image\cat_and_dog\\test\Test'
-id_list = os.listdir(forder_dir)
-for i,id in enumerate(id_list):
-        id_list[i] = int(id.split('.')[0])
+file = os.listdir(image_path)
+# y_prediect = np.around(y_prediect.reshape(-1))
+# model.save(path+f"model_save//acc_{loss[1]:.6f}.h5")
+y_submit = pd.DataFrame({'id': file, 'Target': y_prediect})
+id_list = os.listdir(image_path)
+for i in range(len(file)):
+    file[i] = file[i].replace('.jpg', '')
+    # 수정된 부분
+    y_submit.at[i, 'id'] = file[i]  # 파일 확장자명을 '.jpg'에서 ''으로 변경
+
 for id in id_list:
-        print(id)
+    print(id)
 
-y_submit.to_csv(path+f"submit\\제출1.csv",index=False)
+y_submit.to_csv(path+f"submit\\제출2.csv",index=False)
 print("Loss:", loss[0])
 print("Accuracy:", loss[1])

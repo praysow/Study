@@ -1,74 +1,44 @@
-# test 폴더는 사용하지 말 것
+# test 데이터에 대한 ImageDataGenerator 활성화
+
+#test 폴더는 사용하지 말것
 import time
 import numpy as np
 import pandas as pd
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
-from keras.layers import Dense, Conv2D, Flatten, BatchNormalization, MaxPooling2D, Dropout, AveragePooling2D
+from keras.layers import Dense, Conv2D, Flatten, BatchNormalization, MaxPooling2D,Dropout,AveragePooling2D
 from sklearn.model_selection import train_test_split
-import os
+import time
+from sklearn.preprocessing import OneHotEncoder
+start_t = time.time()
+train_dategen=ImageDataGenerator(
+     rescale=1.255,                      #앞에 1.에서 .은 부동소수점 계산하겠다는 것이다
+    #  horizontal_flip=True,           #수평 뒤집기
+    #  vertical_flip=True,             #수직 뒤집기
+    #  width_shift_range=0.1,           #평행이동 0.1=10%이동
+    #  height_shift_range=0.1,          #
+    #  rotation_range=5,               #정해진 각도 만큼 이미지를 회전 (5도 회전)
+    #  zoom_range=1.0,                 #1.2배 확대혹은 축소
+    #  shear_range=0.9,                 #좌표 하나를 고정시키고 다른 몇개의 좌표를 이동시키는 변환
+    #  fill_mode='nearest'
+     )
+test_datagen = ImageDataGenerator(rescale=1./255)
+batch1=150
+batch2=150
+path_train = "c:/_data/image/rps/rps/"
+path_test = "c:/_data/image/rps/"
+paper = train_dategen.flow_from_directory(path_train + 'paper', target_size=(batch1, batch2), batch_size=200, class_mode='binary', color_mode='grayscale')
+rock = train_dategen.flow_from_directory(path_train + 'rock', target_size=(batch1, batch2), batch_size=200, class_mode='binary', color_mode='grayscale')
+scissors = train_dategen.flow_from_directory(path_train + 'scissors', target_size=(batch1, batch2), batch_size=200, class_mode='binary', color_mode='grayscale')
+test = test_datagen.flow_from_directory(path_test, target_size=(batch1, batch2), batch_size=200, class_mode='binary', color_mode='rgb')
+
+print("Number of samples in paper generator:", paper.samples)
+print("Number of samples in rock generator:", rock.samples)
+print("Number of samples in scissors generator:", scissors.samples)
+print("Number of samples in test generator:", test.samples)
 
 np_path = 'c:/_data/_save_npy/'
-x_train = np.load(np_path + 'keras39_3_x_train.npy')
-y_train = np.load(np_path + 'keras39_3_y_train.npy')
-
-test_datagen = ImageDataGenerator(rescale=1./255)
-
-path_test = "c:/_data/image/cat_and_dog/test/"
-test = test_datagen.flow_from_directory(path_test, target_size=(100, 100), batch_size=1600, class_mode='binary', color_mode='grayscale')
-
-x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, train_size=0.8, random_state=1, stratify=y_train)
-
-# 2. 모델 구성
-model = Sequential()
-model.add(Conv2D(30, (3, 3), input_shape=(100, 100, 1)))
-model.add(MaxPooling2D())
-model.add(Dropout(0.4))
-model.add(Conv2D(20, (2, 2)))
-model.add(MaxPooling2D())
-model.add(Dropout(0.4))
-model.add(Flatten())
-model.add(Dense(300))
-model.add(Dropout(0.4))
-model.add(Dense(32))
-model.add(BatchNormalization())
-model.add(Dense(4))
-model.add(Dropout(0.4))
-model.add(Dense(1, activation='sigmoid'))
-
-# 3. 모델 컴파일 및 학습
-from keras.callbacks import EarlyStopping, ModelCheckpoint
-es = EarlyStopping(monitor='val_loss', mode='auto', patience=100, verbose=1, restore_best_weights=True)
-mcp = ModelCheckpoint(monitor='val_loss', mode='auto', verbose=1, save_best_only=True,
-                      filepath='../_data/_save/MCP/keras31-2.hdf5')
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-model.fit(x_train, y_train, epochs=1, batch_size=5, verbose=2,
-          validation_data=(x_test, y_test),
-          callbacks=[es, mcp]
-          )
-
-# 4. 모델 평가
-loss = model.evaluate(x_test, y_test, verbose=0)
-y_prediect = model.predict(test)
-y_prediect = np.around(y_prediect.reshape(-1))
-print(y_prediect.shape)
-
-path = 'c:/_data/kaggle/catdog/제출/'
-y_prediect = np.around(y_prediect.reshape(-1))
-model.save(path + f"model_save\\acc_{loss[1]:.6f}.h5")
-
-y_submit = pd.DataFrame({'id': range(5000), 'Target': y_prediect})
-
-forder_dir = path + 'submit'
-id_list = os.listdir(forder_dir)
-for i, id in enumerate(id_list):
-    if id.startswith('acc_'):
-        id_list[i] = int(id.split('_')[1].split('.')[0])
-
-for id in id_list:
-    print(id)
-
-y_submit.to_csv(path + f"submit\\제출1.csv", index=False)
-
-print("Loss:", loss[0])
-print("Accuracy:", loss[1])
+np.save(np_path + 'keras39_1_paper_train.npy', arr=paper)
+np.save(np_path + 'keras39_1_rock_train.npy', arr=rock)
+np.save(np_path + 'keras39_1_scissors_train.npy', arr=scissors)
+np.save(np_path + 'keras39_1_x_test.npy', arr=test)

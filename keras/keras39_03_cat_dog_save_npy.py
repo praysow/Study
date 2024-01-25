@@ -21,14 +21,14 @@ train_dategen=ImageDataGenerator(
      # fill_mode='nearest'
      )
 
-batch1=100
-batch2=100
+batch1=200
+batch2=200
 
 test_datagen = ImageDataGenerator(rescale=1./255)
 
-path_train= "c:/_data/image/cat_and_dog/train/"
-path_test= "c:/_data/image/cat_and_dog/test/"
-xy_train=train_dategen.flow_from_directory(path_train,target_size=(batch1,batch2),batch_size=1600,class_mode='binary',color_mode='grayscale')         #batch_size을 최대로 하면 x데이터를 통으로 가져올수있다
+# path_train= "c:/_data/image/cat_and_dog/train/"
+# path_test= "c:/_data/image/cat_and_dog/test/"
+# xy_train=train_dategen.flow_from_directory(path_train,target_size=(batch1,batch2),batch_size=1600,class_mode='binary',color_mode='grayscale')         #batch_size을 최대로 하면 x데이터를 통으로 가져올수있다
 
 
 # print(xy_train)
@@ -37,8 +37,8 @@ test=test_datagen.flow_from_directory(path_test,target_size=(batch1,batch2),batc
 # print(np.unique(xy_train,return_counts=True))
 
 
-x = xy_train[0][0]                 #batch가 100일때 100의 0번째이다
-y = xy_train[0][1]                 #batch가 100일때 100의 1번째이다
+# x = xy_train[0][0]                 #batch가 100일때 100의 0번째이다
+# y = xy_train[0][1]                 #batch가 100일때 100의 1번째이다
 # x_test = xy_test[0][0]
 # y_test = xy_test[0][1]
 # print(xy_train[0][0].shape,xy_train[0][1].shape)  #(800, 150, 150, 3) (800,)
@@ -49,8 +49,8 @@ y = xy_train[0][1]                 #batch가 100일때 100의 1번째이다
 # x_train,x_test,y_train,y_test=train_test_split(x,y,train_size=0.8,random_state=1,stratify=y)
 
 np_path='c:/_data/_save_npy/'
-np.save(np_path + 'keras39_3_x_train.npy', arr=x)
-np.save(np_path + 'keras39_3_y_train.npy', arr=y)
+# np.save(np_path + 'keras39_3_x_train.npy', arr=x)
+# np.save(np_path + 'keras39_3_y_train.npy', arr=y)
 np.save(np_path + 'keras39_3_x_test.npy', arr=test)
 
 '''
