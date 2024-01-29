@@ -49,55 +49,7 @@ test=test_datagen.flow_from_directory(path_test,target_size=(batch1,batch2),batc
 # x_train,x_test,y_train,y_test=train_test_split(x,y,train_size=0.8,random_state=1,stratify=y)
 
 np_path='c:/_data/_save_npy/'
-# np.save(np_path + 'keras39_3_x_train.npy', arr=x)
-# np.save(np_path + 'keras39_3_y_train.npy', arr=y)
+np.save(np_path + 'keras39_3_x_train.npy', arr=x)
+np.save(np_path + 'keras39_3_y_train.npy', arr=y)
 np.save(np_path + 'keras39_3_x_test.npy', arr=test)
 
-'''
-#2. 모델구성
-model = Sequential()
-model.add(Conv2D(30, (3, 3), input_shape=(batch1, batch2,3)))
-model.add(MaxPooling2D())
-model.add(Dropout(0.4))
-model.add(Conv2D(20, (2, 2)))
-model.add(MaxPooling2D())
-model.add(Dropout(0.4))
-model.add(Flatten())
-model.add(Dense(300))
-model.add(Dropout(0.4))
-model.add(Dense(32))
-model.add(BatchNormalization())
-model.add(Dense(4))
-model.add(Dropout(0.4))
-model.add(Dense(1, activation='sigmoid'))
-
-#3. 모델 컴파일 및 학습
-from keras.callbacks import EarlyStopping,ModelCheckpoint
-es= EarlyStopping(monitor='val_loss',mode='auto',patience=100,verbose=1,restore_best_weights=True)
-mcp = ModelCheckpoint(monitor='val_loss',mode='auto',verbose=1,save_best_only=True,
-                      filepath='../_data/_save/MCP/keras31-2.hdf5')
-model.compile(loss='binary_crossentropy',optimizer='adam',metrics=['accuracy'])
-# start_t = time.time()
-model.fit(x_train,y_train,epochs=1000, batch_size=5, verbose=2,
-          validation_data=(x_test, y_test),
-           callbacks=[es,mcp]
-        )
-end_t= time.time()
-
-#4. 모델 평가
-result = model.evaluate(x_test, y_test)
-y_submit= model.predict(xy_test)
-# sample_csv=y_submit
-
-# sample_csv.to_csv(path_train + "sample_submission_19.csv", index=False)
-
-print("Loss:", result[0])
-print("Accuracy:", result[1])
-print("걸린 시간:", round(end_t - start_t))
-'''
-
-'''
-Loss: 0.8322620391845703
-Accuracy: 0.75
-걸린 시간: 48
-'''

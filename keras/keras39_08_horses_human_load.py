@@ -51,7 +51,7 @@ model.add(BatchNormalization())
 model.add(Dense(40))
 model.add(Dense(2, activation='softmax'))
 
-model.summary()
+# model.summary()
 
 
 #3. 모델 컴파일 및 학습
