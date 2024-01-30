@@ -8,10 +8,15 @@ from sklearn.model_selection import train_test_split
 #1. 데이터
 path = "c:/_data/kaggle/jena/"
 train = pd.read_csv(path+"jena_climate_2009_2016.csv",index_col=0)
+# TC = pd.read_csv(path+"jena_climate_2009_2016.csv",index_col=0)
+# TC = TC.iloc[:,2]
 datasets = train
-y_c = train['T (degC)']
+y_col = train['T (degC)']
 col = datasets.columns
 datasets = pd.DataFrame(datasets,columns=col)
+# a= np.array(range(1,11))
+size = 144    #bbb의 열의 갯수
+
 
 def split_xy(data, time_step, y_col):
     result_x = []
@@ -26,34 +31,34 @@ def split_xy(data, time_step, y_col):
 
 x, y = split_xy(datasets,3,'T (degC)')
 
-print(x.shape,y.shape)  #((420548, 3, 14) (420548,)
+# print(x.shape,y.shape)  #(6, 4) (6,)
 
 x_train,x_test,y_train,y_test=train_test_split(x,y,train_size=0.9,random_state=333)
 
-print(x_train.shape,y_train.shape)  #((378493, 3, 14) (378493,)
-print(x_test.shape,y_test.shape)    #((42055, 3, 14) (42055,)
+# print(x_train.shape,y_train.shape)  #(378366, 144, 13) (378366, 13)
+# print(x_test.shape,y_test.shape)    #(42041, 144, 13) (42041, 13)
 
-# #2.모델구성
-# model=Sequential()
-# model.add(GRU(units=10,input_shape=(3,14)))
-# model.add(Dense(15))
-# model.add(Dense(10))
-# model.add(Dense(8))
-# model.add(Dense(1))
+#2.모델구성
+model=Sequential()
+model.add(GRU(units=10,input_shape=(3,14)))
+model.add(Dense(15))
+model.add(Dense(10))
+model.add(Dense(8))
+model.add(Dense(1))
 
-# # model.summary()
-# #3.컴파일 훈련
-# from keras.callbacks import EarlyStopping,ModelCheckpoint
-# es= EarlyStopping(monitor='loss',mode='auto',patience=50,verbose=3,restore_best_weights=True)
-# model.compile(loss='mse',optimizer='adam')
-# model.fit(x_train,y_train,epochs=100,batch_size=1000,callbacks=[es])
+# model.summary()
+#3.컴파일 훈련
+from keras.callbacks import EarlyStopping,ModelCheckpoint
+es= EarlyStopping(monitor='loss',mode='auto',patience=50,verbose=3,restore_best_weights=True)
+model.compile(loss='mse',optimizer='adam')
+model.fit(x_train,y_train,epochs=100,batch_size=1000,callbacks=[es])
 
-# #4.결과예측
-# result = model.evaluate(x_test,y_test)
-# y_pred=model.predict([x_test])
-# print("결과",y_pred)
-# print(("loss",result))
-# #145번 24시간
+#4.결과예측
+result = model.evaluate(x_test,y_test)
+y_pred=model.predict([x_test])
+print("결과",y_pred)
+print(("loss",result))
+#145번 24시간
 
 '''
 Bidirectional.GRU   ('loss', 0.27828383445739746)

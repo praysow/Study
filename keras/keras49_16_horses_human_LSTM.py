@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
-from keras.layers import Dense, Conv2D, Flatten, BatchNormalization, MaxPooling2D,Dropout,AveragePooling2D
+from keras.layers import Dense, LSTM
 from sklearn.model_selection import train_test_split
 import time
 from sklearn.preprocessing import OneHotEncoder
@@ -16,6 +16,9 @@ path_train= "c:/_data/image/horse_human/train/"
 # print(xy_train)
 test=test_datagen.flow_from_directory(path_train,target_size=(300,300),batch_size=100,class_mode='binary')            #원본데이터는 최대한 건드리지 말자,원본데이터는 각각다르니 target_size를 통해서 사이즈를 동일화시킨다
 # print(np.unique(xy_train,return_counts=True))
+
+
+
 
 
 np_path='c:/_data/_save_npy/'
@@ -31,20 +34,17 @@ ohe = OneHotEncoder()
 # y_ohe = ohe.fit_transform(y).toarray()
 y=pd.get_dummies(y)
 
+
 x_train,x_test,y_train,y_test=train_test_split(x,y,train_size=0.8,random_state=1,stratify=y)
+x_train = x_train.reshape(-1, 300, 300)
+x_test = x_test.reshape(-1, 300, 300)
+# test = test.valuse.reshape(-1,300,300)
 
-
-#2. 모델구성
+# #2. 모델구성
 model = Sequential()
-model.add(Conv2D(30, (3, 3), input_shape=(300, 300, 1)))
-model.add(MaxPooling2D())
-model.add(Conv2D(20, (2, 2)))
-# model.add(MaxPooling2D())
-model.add(Flatten())
+model.add(LSTM(30, input_shape=(300, 300)))
 model.add(Dense(300))
-model.add(Dropout(0.4))
 model.add(Dense(32))
-model.add(BatchNormalization())
 model.add(Dense(40))
 model.add(Dense(2, activation='softmax'))
 
@@ -66,7 +66,7 @@ end_t= time.time()
 
 #4. 모델 평가
 result = model.evaluate(x_test, y_test)
-y_submit= model.predict(test)
+y_submit= model.predict(test_horse)
 y_test = np.argmax(y_test)
 y_predict = np.argmax(y_submit)
 # if 0.5<y_submit:
@@ -83,10 +83,8 @@ print("Accuracy:", result[1])
 print("걸린 시간:", round(end_t - start_t))
 # f1 = f1_score(y_test, y_pred, average='macro')
 
-
 '''
-Loss: 0.13482658565044403
-Accuracy: 0.949999988079071
-걸린 시간: 105
-
+Loss: 0.664334237575531
+Accuracy: 0.675000011920929
+걸린 시간: 6
 '''

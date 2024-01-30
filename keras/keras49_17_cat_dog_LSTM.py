@@ -4,11 +4,10 @@ import numpy as np
 import pandas as pd
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
-from keras.layers import Dense, Conv2D, Flatten, BatchNormalization, MaxPooling2D,Dropout,AveragePooling2D
+from keras.layers import Dense, LSTM
 from sklearn.model_selection import train_test_split
 import time
 from sklearn.preprocessing import OneHotEncoder
-
 
 np_path='c:/_data/_save_npy/'
 x_train=np.load(np_path + 'keras39_3_x_train.npy')
@@ -20,28 +19,21 @@ test_datagen = ImageDataGenerator(rescale=1./255)
 path_test= "c:/_data/image/cat_and_dog/test/"
 test=test_datagen.flow_from_directory(path_test,target_size=(200,200),batch_size=100,class_mode='binary',color_mode='grayscale')            #원본데이터는 최대한 건드리지 말자,원본데이터는 각각다르니 target_size를 통해서 사이즈를 동일화시킨다
 
-
+test = np.array(test)
 # print(x_train)
 # print(x_train.shape)(1600, 100, 100, 1)
 # print(y_train.shape)(1600,)
 # print(test.shape)
 x_train,x_test,y_train,y_test=train_test_split(x_train,y_train,train_size=0.9,random_state=1,stratify=y_train)
 
+x_train=x_train.reshape(-1,200,200)
+x_test=x_test.reshape(-1,200,200)
 #2. 모델구성
 model = Sequential()
-model.add(Conv2D(30, (3, 3), input_shape=(200, 200,1)))
-model.add(MaxPooling2D())
-model.add(Dropout(0.4))
-model.add(Conv2D(20, (2, 2)))
-model.add(MaxPooling2D())
-model.add(Dropout(0.4))
-model.add(Flatten())
+model.add(LSTM(30, input_shape=(200, 200)))
 model.add(Dense(300))
-model.add(Dropout(0.4))
 model.add(Dense(32))
-model.add(BatchNormalization())
 model.add(Dense(4))
-model.add(Dropout(0.4))
 model.add(Dense(1, activation='sigmoid'))
 
 #3. 모델 컴파일 및 학습
@@ -83,3 +75,8 @@ for id in id_list:
 y_submit.to_csv(path+f"submit\\제출2.csv",index=False)
 print("Loss:", loss[0])
 print("Accuracy:", loss[1])
+'''
+Loss: 0.6651195287704468
+Accuracy: 0.59375
+
+'''

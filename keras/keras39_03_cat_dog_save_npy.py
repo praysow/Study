@@ -49,7 +49,7 @@ test=test_datagen.flow_from_directory(path_test,target_size=(batch1,batch2),batc
 # x_train,x_test,y_train,y_test=train_test_split(x,y,train_size=0.8,random_state=1,stratify=y)
 
 np_path='c:/_data/_save_npy/'
-np.save(np_path + 'keras39_3_x_train.npy', arr=x)
-np.save(np_path + 'keras39_3_y_train.npy', arr=y)
+# np.save(np_path + 'keras39_3_x_train.npy', arr=x)
+# np.save(np_path + 'keras39_3_y_train.npy', arr=y)
 np.save(np_path + 'keras39_3_x_test.npy', arr=test)
 
