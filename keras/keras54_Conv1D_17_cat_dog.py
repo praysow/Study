@@ -14,16 +14,48 @@ x_train=np.load(np_path + 'keras39_3_x_train.npy')
 y_train=np.load(np_path + 'keras39_3_y_train.npy')
 # test=np.load(np_path + 'keras39_3_x_test.npy')
 
+import numpy as np
+
+# 필요한 라이브러리 및 데이터를 이미 로드한 경우를 가정합니다.
+
+# 테스트 데이터에 대한 ImageDataGenerator 생성
 test_datagen = ImageDataGenerator(rescale=1./255)
 
-path_test= "c:/_data/image/cat_and_dog/test/"
-test=test_datagen.flow_from_directory(path_test,target_size=(200,200),batch_size=100,class_mode='binary',color_mode='grayscale')            #원본데이터는 최대한 건드리지 말자,원본데이터는 각각다르니 target_size를 통해서 사이즈를 동일화시킨다
+# 테스트 데이터의 경로 지정
+path_test = "c:/_data/image/cat_and_dog/test/"
 
-test = np.array(test)
+# flow_from_directory를 사용하여 테스트 데이터를 배치로 로드
+test_generator = test_datagen.flow_from_directory(
+    path_test,
+    target_size=(200, 200),
+    batch_size=100,
+    class_mode='binary',
+    color_mode='grayscale',
+    shuffle=False  # 파일의 순서를 유지하기 위해 shuffle을 False로 설정
+)
+
+# 테스트 데이터의 전체 샘플 수 가져오기
+num_samples = len(test_generator.filenames)
+
+# 이미지를 저장할 빈 배열 생성
+test = np.empty((num_samples, 200, 200, 1), dtype=np.float32)
+
+# 배치를 반복하며 데이터를 배열에 누적
+for i in range((num_samples - 1) // 100 + 1):  # num_samples가 100의 배수가 아닌 경우를 고려하여 조정
+    start_idx = i * 100
+    end_idx = start_idx + min(100, num_samples - start_idx)  # 마지막 배치 처리
+    test[start_idx:end_idx] = test_generator.next()[0]
+
+# NumPy 배열의 모양 출력
+print("x_test의 형태:", test.shape)
+
+# 이제 x_test에는 NumPy 배열로 표현된 테스트 데이터가 포함되어 있습니다.
+
 # print(x_train)
 # print(x_train.shape)(1600, 100, 100, 1)
 # print(y_train.shape)(1600,)
 # print(test.shape)
+
 x_train,x_test,y_train,y_test=train_test_split(x_train,y_train,train_size=0.9,random_state=1,stratify=y_train)
 
 x_train=x_train.reshape(-1,200,200)
@@ -76,8 +108,11 @@ for id in id_list:
 y_submit.to_csv(path+f"submit\\제출2.csv",index=False)
 print("Loss:", loss[0])
 print("Accuracy:", loss[1])
+
 '''
 Loss: 0.6651195287704468
 Accuracy: 0.59375
 
+Loss: 18.395023345947266
+Accuracy: 0.5375000238418579
 '''
