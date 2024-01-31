@@ -51,7 +51,7 @@ model.add(Dense(1))
 from keras.callbacks import EarlyStopping,ModelCheckpoint
 es= EarlyStopping(monitor='loss',mode='auto',patience=50,verbose=3,restore_best_weights=True)
 model.compile(loss='mse',optimizer='adam')
-model.fit(x_train,y_train,epochs=100,batch_size=1000,callbacks=[es])
+model.fit(x_train,y_train,epochs=10,batch_size=1000,callbacks=[es])
 
 #4.결과예측
 result = model.evaluate(x_test,y_test)

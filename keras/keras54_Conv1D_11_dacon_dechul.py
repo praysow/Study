@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from keras.models import Sequential, load_model
-from keras.layers import Dense,Dropout,BatchNormalization, AveragePooling2D, Flatten, Conv2D, LSTM, Bidirectional
+from keras.layers import Dense,Dropout,BatchNormalization, AveragePooling1D, Flatten, Conv2D, LSTM, Bidirectional,Conv1D,MaxPooling1D
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler, MinMaxScaler, Normalizer, RobustScaler
 from sklearn.metrics import accuracy_score, f1_score
@@ -84,19 +84,27 @@ test_csv=test_csv.reshape(test_csv.shape[0],13,1)
 #swish
 # model= load_model("c:\_data\_save\대출모델9.h5")
 model=Sequential()
-model.add(Bidirectional(LSTM(7),input_shape=(13,1)))
-model.add(Dense(15,activation='swish'))
-model.add(Dense(21,activation='swish'))
-model.add(Dense(23,activation='swish'))
-model.add(Dense(8,activation='swish'))
-model.add(Dense(17,activation='swish'))
-model.add(Dense(14,activation='swish'))
-model.add(Dense(14,activation='swish'))
-model.add(Dense(5,activation='swish'))
-model.add(Dense(12,activation='swish'))
+# model.add(Bidirectional(LSTM(7),input_shape=(13,1)))
+model.add(Conv1D(filters=7,kernel_size=2,input_shape=(13,1)))
+model.add(Flatten())
+model.add(Dense(150,activation='swish'))
+model.add(Dense(210,activation='swish'))
+model.add(Dense(230,activation='swish'))
+model.add(Dense(80,activation='swish'))
+model.add(Dense(170,activation='swish'))
+model.add(Dense(140,activation='swish'))
+model.add(Dense(140,activation='swish'))
+model.add(Dense(50,activation='swish'))
+model.add(Dense(230,activation='swish'))
+model.add(Dense(110,activation='swish'))
+model.add(Dense(140,activation='swish'))
+model.add(BatchNormalization())
+model.add(Dense(200,activation='swish'))
+model.add(Dense(120,activation='swish'))
 model.add(Dense(7,activation='softmax'))
 #3.컴파일 훈련
 
+# model.summary()
 from keras.callbacks import EarlyStopping,ModelCheckpoint
 es= EarlyStopping(monitor='val_loss',mode='min',patience=1000,verbose=1,restore_best_weights=True)
 mcp = ModelCheckpoint(
@@ -104,15 +112,15 @@ mcp = ModelCheckpoint(
     mode='auto',
     verbose=1,
     save_best_only=True,
-    filepath='..\_data\_save\MCP\대출70.hdf5'
+    filepath='..\_data\_save\MCP\대출75.hdf5'
     )
 
 model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
-hist= model.fit(x_train, y_train, epochs=100000,batch_size=3000, validation_split=0.1,verbose=2,
+hist= model.fit(x_train, y_train, epochs=100000,batch_size=1000, validation_split=0.1,verbose=2,
           callbacks=[es,mcp]
             )
 # model=load_model("c:\_data\_save\dechul_8.h5")
-model.save("c:\_data\_save\대출70.h5")
+model.save("c:\_data\_save\대출75.h5")
 
 
 # ... (이전 코드)
@@ -133,7 +141,7 @@ y_submit = ohe.inverse_transform(y_submit)
 y_submit = pd.DataFrame(y_submit)
 sample_csv["대출등급"]=y_submit
 
-sample_csv.to_csv(path + "대출70.csv", index=False)
+sample_csv.to_csv(path + "대출75.csv", index=False)
 
 y_pred= model.predict(x_test)
 y_pred= ohe.inverse_transform(y_pred)
@@ -146,9 +154,9 @@ print("로스:", loss[0])
 print("acc", loss[1])
 
 '''
-f1 0.8954654356100054
-로스: 0.2651960849761963
-acc 0.909345805644989
+f1 0.9209169259289897
+로스: 0.18799705803394318
+acc 0.9361370801925659    76번
 '''
 
 

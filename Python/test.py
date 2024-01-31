@@ -1,43 +1,51 @@
 import numpy as np
+import pandas as pd
 from keras.models import Sequential
-from keras.layers import LSTM, Dense
+from keras.layers import Dense, GRU
+from sklearn.model_selection import train_test_split
 
-a = np.array(range(1, 101))
-x_predict = np.array(range(96, 106))
-size = 5  # x데이터는 4개, y데이터는 1개
+# 1. 데이터
+path = "c:/_data/kaggle/jena/"
+train = pd.read_csv(path + "jena_climate_2009_2016.csv", index_col=0)
+datasets = train
+y_col = train['T (degC)']
+col = datasets.columns
+datasets = pd.DataFrame(datasets, columns=col)
+size = 72
 
-def split_x(dataset, size):
-    aaa = []
-    for i in range(len(dataset) - size + 1):
-        subset = dataset[i: (i + size)]
-        aaa.append(subset)
-    return np.array(aaa)
+def split_xy(data, time_step, y_col, pred_step):
+    result_x = []
+    result_y = []
+    
+    num = len(data) - (time_step + pred_step)
+    for i in range(num):
+        result_x.append(data.iloc[i:i+time_step,:])
+        result_y.append(data.iloc[result_x:i+time_step+pred_step][y_col])      #865번째
+        
+    return np.array(result_x), np.array(result_y)
 
-bbb = split_x(a, size)
+# time_step은 5일(720행), pred_step은 1일(144행)로 수정
+x, y = split_xy(datasets, size, 'T (degC)', pred_step=144)
 
-x = bbb[:, :-1]
-y = bbb[:, -1]
-x= x.reshape(-1,2,2)
-# x_predict = x_predict[-(size-1):].reshape(1, 2, 2)
-x_predict = x_predict.reshape(-1, 2, 2)
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.9, random_state=333)
 
-print(x_predict.shape)
+# 2. 모델 구성
+model = Sequential()
+model.add(GRU(units=10, input_shape=(size, 14)))
+# model.add(Dense(15))
+# model.add(Dense(10))
+model.add(Dense(8))
+model.add(Dense(1))
 
-# model = Sequential()
-# model.add(LSTM(units=10, input_shape=(2, 2)))
-# model.add(Dense(500))
-# model.add(Dense(600))
-# model.add(Dense(700))
-# model.add(Dense(300))
-# model.add(Dense(1))
+# 3. 컴파일 및 훈련
+from keras.callbacks import EarlyStopping
 
-# model.compile(loss='mse', optimizer='adam')
-# model.fit(x, y, epochs=1000)
+es = EarlyStopping(monitor='loss', mode='auto', patience=50, verbose=3, restore_best_weights=True)
+model.compile(loss='mse', optimizer='adam')
+model.fit(x_train, y_train, epochs=5, batch_size=1000, callbacks=[es])
 
-
-# # 결과 예측
-# result = model.evaluate(x, y)
-# y_pred = model.predict(x_predict)
-
-# print("loss", result)
-# print("예측값", y_pred)
+# 4. 결과 예측
+result = model.evaluate(x_test, y_test)
+y_pred = model.predict(x_test)
+print("결과", y_pred)
+print(("loss", result))

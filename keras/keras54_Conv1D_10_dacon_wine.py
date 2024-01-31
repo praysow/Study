@@ -1,5 +1,5 @@
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, AveragePooling2D, Flatten, Conv2D, LSTM
+from keras.layers import Dense, Dropout, AveragePooling2D, Flatten, Conv2D,Conv1D,Flatten
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
@@ -49,15 +49,16 @@ x_train=np.asarray(x_train).astype(np.float32)
 x_test=np.asarray(x_test).astype(np.float32)
 test_csv = np.asarray(test_csv).astype(np.float32)
 
-x_train=x_train.reshape(x_train.shape[0],3,2,2)
-x_test=x_test.reshape(x_test.shape[0],3,2,2)
-test_csv=test_csv.reshape(test_csv.shape[0],3,2,2)
+x_train=x_train.reshape(x_train.shape[0],3,4)
+x_test=x_test.reshape(x_test.shape[0],3,4)
+test_csv=test_csv.reshape(test_csv.shape[0],3,4)
 
 
 
 #2.모델구성
 model=Sequential()
-model.add(LSTM(10,input_shape=(3,2,2),activation='relu'))
+model.add(Conv1D(filters=10,kernel_size=2,input_shape=(3,4),activation='relu'))
+model.add(Flatten())
 model.add(Dense(139))
 model.add(Dense(151))
 model.add(Dropout(0.1))
@@ -97,7 +98,7 @@ mcp = ModelCheckpoint(
     )
 es= EarlyStopping(monitor='val_loss',mode='min',patience=100,verbose=1,restore_best_weights=True)
 model.compile(loss='categorical_crossentropy',optimizer='adam',metrics='accuracy')
-hist= model.fit(x_train, y_train, epochs=10,batch_size=1000, validation_split=0.1,verbose=2,
+hist= model.fit(x_train, y_train, epochs=1000,batch_size=1000, validation_split=0.1,verbose=2,
           callbacks=[es,mcp])
 
 model.save("c:\_data\_save\dacon_wine_1.h5")
@@ -131,5 +132,8 @@ ACC : 0.5833333333333334
 
 
 ACC : 0.6216216216216216
-로스 : [0.9659953117370605, 0.6216216087341309]     아래하나
+로스 : [0.9659953117370605, 0.6216216087341309]
+
+ACC : 0.6058558558558559
+로스 : [1.0000303983688354, 0.6058558821678162]
 '''
