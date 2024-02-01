@@ -7,7 +7,7 @@ from keras.layers import Dense,Input,Concatenate,concatenate
 x1_datasets = np.array([range(100),range(301,401)]).T     #삼성전자 종가, 하이닉스 종가
 x2_datasets = np.array([range(101,201),range(411,511),range(150,250)]).T  #원유, 환율, 금 시세
 x3_datasets = np.array([range(100),range(301,401),range(77,177),range(33,133)]).T
-print(x1_datasets.shape,x2_datasets.shape)
+# print(x1_datasets.shape,x2_datasets.shape)
 
 y=np.array(range(3001,3101))    #비트코인 종가
 
@@ -15,6 +15,10 @@ x1_train,x1_test,x2_train,x2_test,x3_train,x3_test,y_train,y_test=train_test_spl
 
 # print(x1_train.shape,x2_train.shape,x3_train.shape,y_train.shape)    #(70, 2) (70, 3) (70, 4) (70,)
 
+# x2_train=x2_train.reshape(-1,3,1)
+# x2_test = x2_test.reshape(-1,3,1)
+
+print(x1_test.shape,x1_train.shape)
 #모델 1
 input1 = Input(shape= (2,))
 dense1= Dense(10,activation='swish',name='bit1')(input1)

@@ -37,7 +37,12 @@ output11= Dense(5,activation='swish',name='bit15')(dense14)
 # model2.summary()
 
 #2-3.Concatenate
-merge1 = concatenate([output1,output11],name='mg1')
+# merge1 = concatenate([output1,output11],name='mg1')
+# merge2 = Dense(10,name='mg2')(merge1)
+# merge3 = Dense(11,name='mg3')(merge2)
+# last_output = Dense(1, name='last')(merge3)
+
+merge1 = Concatenate(name='mg1')([output1,output11])
 merge2 = Dense(10,name='mg2')(merge1)
 merge3 = Dense(11,name='mg3')(merge2)
 last_output = Dense(1, name='last')(merge3)

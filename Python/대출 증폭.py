@@ -54,7 +54,7 @@ lb.fit(test_csv['대출목적'])
 test_csv['대출목적'] =lb.transform(test_csv['대출목적'])
 
 
-x_train,x_test,y_train,y_test=train_test_split(x,y_ohe,train_size=0.9,random_state=333 ,
+x_train,x_test,y_train,y_test=train_test_split(x,y_ohe,train_size=0.8,random_state=333 ,
                                                stratify=y_ohe
                                                )
 
@@ -96,9 +96,9 @@ model.add(Dense(140,activation='swish'))
 model.add(Dense(140,activation='swish'))
 model.add(Dense(50,activation='swish'))
 model.add(Dense(230,activation='swish'))
+model.add(BatchNormalization())
 model.add(Dense(110,activation='swish'))
 model.add(Dense(140,activation='swish'))
-model.add(BatchNormalization())
 model.add(Dense(200,activation='swish'))
 model.add(Dense(120,activation='swish'))
 model.add(Dense(7,activation='softmax'))
