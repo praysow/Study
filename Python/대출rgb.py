@@ -1,67 +1,43 @@
 import numpy as np
 import pandas as pd
-from keras.models import Sequential, load_model
-from keras.layers import Dense,Dropout,BatchNormalization, AveragePooling1D, Flatten, Conv2D, LSTM, Bidirectional,Conv1D,MaxPooling1D
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler, MinMaxScaler, Normalizer, RobustScaler
 from sklearn.metrics import accuracy_score, f1_score
-from keras.utils import to_categorical
 import lightgbm as lgb
-# 데이터 로드
+
 # 데이터 로드
 path = "c:\_data\dacon\dechul\\"
 train_csv = pd.read_csv(path + "train.csv", index_col=0)
 test_csv = pd.read_csv(path + "test.csv", index_col=0)
 sample_csv = pd.read_csv(path + "sample_submission.csv")
-x= train_csv.drop(['대출등급','최근_2년간_연체_횟수','총연체금액','연체계좌수'],axis=1)
-y= train_csv['대출등급']
-test_csv = test_csv.drop(['최근_2년간_연체_횟수','총연체금액','연체계좌수'],axis=1)
+
 # 범주형 변수 리스트
 categorical_cols = ['대출기간', '근로기간', '주택소유상태', '대출목적']
 
 # 범주형 변수들을 정수로 인코딩
-lb=LabelEncoder()
-lb.fit(x['대출기간'])
-x['대출기간'] = lb.transform(x['대출기간'])
-lb.fit(x['근로기간'])
-x['근로기간'] = lb.transform(x['근로기간'])
-lb.fit(x['주택소유상태'])
-x['주택소유상태'] = lb.transform(x['주택소유상태'])
-lb.fit(x['대출목적'])
-x['대출목적'] = lb.transform(x['대출목적'])
+label_encoders = {}
+for col in categorical_cols:
+    le = LabelEncoder()
+    train_csv[col] = le.fit_transform(train_csv[col])
+    label_encoders[col] = le
 
-lb.fit(test_csv['대출기간'])
-test_csv['대출기간'] =lb.transform(test_csv['대출기간'])
-
-lb.fit(test_csv['근로기간'])
-test_csv['근로기간'] =lb.transform(test_csv['근로기간'])
-
-lb.fit(test_csv['주택소유상태'])
-test_csv['주택소유상태'] =lb.transform(test_csv['주택소유상태'])
-
-lb.fit(test_csv['대출목적'])
-test_csv['대출목적'] =lb.transform(test_csv['대출목적'])
+    # 테스트 데이터에도 적용 (이때, 새로운 레이블이 발생하지 않도록 주의)
+    test_csv[col] = test_csv[col].map(lambda s: le.transform([s])[0] if s in le.classes_ else le.transform([le.classes_[0]])[0])
 
 # 불필요한 컬럼 제거
 x = train_csv.drop(['대출등급', '최근_2년간_연체_횟수', '총연체금액', '연체계좌수'], axis=1)
 y = train_csv['대출등급']
 
-y=y.values.reshape(-1,1)
+y = y.values.reshape(-1, 1)
 
 ohe = OneHotEncoder(sparse=False)
 ohe = OneHotEncoder()
 y_ohe = ohe.fit_transform(y).toarray()
 
-x_train,x_test,y_train,y_test=train_test_split(x,y_ohe,train_size=0.8,random_state=3 ,
-                                               stratify=y
-                                               )
-# print(x_train.shape,x_test.shape)
-# print(y_train.shape,y_test.shape)
-
-
+x_train, x_test, y_train, y_test = train_test_split(x, y_ohe, train_size=0.8, random_state=3, stratify=y)
 
 # LightGBM 데이터셋 생성
-train_data = lgb.Dataset(x, label=y, categorical_feature=categorical_cols)
+train_data = lgb.Dataset(x_train, label=y_train, categorical_feature=categorical_cols)
 valid_data = lgb.Dataset(x_test, label=y_test, reference=train_data, categorical_feature=categorical_cols)
 
 # LightGBM 모델 설정
@@ -98,4 +74,3 @@ y_submit_class = [round(x) for x in y_submit]
 # 예측 결과 저장
 sample_csv["대출등급"] = y_submit_class
 sample_csv.to_csv(path + "대출_lgbm.csv", index=False)
-

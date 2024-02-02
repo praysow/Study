@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from keras.models import Sequential
 from keras.layers import Dense,Embedding,Flatten,SimpleRNN,Conv1D,BatchNormalization
-(x_train,y_train),(x_test,y_test) = reuters.load_data(num_words=100,
+(x_train,y_train),(x_test,y_test) = reuters.load_data(num_words=230,
                                                       test_split=0.2)
 # word_index = reuters.get_word_index()
 # vocab_size = len(word_index)
@@ -44,7 +44,7 @@ y_test = ohe.fit_transform(y_test)
 
 
 model= Sequential()
-model.add(Embedding(input_dim=100,output_dim=30
+model.add(Embedding(input_dim=1000,output_dim=30
                     ,input_length=100
                     ))#input_dim=단어 사전의 갯수 output_dim=훈련의 갯수(노드수),input_length=shape의 갯수
 model.add(Conv1D(10,2))
@@ -60,16 +60,17 @@ model.add(Dense(30))
 model.add(Dense(46,activation='softmax'))
 # model.summary()
 from keras.callbacks import EarlyStopping,ModelCheckpoint
-es= EarlyStopping(monitor='val_loss',mode='min',patience=500,verbose=1,restore_best_weights=True)
+es= EarlyStopping(monitor='val_loss',mode='min',patience=1000,verbose=1,restore_best_weights=True)
 mcp = ModelCheckpoint(
     monitor='val_loss',
     mode='auto',
     verbose=1,
     save_best_only=True,
-    filepath='..\_data\_save\MCP\\reuters.hdf5'
+    filepath='..\_data\_save\MCP\로이터.hdf5'
     )
-model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-hist= model.fit(x_train, y_train, epochs=10000,batch_size=3000,verbose=3,
+
+model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
+hist= model.fit(x_train, y_train, epochs=100000,batch_size=3000, validation_split=0.1,verbose=2,
           callbacks=[es,mcp]
             )
 
@@ -81,6 +82,6 @@ print("acc:",result[1])
 # print("예측값:",y_pred)
 
 '''
-loss: 1.775757908821106
-acc: 0.5467497706413269
+loss: 1.6934758424758911
+acc: 0.5792520046234131
 '''

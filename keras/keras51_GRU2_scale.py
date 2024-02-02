@@ -20,6 +20,14 @@ x=np.array([[1,2,3],
 y=np.array([4,5,6,7,8,9,10])
 # print(x.shape,y.shape)  (7, 3) (7,)
 x= x.reshape(7,3,1)
+
+x_train,x_test,y_train,y_test=train_test_split(x,y,train_size=0.7,random_state=3)
+
+from sklearn.preprocessing import MinMaxScaler
+scaler = MinMaxScaler()
+scaler.fit(x_train)
+x_train = scaler.transform(x_train)
+x_test = scaler.transform(x_test)
 #2.모델구성
 model=Sequential()
 model.add(GRU(units=10,input_shape=(3,1)))

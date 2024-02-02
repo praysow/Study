@@ -1,7 +1,7 @@
 import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense,LSTM,Conv1D,Flatten
-
+from sklearn.model_selection import train_test_split
 x=np.array([[1,2,3],[2,3,4],[3,4,5],
             [4,5,6],[5,6,7],[6,7,8],
             [7,8,9],[8,9,10],[9,10,11],
@@ -10,6 +10,15 @@ y=np.array([4,5,6,7,8,9,10,11,12,13,50,60,70])
 # y_predict = np.array([50,60,70])
 
 x=x.reshape(-1,3,1,1)
+
+x_train,x_test,y_train,y_test=train_test_split(x,y,train_size=0.7,random_state=3)
+
+from sklearn.preprocessing import MinMaxScaler
+scaler = MinMaxScaler()
+scaler.fit(x_train)
+x_train = scaler.transform(x_train)
+x_test = scaler.transform(x_test)
+
 model=Sequential()
 # model.add(LSTM(units=100,input_shape=(3,1)))
 model.add(Conv1D(filters=100,kernel_size=2,input_shape=(3,1)))
