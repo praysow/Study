@@ -55,7 +55,7 @@ lb.fit(test_csv['대출목적'])
 test_csv['대출목적'] =lb.transform(test_csv['대출목적'])
 
 
-x_train,x_test,y_train,y_test=train_test_split(x,y_ohe,train_size=0.9,random_state=3 ,
+x_train,x_test,y_train,y_test=train_test_split(x,y_ohe,train_size=0.85,random_state=3 ,
                                                stratify=y_ohe
                                                )
 
