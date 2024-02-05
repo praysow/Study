@@ -58,13 +58,15 @@ model = Model(inputs=[input1,input11,input111],outputs=[last_output1,last_output
 # model.summary()
 #3.컴파일
 model.compile(loss= 'mse',optimizer='adam')
-model.fit([x1_train,x2_train,x3_train],[y1_train,y2_train],epochs=1000)
+model.fit([x1_train,x2_train,x3_train],[y1_train,y2_train],epochs=10)
 
 #4.결과예측
 result = model.evaluate([x1_test,x2_test,x3_test],[y1_test,y2_test])
 predict = model.predict([x1_test,x2_test,x3_test])
 print("loss:",result)
 print("예측값:",predict)
+print("삼성:",predict[0])
+print("코인:",predict[1])
 
 '''
 loss: [4966.1943359375, 234.9996795654297, 4731.19482421875]
