@@ -1,25 +1,40 @@
 import numpy as np
 import pandas as pd
 from keras.models import Sequential, load_model
-from keras.layers import Dense,Dropout,BatchNormalization, AveragePooling1D, Flatten, Conv2D, LSTM, Bidirectional,Conv1D,MaxPooling1D
+from keras.layers import Dense,Dropout,BatchNormalization, AveragePooling2D, Flatten, Conv2D, LSTM, Bidirectional,Conv1D
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler, MinMaxScaler, Normalizer, RobustScaler
 from sklearn.metrics import accuracy_score, f1_score
 from keras.utils import to_categorical
+from keras.optimizers import Adam
+from keras.callbacks import LearningRateScheduler
 import lightgbm as lgb
-# 데이터 로드
-# 데이터 로드
-path = "c:\_data\dacon\dechul\\"
-train_csv = pd.read_csv(path + "train.csv", index_col=0)
-test_csv = pd.read_csv(path + "test.csv", index_col=0)
-sample_csv = pd.read_csv(path + "sample_submission.csv")
+#1.데이터
+path= "c:\_data\dacon\dechul\\"
+train_csv=pd.read_csv(path+"train.csv",index_col=0)
+test_csv=pd.read_csv(path+"test.csv",index_col=0)
+sample_csv=pd.read_csv(path+"sample_submission.csv")
+# train_csv = train_csv[train_csv['총상환이자'] != 0.0]
 x= train_csv.drop(['대출등급','최근_2년간_연체_횟수','총연체금액','연체계좌수'],axis=1)
 y= train_csv['대출등급']
 test_csv = test_csv.drop(['최근_2년간_연체_횟수','총연체금액','연체계좌수'],axis=1)
-# 범주형 변수 리스트
-categorical_cols = ['대출기간', '근로기간', '주택소유상태', '대출목적']
 
-# 범주형 변수들을 정수로 인코딩
+# print(x.shape)
+# print(x.shape)      #  (96294, 14)
+# print(test_csv.shape)       #   (64197, 13)
+# print(sample_csv.shape)  #    (64197, 2)
+# print(np.unique(y,return_counts=True))
+
+
+y=y.values.reshape(-1,1)
+
+ohe = OneHotEncoder(sparse=False)
+ohe = OneHotEncoder()
+y_ohe = ohe.fit_transform(y).toarray()
+
+# print(y_ohe,y_ohe.shape)
+
+
 lb=LabelEncoder()
 lb.fit(x['대출기간'])
 x['대출기간'] = lb.transform(x['대출기간'])
@@ -42,60 +57,32 @@ test_csv['주택소유상태'] =lb.transform(test_csv['주택소유상태'])
 lb.fit(test_csv['대출목적'])
 test_csv['대출목적'] =lb.transform(test_csv['대출목적'])
 
-# 불필요한 컬럼 제거
-x = train_csv.drop(['대출등급', '최근_2년간_연체_횟수', '총연체금액', '연체계좌수'], axis=1)
-y = train_csv['대출등급']
 
-y=y.values.reshape(-1,1)
+x_train,x_test,y_train,y_test=train_test_split(x,y_ohe,train_size=0.85,random_state=3,stratify=y_ohe)
 
-ohe = OneHotEncoder(sparse=False)
-ohe = OneHotEncoder()
-y_ohe = ohe.fit_transform(y).toarray()
-
-x_train,x_test,y_train,y_test=train_test_split(x,y_ohe,train_size=0.8,random_state=3 ,
-                                               stratify=y
-                                               )
-# print(x_train.shape,x_test.shape)
-# print(y_train.shape,y_test.shape)
-
-
-
-# LightGBM 데이터셋 생성
-train_data = lgb.Dataset(x, label=y, categorical_feature=categorical_cols)
-valid_data = lgb.Dataset(x_test, label=y_test, reference=train_data, categorical_feature=categorical_cols)
-
-# LightGBM 모델 설정
+# LightGBM 모델 정의 및 학습
 params = {
     'objective': 'multiclass',
-    'num_class': 7,  # 클래스 개수
-    'boosting_type': 'gbdt',
+    'num_class': 4,
     'metric': 'multi_logloss',
     'num_leaves': 31,
     'learning_rate': 0.05,
-    'feature_fraction': 0.9
+    'feature_fraction': 0.9,
 }
 
-# LightGBM 모델 훈련
-num_round = 100  # 반복 횟수
-bst = lgb.train(params, train_data, num_boost_round=num_round, valid_sets=[valid_data])
+train_data = lgb.Dataset(x_train, label=y_train)
+test_data = lgb.Dataset(x_test, label=y_test, reference=train_data)
 
-# 나머지 코드는 그대로 사용
-# LightGBM 모델 예측
-y_pred = bst.predict(x_test, num_iteration=bst.best_iteration)
-y_pred_class = [round(x) for x in y_pred]
-
-# 정확도 평가
-accuracy = accuracy_score(y_test, y_pred_class)
-f1 = f1_score(y_test, y_pred_class, average='macro')
-
-print(f"Validation Accuracy: {accuracy}")
-print(f"F1 Score: {f1}")
+num_round = 100
+bst = lgb.train(params, train_data, num_round, valid_sets=[test_data], valid_names=['test'], early_stopping_rounds=10)
 
 # 결과 예측
-y_submit = bst.predict(test_csv, num_iteration=bst.best_iteration)
-y_submit_class = [round(x) for x in y_submit]
+y_pred = bst.predict(x_test, num_iteration=bst.best_iteration)
+y_pred_max = np.argmax(y_pred, axis=1)
 
-# 예측 결과 저장
-sample_csv["대출등급"] = y_submit_class
-sample_csv.to_csv(path + "대출_lgbm.csv", index=False)
+# 정확도 및 F1-score 계산
+accuracy = np.mean(y_pred_max == y_test)
+f1 = f1_score(y_test, y_pred_max, average='macro')
 
+print("Accuracy:", accuracy)
+print("F1-score:", f1)

@@ -27,30 +27,36 @@ y1=y1.sort_values(ascending=[True])
 y2=y2.sort_values(ascending=[True])
 z=samsung['시가']
 # print(np.unique(z,return_counts=True))
-print(z)
+# print(z)
 
 # 일부 컬럼만 변경
 samsung.rename(columns=lambda x: '전일비투' if x == 'Unnamed: 6' else x, inplace=True)
 amore.rename(columns=lambda x: '전일비투' if x == 'Unnamed: 6' else x, inplace=True)
 
+samsung = samsung.drop(['전일비','전일비투','등락률','금액(백만)','신용비','외인비'],axis=1)
+amore = amore.drop(['전일비','전일비투','등락률','금액(백만)','신용비','외인비'],axis=1)
+
 # 변경된 컬럼명 출력
 # print(samsung.columns)
+# print(samsung.shape,amore.shape)
 
 lb=LabelEncoder()
-lb.fit(samsung['전일비'])
-samsung['전일비'] = lb.transform(samsung['전일비'])
+# lb.fit(samsung['전일비'])
+# samsung['전일비'] = lb.transform(samsung['전일비'])
 lb.fit(samsung['거래량'])
 samsung['거래량'] = lb.transform(samsung['거래량'])
-lb.fit(samsung['금액(백만)'])
-samsung['금액(백만)'] = lb.transform(samsung['금액(백만)'])
-lb.fit(amore['전일비'])
-amore['전일비'] = lb.transform(amore['전일비'])
+# lb.fit(samsung['금액(백만)'])
+# samsung['금액(백만)'] = lb.transform(samsung['금액(백만)'])
+# lb.fit(amore['전일비'])
+# amore['전일비'] = lb.transform(amore['전일비'])
 lb.fit(amore['거래량'])
 amore['거래량'] = lb.transform(amore['거래량'])
-lb.fit(amore['금액(백만)'])
-amore['금액(백만)'] = lb.transform(amore['금액(백만)'])
+# lb.fit(amore['금액(백만)'])
+# amore['금액(백만)'] = lb.transform(amore['금액(백만)'])
 
-numeric_columns = ['시가', '고가', '저가', '종가', '전일비','전일비투', '등락률', '신용비', '개인', '기관', '외인(수량)', '외국계', '프로그램']
+numeric_columns = ['시가', '고가', '저가', '종가','개인', '기관', '외인(수량)', '외국계', '프로그램']
+# numeric_columns = ['시가', '고가', '저가', '종가', '전일비','전일비투', '등락률', '신용비', '개인', '기관', '외인(수량)', '외국계', '프로그램']
+
 
 for col in numeric_columns:
     samsung[col] = samsung[col].replace({',': ''}, regex=True).astype(int)
@@ -82,54 +88,60 @@ def split_xy(data, time_step, y_col, pred_step):
     return np.array(result_x), np.array(result_y)
 
 x1, y1 = split_xy(samsung, size, '시가', pred_step)
-# x2, y1 = split_xy(amore, size, '시가', pred_step)
-# x1, y2 = split_xy(samsung, size, '시가', pred_step)
 x2, y2 = split_xy(amore, size, '종가', pred_step)
 
-# y = samsung['시가'][0:4350].astype(float)
-print(x1.shape,x2.shape,y1.shape,y2.shape)  #(1387, 30, 16) (1387, 30, 16) (1387,) (1387,)
+# # y = samsung['시가'][0:4350].astype(float)
+# print(x1.shape,x2.shape,y1.shape,y2.shape)  #(1387, 30, 16) (1387, 30, 16) (1387,) (1387,)
 
 x1_train,x1_test,x2_train,x2_test,y1_train,y1_test,y2_train,y2_test=train_test_split(x1,x2,y1,y2,train_size=0.9,random_state=3
-                                                                                     ,shuffle=True
+                                                                                     ,shuffle=False
                                                                                      )
 # print(x1_train.shape,x2_train.shape,y_train.shape)
-x1_train=x1_train.reshape(-1,size*16)
-x1_test=x1_test.reshape(-1,size*16)
-x2_train=x2_train.reshape(-1,size*16)
-x2_test=x2_test.reshape(-1,size*16)
+shape=10
+
+x1_train=x1_train.reshape(-1,size*shape)
+x1_test=x1_test.reshape(-1,size*shape)
+x2_train=x2_train.reshape(-1,size*shape)
+x2_test=x2_test.reshape(-1,size*shape)
+
 scaler = MinMaxScaler()
+scaler2= RobustScaler()
 scaler.fit(x1_train,x2_train)
-x1_train = scaler.transform(x1_train)
-x1_test = scaler.transform(x1_test)
+scaler2.fit(x1_train,x2_train)
+x1_train = scaler2.transform(x1_train)
+x1_test = scaler2.transform(x1_test)
 x2_train = scaler.transform(x2_train)
 x2_test = scaler.transform(x2_test)
 
-x1_train=x1_train.reshape(-1,size,16)
-x1_test=x1_test.reshape(-1,size,16)
-x2_train=x2_train.reshape(-1,size,16)
-x2_test=x2_test.reshape(-1,size,16)
+x1_train=x1_train.reshape(-1,size,shape)
+x1_test=x1_test.reshape(-1,size,shape)
+x2_train=x2_train.reshape(-1,size,shape)
+x2_test=x2_test.reshape(-1,size,shape)
+
 
 # 모델1
-input1 = Input(shape= (size,16,))
+input1 = Input(shape= (size,shape,))
 dense1= Conv1D(100,2,activation='swish',padding='same')(input1)
-drop1=Dropout(0.2)(dense1)
-dense2= Conv1D(200,2,activation='swish')(drop1)
-drop2=Dropout(0.2)(dense2)
-dense3= Conv1D(300,2,activation='swish')(drop2)
-drop3=Dropout(0.2)(dense3)
-dense4= Conv1D(400,2,activation='swish')(drop3)
+drop1=Dropout(0.5)(dense1)
+dense2= Conv1D(150,2,activation='swish')(drop1)
+drop2=Dropout(0.5)(dense2)
+dense3= Conv1D(200,2,activation='swish')(drop2)
+drop3=Dropout(0.5)(dense3)
+dense4= Conv1D(100,2,activation='swish')(drop3)
 flatten= Flatten()(dense4)
 output1= Dense(10,activation='swish')(flatten)
 
 # 모델2
-input11 = Input(shape= (size,16,))
-dense2_1= Conv1D(100,2,activation='swish',padding='same')(input11)
-drop2_1=Dropout(0.2)(dense2_1)
-dense2_2= Conv1D(200,2,activation='swish')(drop2_1)
-drop2_2=Dropout(0.2)(dense2_2)
-dense2_3= Conv1D(200,2,activation='swish')(dense2_2)
-drop2_3=Dropout(0.2)(dense2_3)
-dense2_4= Conv1D(300,2,activation='swish')(dense2_3)
+input11 = Input(shape= (size,shape,))
+dense2_1= Conv1D(50,2,activation='swish',padding='same')(input11)
+# drop2_1=Dropout(0.5)(dense2_1)
+# dense2_2= Conv1D(200,2,activation='swish')(dense2_1)
+# drop2_2=Dropout(0.5)(dense2_2)
+# dense2_3= Conv1D(200,2,activation='swish')(dense2_2)
+# drop2_3=Dropout(0.5)(dense2_3)
+# dense2_4= Conv1D(300,2,activation='swish')(dense2_3)
+# dense2_4= Conv1D(200,2,activation='swish')(dense2_3)
+dense2_4= Conv1D(100,2,activation='swish')(dense2_1)
 flatten= Flatten()(dense2_4)
 output11= Dense(10,activation='swish')(flatten)
 
@@ -142,16 +154,16 @@ merge6 = Dense(250,activation='swish')(merge5)
 merge7 = Dense(200,activation='swish')(merge6)
 merge8 = Dense(150,activation='swish')(merge7)
 merge9 = Dense(100,activation='swish')(merge8)
-last_output1 = Dense(1, name='last')(merge9)
-last_output2 = Dense(1, name='last2')(merge6)
-
+last_output1 = Dense(1, name='last')(merge4)
+last_output2 = Dense(1, name='last2')(merge3)
+ 
 # 모델 정의 후에 compile 호출이 필요합니다.
 model = Model(inputs=[input1,input11],outputs=[last_output1,last_output2])
 
 from keras.callbacks import EarlyStopping,ModelCheckpoint,Callback
-
+방지코드=10.0
 class ThresholdCallback(Callback):
-    def __init__(self, threshold_percentage=10.0):        #수치조정
+    def __init__(self, threshold_percentage=방지코드):        #수치조정
         super(ThresholdCallback, self).__init__()
         self.threshold_percentage = threshold_percentage
 
@@ -185,21 +197,21 @@ class ThresholdCallback(Callback):
 
 
 # Callback 인스턴스 생성
-threshold_callback = ThresholdCallback(threshold_percentage=10.0)    #수치조정
-es= EarlyStopping(monitor='val_loss',mode='auto',patience=150,verbose=1,restore_best_weights=True)
+threshold_callback = ThresholdCallback(threshold_percentage=방지코드)    #수치조정
+es= EarlyStopping(monitor='val_loss',mode='auto',patience=1000,verbose=1,restore_best_weights=True)
 mcp = ModelCheckpoint(
     monitor='val_loss',
     mode='auto',
     verbose=1,
     save_best_only=True,
-    filepath='c:/_data/si_hum/삼성전자3.hdf5'
+    filepath='c:/_data/si_hum/삼성전자8.hdf5'
     )
 # 모델에 콜백 등록
 model.compile(loss='mae',optimizer='adam')
-model.fit([x1_train, x2_train], [y1_train, y2_train], epochs=2000, batch_size=100, validation_split=0.1, verbose=2,
+model.fit([x1_train, x2_train], [y1_train, y2_train], epochs=100, batch_size=50, validation_split=0.1, verbose=3,
           callbacks=[es, mcp, threshold_callback])
 
-model.save("c:/_data/si_hum/삼성전자3.h5")
+model.save("c:/_data/si_hum/삼성전자8.h5")
 #4.결과예측
 result = model.evaluate([x1_test,x2_test],[y1_test,y2_test])
 predict = model.predict([x1_test,x2_test])
@@ -231,4 +243,28 @@ mse: [7065.3203125, 1493.4793701171875, 5571.84130859375]
 mae: [7379.51416015625, 1826.3887939453125, 5553.12548828125]
 삼성: [74874.89]
 아모레: [128233.11] 2번
+
+mae: [7016.935546875, 1572.3765869140625, 5444.55859375]
+삼성: [74262.14]
+아모레: [123221.31]
+
+mae: [8194.287109375, 1286.0899658203125, 6908.19775390625]
+삼성: [73533.75]        3번
+아모레: [131045.74]
+
+mae: [7806.15966796875, 1722.9407958984375, 6083.21875]
+삼성: [72712.75]
+아모레: [125141.48]     4번
+
+mae: [6831.548828125, 1507.5394287109375, 5324.0087890625]
+삼성: [74066.92]
+아모레: [129030.16]     5번
+
+mae: [7808.18359375, 1721.9268798828125, 6086.25634765625]
+삼성: [73822.4]
+아모레: [128027.84]     6번
+
+mae: [8491.01171875, 1750.11767578125, 6740.8935546875]
+삼성: [74273.99]
+아모레: [130807.12]     7번
 '''
