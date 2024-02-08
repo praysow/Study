@@ -24,28 +24,42 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.86,
                                                     random_state=100,        #346
                                                     #stratify=y_ohe           
                                                     )
+from sklearn.metrics import accuracy_score
 from sklearn.utils import all_estimators
 import warnings
 warnings.filterwarnings('ignore')
-#2.모델구성
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, Normalizer, RobustScaler
+scaler = RobustScaler()
+scaler.fit(x_train)
+x_train = scaler.transform(x_train)
+x_test = scaler.transform(x_test)
+
+from sklearn.model_selection import KFold, cross_val_score
+from sklearn.model_selection import StratifiedKFold,cross_val_predict
+
 allAlgorithms = all_estimators(type_filter='classifier')
 # allAlgorithms = all_estimators(type_filter='regressor')
 
-#3.모델훈련
-# print(allAlgorithms)
-# print(len(allAlgorithms))   #41개
+
+n_split = 5
+kfold = KFold(n_splits=n_split,shuffle=True, random_state=123)
+#2.모델훈련
 for name, algorithm in allAlgorithms:
     try:
         #2.모델
         model = algorithm()
         #3.훈련
-        model.fit(x_train,y_train)
+       
+        scores = cross_val_score(model, x_train, y_train, cv=kfold)
+        print("ACC:",scores,"\n평균:",round(np.mean(scores),4))
 
-        acc = model.score(x_test,y_test)
-        print(name,'의 정답률:',acc)
+        y_pred = cross_val_predict(model, x_test, y_test, cv=kfold)
+        acc = accuracy_score(y_test, y_pred)
+        print("acc", acc)
     except:
         print(name, '실패')
         continue
+asd
 """
 AdaBoostClassifier 의 정답률: 0.8235294117647058
 BaggingClassifier 의 정답률: 0.8235294117647058
