@@ -57,7 +57,7 @@ x_train,x_test,y_train,y_test=train_test_split(x,y,train_size=0.85,random_state=
 
 allAlgorithms = all_estimators(type_filter='classifier')
 # allAlgorithms = all_estimators(type_filter='regressor')
-
+allAlgorithms = allAlgorithms[10:20]
 #3.모델훈련
 # print(allAlgorithms)
 # print(len(allAlgorithms))   #41개
@@ -75,12 +75,14 @@ for name, algorithm in allAlgorithms:
         continue
         
 '''
-acc 1: 0.37673935617860854
-acc 2: 0.44205607476635517
-acc 3: 0.8299065420560747
-acc 4: 0.8074766355140187
-f1 0.1998968186365091
-f1 0.30920652516264097
-f1 0.7497253727731452
-f1 0.6804292893970031
+AdaBoostClassifier 의 정답률: 0.5075112495673243
+BaggingClassifier 의 정답률: 0.8676358601592247
+BernoulliNB 의 정답률: 0.3621322256836276
+CalibratedClassifierCV 의 정답률: 0.3685012114918657
+CategoricalNB 실패
+ClassifierChain 실패
+ComplementNB 의 정답률: 0.20989961924541364
+DecisionTreeClassifier 의 정답률: 0.8353063343717549
+DummyClassifier 의 정답률: 0.30834198684665975
+ExtraTreeClassifier 의 정답률: 0.4559363101419176
 '''
