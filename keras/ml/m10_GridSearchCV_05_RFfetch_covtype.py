@@ -14,6 +14,8 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import GridSearchCV
 warnings.filterwarnings('ignore')
 import time
+from sklearn.datasets import fetch_covtype
+
 #1.데이터
 datasets= fetch_covtype()
 x= datasets.data

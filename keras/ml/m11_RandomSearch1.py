@@ -11,7 +11,7 @@ from sklearn.ensemble import RandomForestClassifier,RandomForestRegressor
 from sklearn.utils import all_estimators
 import warnings
 from sklearn.metrics import accuracy_score
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV,RandomizedSearchCV
 warnings.filterwarnings('ignore')
 import time
 
@@ -33,7 +33,9 @@ from sklearn.model_selection import StratifiedKFold,cross_val_predict
 n_split = 5
 kfold = KFold(n_splits=n_split,shuffle=True, random_state=123)
 # model = SVC(C=1, kernel ='linear',degree=3)
-model = GridSearchCV(RandomForestClassifier(),parameters, cv = kfold,verbose=1,refit=True,n_jobs=-1)       #n_jobs gpu아니고 cpu
+# model = GridSearchCV(RandomForestClassifier(),parameters, cv = kfold,verbose=1,refit=True,n_jobs=-1)       #n_jobs gpu아니고 cpu
+model = RandomizedSearchCV(RandomForestClassifier(),parameters, cv = kfold,verbose=1,refit=True,n_jobs=-1,random_state=6,n_iter=20)       #n_jobs gpu아니고 cpu
+
 s_t= time.time()
 model.fit(x_train,y_train)
 e_t= time.time()

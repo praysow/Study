@@ -9,9 +9,9 @@ from sklearn.neighbors import KNeighborsClassifier,KNeighborsRegressor
 from sklearn.tree import DecisionTreeClassifier,DecisionTreeRegressor
 from sklearn.ensemble import RandomForestClassifier,RandomForestRegressor
 from sklearn.utils import all_estimators
-import warnings
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import GridSearchCV
+import warnings
 warnings.filterwarnings('ignore')
 import time
 from sklearn.datasets import load_wine

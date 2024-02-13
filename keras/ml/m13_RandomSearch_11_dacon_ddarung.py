@@ -11,16 +11,33 @@ from sklearn.ensemble import RandomForestClassifier,RandomForestRegressor
 from sklearn.utils import all_estimators
 import warnings
 from sklearn.metrics import accuracy_score
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV,RandomizedSearchCV
 warnings.filterwarnings('ignore')
 import time
+#1. 데이터
 
-# 1.데이터
-x,y = load_iris(return_X_y=True)
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.8,
-                                                    random_state=450,         #850:acc=1
-                                                    stratify=y              #stratify는 분류에서만 사용
-                                                    )
+path= "c:\_data\dacon\ddarung\\"
+
+train_csv = pd.read_csv(path+"train.csv",index_col=0)
+test_csv= pd.read_csv(path+"test.csv",index_col=0)
+submission_csv= pd.read_csv(path+"submission.csv")
+
+train_csv=train_csv.fillna(train_csv.mean())                         #test는 dropna를 하면 안되고 결측치를 변경해줘야한다
+# train_csv=train_csv.fillna(0)
+test_csv=test_csv.fillna(test_csv.mean())                         #test는 dropna를 하면 안되고 결측치를 변경해줘야한다
+# test_csv=test_csv.fillna(0)
+
+x= train_csv.drop(['count'],axis=1)
+y= train_csv['count']
+
+x_train,x_test,y_train,y_test=train_test_split(x,y, train_size=0.8, random_state=6)
+
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, Normalizer, RobustScaler
+scaler = RobustScaler()
+scaler.fit(x_train)
+x_train = scaler.transform(x_train)
+x_test = scaler.transform(x_test)
+
 parameters = [
     {'n_estimators' : [100,200], 'max_depth':[6,10,12],'min_samples_leaf' : [3,10]},
     {'max_depth' : [6,8,10,12], 'min_samples_leaf':[3,5,7,10]},
@@ -33,7 +50,8 @@ from sklearn.model_selection import StratifiedKFold,cross_val_predict
 n_split = 5
 kfold = KFold(n_splits=n_split,shuffle=True, random_state=123)
 # model = SVC(C=1, kernel ='linear',degree=3)
-model = GridSearchCV(RandomForestClassifier(),parameters, cv = kfold,verbose=1,refit=True,n_jobs=-1)       #n_jobs gpu아니고 cpu
+# model = GridSearchCV(RandomForestClassifier(),parameters, cv = kfold,verbose=1,refit=True,n_jobs=-1)       #n_jobs gpu아니고 cpu
+model = RandomizedSearchCV(RandomForestRegressor(),parameters, cv = kfold,verbose=1,refit=True,n_jobs=-1)       #n_jobs gpu아니고 cpu
 s_t= time.time()
 model.fit(x_train,y_train)
 e_t= time.time()
@@ -53,3 +71,7 @@ y_pred_best = model.best_estimator_.predict(x_test)
 print("acc",accuracy_score(y_test,y_pred_best))
 print("걸린시간",round(e_t-s_t,2),"초")
 # print(pd.DataFrame(model.cv_results_))  #가로세로변환 .T
+'''
+베스트 스코어 0.7715007040069083
+model 스코어 0.7922101906299016
+'''

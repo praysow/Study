@@ -11,7 +11,8 @@ from sklearn.ensemble import RandomForestClassifier,RandomForestRegressor
 from sklearn.utils import all_estimators
 import warnings
 from sklearn.metrics import accuracy_score
-from sklearn.model_selection import GridSearchCV
+from sklearn.experimental import enable_halving_search_cv
+from sklearn.model_selection import GridSearchCV,RandomizedSearchCV,HalvingGridSearchCV,HalvingRandomSearchCV
 warnings.filterwarnings('ignore')
 import time
 from sklearn.preprocessing import LabelEncoder
@@ -63,7 +64,9 @@ from sklearn.model_selection import StratifiedKFold,cross_val_predict
 n_split = 5
 kfold = KFold(n_splits=n_split,shuffle=True, random_state=123)
 # model = SVC(C=1, kernel ='linear',degree=3)
-model = GridSearchCV(RandomForestClassifier(),parameters, cv = kfold,verbose=1,refit=True,n_jobs=-1)       #n_jobs gpu아니고 cpu
+model = HalvingRandomSearchCV(RandomForestClassifier(),parameters, cv = kfold,verbose=1,refit=True,n_jobs=-1,random_state=6,factor=3.5,min_resources=150)     #데이터를 최대한 사용하고싶다면 factor와,min_resources 를 조절하자
+# model = HalvingGridSearchCV(RandomForestClassifier(),parameters, cv = kfold,verbose=1,refit=True,n_jobs=-1,random_state=6,factor=3,min_resources=150)     #데이터를 최대한 사용하고싶다면 factor와,min_resources 를 조절하자
+# model = GridSearchCV(RandomForestClassifier(),parameters, cv = kfold,verbose=1,refit=True,n_jobs=-1)       #n_jobs gpu아니고 cpu
 s_t= time.time()
 model.fit(x_train,y_train)
 e_t= time.time()
@@ -83,3 +86,39 @@ y_pred_best = model.best_estimator_.predict(x_test)
 print("acc",accuracy_score(y_test,y_pred_best))
 print("걸린시간",round(e_t-s_t,2),"초")
 # print(pd.DataFrame(model.cv_results_))  #가로세로변환 .T
+'''
+n_iterations: 4
+n_required_iterations: 4
+n_possible_iterations: 6
+min_resources_: 150
+max_resources_: 81849
+aggressive_elimination: False
+factor: 3.5
+----------
+iter: 0
+n_candidates: 48
+n_resources: 150
+Fitting 5 folds for each of 48 candidates, totalling 240 fits
+----------
+iter: 1
+n_candidates: 14
+n_resources: 525
+Fitting 5 folds for each of 14 candidates, totalling 70 fits
+----------
+iter: 2
+n_candidates: 4
+n_resources: 1837
+Fitting 5 folds for each of 4 candidates, totalling 20 fits
+----------
+iter: 3
+n_candidates: 2
+n_resources: 6431
+Fitting 5 folds for each of 2 candidates, totalling 10 fits
+최적의 매개변수 RandomForestClassifier(n_jobs=-1)
+최적의 파라미터 {'n_jobs': -1, 'min_samples_split': 2}
+베스트 스코어 0.637791601866252
+model 스코어 0.8115610938040845
+acc 0.8115610938040845
+acc 0.8115610938040845
+걸린시간 13.49 초
+'''

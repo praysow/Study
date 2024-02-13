@@ -1,6 +1,6 @@
+from sklearn.datasets import load_digits
 import numpy as np
 import pandas as pd
-from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.svm import LinearSVC, SVC
 from sklearn.linear_model import Perceptron,LogisticRegression,SGDClassifier
@@ -11,12 +11,29 @@ from sklearn.ensemble import RandomForestClassifier,RandomForestRegressor
 from sklearn.utils import all_estimators
 import warnings
 from sklearn.metrics import accuracy_score
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV,RandomizedSearchCV
 warnings.filterwarnings('ignore')
 import time
+datasets = load_digits()
+x = datasets.data
+y = datasets.target
+# print(x.shape,y.shape)
+# print(pd.value_counts(y))
+# (1797, 64) (1797,)
+# 3    183
+# 1    182
+# 5    182
+# 4    181
+# 6    181
+# 9    180
+# 7    179
+# 0    178
+# 2    177
+# 8    174
 
-# 1.데이터
-x,y = load_iris(return_X_y=True)
+#모델 : RF
+#그리드서치와 랜덤서치로 성능및 시간비교.
+
 x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.8,
                                                     random_state=450,         #850:acc=1
                                                     stratify=y              #stratify는 분류에서만 사용
@@ -34,6 +51,9 @@ n_split = 5
 kfold = KFold(n_splits=n_split,shuffle=True, random_state=123)
 # model = SVC(C=1, kernel ='linear',degree=3)
 model = GridSearchCV(RandomForestClassifier(),parameters, cv = kfold,verbose=1,refit=True,n_jobs=-1)       #n_jobs gpu아니고 cpu
+# model = RandomizedSearchCV(RandomForestClassifier(),parameters, cv = kfold,verbose=1,refit=True,n_jobs=-1)       #n_jobs gpu아니고 cpu
+# model = GridSearchCV(SVC(),parameters, cv = kfold,verbose=1,refit=True,n_jobs=-1)       #n_jobs gpu아니고 cpu
+
 s_t= time.time()
 model.fit(x_train,y_train)
 e_t= time.time()
@@ -53,3 +73,11 @@ y_pred_best = model.best_estimator_.predict(x_test)
 print("acc",accuracy_score(y_test,y_pred_best))
 print("걸린시간",round(e_t-s_t,2),"초")
 # print(pd.DataFrame(model.cv_results_))  #가로세로변환 .T
+
+'''
+베스트 스코어 0.9714745451025939
+model 스코어 0.9611111111111111
+
+베스트 스코어 0.9742595818815332
+model 스코어 0.9722222222222222
+'''
