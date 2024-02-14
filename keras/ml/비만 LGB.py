@@ -19,7 +19,7 @@ y= train['NObeyesdad']
 lb = LabelEncoder()
 
 # 라벨 인코딩할 열 목록
-columns_to_encode = ['Gender','family_history_with_overweight','FAVC','CAEC','SMOKE','SCC','CALC','MTRANS']
+columns_to_encode = ['Gender','family_history _with_overweight','FAVC','CAEC','SMOKE','SCC','CALC','MTRANS']
 
 # 데이터프레임 x의 열에 대해 라벨 인코딩 수행
 for column in columns_to_encode:

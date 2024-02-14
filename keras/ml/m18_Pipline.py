@@ -23,8 +23,8 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.8,
 # scaler.fit(x_train)
 # x_train = scaler.transform(x_train)
 # x_test = scaler.transform(x_test)
-# model1 = make_pipeline(MinMaxScaler(),HalvingGridSearchCV(RandomForestRegressor(),param_grid={"n_estimators": [5],"n_jobs": [2]},cv=5))
-model = Pipeline([('MinMax',MinMaxScaler()),('RF',RandomForestClassifier())])
+model = make_pipeline(MinMaxScaler(),HalvingGridSearchCV(RandomForestRegressor(),param_grid={"n_estimators": [5],"n_jobs": [2]},cv=5))
+# model = Pipeline([('MinMax',MinMaxScaler()),('RF',RandomForestClassifier())])
 model.fit(x_train,y_train)
 
 # 4.결과예측
