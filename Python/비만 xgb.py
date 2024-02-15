@@ -1,13 +1,13 @@
 import numpy as np
 import pandas as pd
 from keras.models import Sequential, load_model
+from keras.layers import Dense,Dropout,BatchNormalization, AveragePooling1D, Flatten, Conv2D, LSTM, Bidirectional,Conv1D,MaxPooling1D
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler, MinMaxScaler, Normalizer, RobustScaler
 from sklearn.metrics import accuracy_score, f1_score
 from lightgbm import LGBMClassifier,Booster
-import lightgbm as lgb
 from sklearn.ensemble import RandomForestClassifier,RandomForestRegressor
-
+from xgboost import XGBClassifier
 path= "c:/_data/kaggle/비만/"
 train=pd.read_csv(path+"train.csv",index_col=0)
 test=pd.read_csv(path+"test.csv",index_col=0)
@@ -16,6 +16,12 @@ x= train.drop(['NObeyesdad'],axis=1)
 y= train['NObeyesdad']
 # print(train.shape,test.shape)   #(20758, 17) (13840, 16)    NObeyesdad
 # print(x.shape,y.shape)  #(20758, 16) (20758,)
+
+y=y.values.reshape(-1,1)
+
+ohe = OneHotEncoder(sparse=False)
+ohe = OneHotEncoder()
+y_ohe = ohe.fit_transform(y).toarray()
 
 lb = LabelEncoder()
 
@@ -31,56 +37,50 @@ for column in columns_to_encode:
 for column in columns_to_encode:
     lb.fit(test[column])
     test[column] = lb.transform(test[column])
+    
+# print(x['Gender'])
+# print(test['CALC'])
+x_train,x_test,y_train,y_test=train_test_split(x,y,train_size=0.9,random_state=367,stratify=y_ohe,shuffle=True)
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.9, random_state=3, stratify=y)
-
-scaler =StandardScaler()
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, Normalizer, RobustScaler
+scaler = RobustScaler()
 scaler.fit(x_train)
 x_train = scaler.transform(x_train)
 x_test = scaler.transform(x_test)
 test = scaler.transform(test)
+
+# print(x_train.shape,y_train.shape)  #(18682, 16) (18682,)
+# print(x_test.shape,y_test.shape)    #(2076, 16) (2076,)
 import random
+
+# 데이터 분할
+x_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
 r = random.randint(1, 100)
-random_state = r
-# 모델 생성 및 학습
-lgbm_params = {"objective": "multiclass",
-               "metric": "multi_logloss",
-               "verbosity": -1,
-               "boosting_type": "gbdt",
-               "random_state": random_state,
-               "num_class": 7,
-               "learning_rate": 0.01386432121252535,
-               "n_estimators": 500,
-               "feature_pre_filter": False,
-               "lambda_l1": 1.2149501037669967e-07,
-               "lambda_l2": 0.9230890143196759,
-               "num_leaves": 31,
-               "feature_fraction": 0.5,
-               "bagging_fraction": 0.5523862448863431,
-               "bagging_freq": 4,
-               "min_child_samples": 20,
-               "max_depth":12,
-               "min_samples_leaf":10,
-               'n_jobs': -1
-               }
-
-
-model = lgb.LGBMClassifier(**lgbm_params,device='gpu')
+# XGBClassifier 모델 초기화 및 학습
+model = XGBClassifier(
+    # booster='gbtree',
+    # n_estimators=100,
+    # max_depth=3,
+    # learning_rate=0.1,
+    # subsample=1.0,
+    # colsample_bytree=1.0,
+    # gamma=0,
+    # reg_alpha=0,
+    # reg_lambda=1,
+    # scale_pos_weight=1,
+    # objective='multi:softmax',
+    # eval_metric='mlogloss',
+    # early_stopping_rounds=None,
+    # verbosity=1,
+    random_state=r,
+    # n_jobs=None
+)
 model.fit(x_train, y_train)
 
-# 모델 저장
-# booster = model.booster_
-model.booster_.save_model("c:/_data/_save/비만31.h5")
+# 테스트 데이터에 대한 예측
+y_pred = model.predict(X_test)
 
-# 테스트 데이터 예측 및 저장
-y_pred = model.predict(x_test)
-y_submit = model.predict(test)
-sample['NObeyesdad'] = y_submit
-sample.to_csv(path + "비만31.csv", index=False)
-
-# 정확도 평가
+# 정확도 계산
 accuracy = accuracy_score(y_test, y_pred)
 print("Accuracy:", accuracy)
 print("r",r)
-
-
