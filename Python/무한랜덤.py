@@ -40,30 +40,43 @@ while True:
 
     scaler = StandardScaler()
     scaler.fit(x_train)
-    x_train = scaler.transform(x_train)
-    x_test = scaler.transform(x_test)
-    test = scaler.transform(test)
+    try:
+        x_train = scaler.transform(x_train)
+        x_test = scaler.transform(x_test)
+        test = scaler.transform(test)
+    except ValueError as e:
+        print("ValueError occurred during scaling:", e)
     r = random.randint(1, 1000)
-    random_state = r
+    min_num_leaves = 2 
+    r2 = random.randint(min_num_leaves, 50)
+    r3 = random.randint(2, 50)
+    r4 = random.randint(2, 50)
+    r5 = random.randint(2, 50)
+    r6 = random.uniform(0.000000000001, 1)
+    r7 = random.uniform(0.000000000001, 1)
+    r8 = random.uniform(0.1, 1)
+    r9 = random.uniform(0.000000000001, 1)
+    
+    
     # 모델 생성 및 학습
     lgbm_params = {"objective": "multiclass",
                    "metric": "multi_logloss",
                    "verbosity": -1,
                    "boosting_type": "gbdt",
-                   "random_state": random_state,
+                   "random_state": r,
                    "num_class": 7,
-                   "learning_rate": 0.01386432121252535,
+                   "learning_rate": r6,# 0.01386432121252535,
                    "n_estimators": 486,
                    "feature_pre_filter": False,
                    "lambda_l1": 1.2149501037669967e-07,
-                   "lambda_l2": 0.9230890143196759,
-                   "num_leaves": 31,
-                   "feature_fraction": 0.5,
-                   "bagging_fraction": 0.5523862448863431,
+                   "lambda_l2": r7,#0.9230890143196759,
+                   "num_leaves": r2,
+                   "feature_fraction": r9,
+                   "bagging_fraction":r8,# 0.5523862448863431,
                    "bagging_freq": 4,
-                   "min_child_samples": 20,
-                   "max_depth": 12,
-                   "min_samples_leaf": 10,
+                   "min_child_samples": r3,
+                   "max_depth": r4,
+                   "min_samples_leaf":  r5,
                    'n_jobs': -1
                    }
 
@@ -78,12 +91,21 @@ while True:
     accuracy = accuracy_score(y_test, y_pred)
     print("Accuracy:", accuracy)
     print("r",r)    
+    print("r2",r2)    
+    print("r3",r3)    
+    print("r4",r4)    
+    print("r5",r5)    
+    print("r5",r6)    
+    print("r5",r7)    
+    print("r5",r8)    
+    print("r5",r6)    
+    
     # If the current model is the best so far, save it
     if accuracy > best_accuracy:
         best_accuracy = accuracy
         best_model = model
 
-    if best_accuracy >= 0.93:
+    if best_accuracy >= 0.928:
         break
 # print("Accuracy:", accuracy)
 # print("r",r)
@@ -101,3 +123,4 @@ Accuracy: 0.9229287090558767        베스트뭐시기
 r 32
 r2 367
 '''
+

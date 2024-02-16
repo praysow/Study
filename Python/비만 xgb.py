@@ -72,7 +72,7 @@ model = XGBClassifier(
     # eval_metric='mlogloss',
     # early_stopping_rounds=None,
     # verbosity=1,
-    random_state=r,
+    # random_state=r,
     # n_jobs=None
 )
 model.fit(x_train, y_train)

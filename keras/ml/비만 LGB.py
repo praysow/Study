@@ -32,7 +32,7 @@ for column in columns_to_encode:
     lb.fit(test[column])
     test[column] = lb.transform(test[column])
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.9, random_state=3, stratify=y)
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.9, random_state=367, stratify=y,shuffle=True)
 
 scaler =StandardScaler()
 scaler.fit(x_train)
