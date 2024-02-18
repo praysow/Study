@@ -74,13 +74,14 @@ model.fit(x_train, y_train, epochs=1915, batch_size=30)
 #4.결과예측
 loss = model.evaluate(x_test,y_test)
 y_submit=model.predict(test_csv)
-
+y_pred = model.predict(x_test)
 print("로스 :",loss)
 
 #submission.csv 만들기 count컬럼에 값만 넣어주기
 submission_csv['count'] = y_submit
 print(submission_csv)
 submission_csv.to_csv(path + "submission_21.csv", index=False)
+
 
 '''
 

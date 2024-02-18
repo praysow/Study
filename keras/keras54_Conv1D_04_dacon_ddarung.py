@@ -92,7 +92,10 @@ submission_csv.to_csv(path + "submission_21.csv", index=False)
 print("로스 :",loss[0])
 print("acc :",loss[1])
 
-
+from sklearn.metrics import r2_score
+y_pred = model.predict(x_test)
+r2=r2_score(y_test,y_pred)
+print("R2 score",r2)
 
 
 
