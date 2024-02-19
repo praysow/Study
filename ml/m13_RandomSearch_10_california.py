@@ -10,7 +10,7 @@ from sklearn.tree import DecisionTreeClassifier,DecisionTreeRegressor
 from sklearn.ensemble import RandomForestClassifier,RandomForestRegressor
 from sklearn.utils import all_estimators
 import warnings
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import f1_score
 from sklearn.model_selection import GridSearchCV,RandomizedSearchCV
 warnings.filterwarnings('ignore')
 import time
@@ -65,11 +65,11 @@ print("베스트 스코어", model.best_score_)
 print("model 스코어", model.score(x_test,y_test))
 # model 스코어 0.9333333333333333
 y_pred = model.predict(x_test)
-print("acc",accuracy_score(y_test,y_pred))
+print("f1",f1_score(y_test,y_pred))
 #acc 0.9333333333333333
 y_pred_best = model.best_estimator_.predict(x_test)
                     #  최적의 매개변수 SVC(C=10, kernel='linear').predict(x_test)
-print("acc",accuracy_score(y_test,y_pred_best))
+print("f1",f1_score(y_test,y_pred_best))
 print("걸린시간",round(e_t-s_t,2),"초")
 # print(pd.DataFrame(model.cv_results_))  #가로세로변환 .T
 '''

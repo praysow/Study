@@ -115,6 +115,11 @@ accuracy = accuracy_score(y_test, y_pred)
 print("Accuracy:", accuracy)
 print("r",r)
 
+import matplotlib.pyplot as plt
+plt.boxplot(x)
+plt.show()
+
+
 '''
 Accuracy: 0.9219653179190751
 r 89

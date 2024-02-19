@@ -29,24 +29,38 @@ sampleSubmission_csv = pd.read_csv(path+"sampleSubmission.csv")
 
 x= train_csv.drop(['count','casual','registered'], axis=1)
 y= train_csv['count']
-# z= train_csv['windspeed']
-# print(pd.value_counts(z))
-# # print(np.unique(z,return_counts=True))
-# # print(train_csv.columns)Index(['season', 'holiday', 'workingday', 'weather', 'temp', 'atemp','humidity', 'windspeed', 'casual', 'registered', 'count'],dtype='object')
-# def outliers(data_out):
-#     quartile_1,q2,quartile_3 = np.percentile(data_out,[25,50,75])
-#     print("1사분위 :", quartile_1)
-#     print("q2",q2)
-#     print("3사분위 :", quartile_3)
-#     iqr = quartile_3 - quartile_1
-#     print("iqr:",iqr)
-#     lower_bound = quartile_1 - (iqr*1.5)    # *1.5 이걸만든 프로그래머가 정한수치이고 직접 조정해도 된다(범위를 조금 늘리기 위해서 해주는것)
-#     upper_bound = quartile_3 + (iqr*1.5)
-#     return np.where((data_out>upper_bound) |    # |는 또는이라는 뜻이다
-#                     (data_out<lower_bound))
+z= train_csv['windspeed']
+print(pd.value_counts(z))
+# print(np.unique(z,return_counts=True))
+# print(train_csv.columns)Index(['season', 'holiday', 'workingday', 'weather', 'temp', 'atemp','humidity', 'windspeed', 'casual', 'registered', 'count'],dtype='object')
+def outliers(data_out):
+    quartile_1,q2,quartile_3 = np.percentile(data_out,[25,50,75])
+    print("1사분위 :", quartile_1)
+    print("q2",q2)
+    print("3사분위 :", quartile_3)
+    iqr = quartile_3 - quartile_1
+    print("iqr:",iqr)
+    lower_bound = quartile_1 - (iqr*1.5)    # *1.5 이걸만든 프로그래머가 정한수치이고 직접 조정해도 된다(범위를 조금 늘리기 위해서 해주는것)
+    upper_bound = quartile_3 + (iqr*1.5)
+    return np.where((data_out>upper_bound) |    # |는 또는이라는 뜻이다
+                    (data_out<lower_bound))
 
-# outliers_loc = outliers(z)
-# print("이상치의 위치 :",outliers_loc)
+outliers_loc = outliers(z)
+print("이상치의 위치 :",outliers_loc)
+
+#windspeed    결측치 위치  175,   178,   
+# 2011-01-08 09:00:00     7.0015
+# 2011-01-08 10:00:00    11.0014
+# 2011-01-08 11:00:00    26.0027
+# 2011-01-08 12:00:00    23.9994
+# 2011-01-08 13:00:00    22.0028
+# 2011-01-08 14:00:00    32.9975
+# 2011-01-08 15:00:00    30.0026
+# 2011-01-08 16:00:00    30.0026
+# 2011-01-08 17:00:00    36.9974
+# 2011-01-08 18:00:00    19.9995
+
+
 x_train,x_test,y_train,y_test=train_test_split(x,y, train_size=0.8, random_state=6)
 
 #2.모델훈련
@@ -78,6 +92,13 @@ sampleSubmission_csv['count'] = y_submit
 sampleSubmission_csv.to_csv(path + "submission_21.csv", index=False)
 print("R2 score",r2)
 print("acc :", result)
+print(z[range(170,180)])
+
+import matplotlib.pyplot as plt
+plt.boxplot(x)
+plt.show()
+
+
 '''
 R2 score 0.3211879989617036
 acc : 0.3211879989617036
