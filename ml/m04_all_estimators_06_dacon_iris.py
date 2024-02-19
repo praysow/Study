@@ -1,17 +1,6 @@
-from keras.models import Sequential
-from keras.layers import Dense
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score,f1_score
-from keras.utils import to_categorical
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.svm import LinearSVC, SVC
-from sklearn.linear_model import Perceptron,LogisticRegression
-from sklearn.linear_model import LogisticRegression,LinearRegression
-from sklearn.neighbors import KNeighborsClassifier,KNeighborsRegressor
-from sklearn.tree import DecisionTreeClassifier,DecisionTreeRegressor
-from sklearn.ensemble import RandomForestClassifier,RandomForestRegressor
 #1.데이터
 path= "c:\_data\dacon\iris\\"
 train_csv = pd.read_csv(path+"train.csv",index_col=0)

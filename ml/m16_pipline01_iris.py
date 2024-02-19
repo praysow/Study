@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
-from sklearn.svm import LinearSVC, SVC
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.preprocessing import RobustScaler, MinMaxScaler, StandardScaler, MaxAbsScaler
 from sklearn.pipeline import make_pipeline
@@ -14,6 +13,12 @@ x, y = load_iris(return_X_y=True)
 x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.8,
                                                     random_state=1,
                                                     stratify=y)
+
+scaler =RobustScaler()
+scaler.fit(x_train)
+x_train = scaler.transform(x_train)
+x_test = scaler.transform(x_test)
+
 
 # 모델 생성 및 하이퍼파라미터 탐색 방법 설정
 models = [

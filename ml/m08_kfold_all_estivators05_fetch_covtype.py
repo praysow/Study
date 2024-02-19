@@ -2,18 +2,8 @@ import numpy as np
 import pandas as pd
 from sklearn.datasets import fetch_covtype
 from sklearn.model_selection import train_test_split
-from keras.models import Sequential, Model
-from keras.layers import Dense,LSTM,Conv1D,Flatten
-from keras.utils import to_categorical
-from sklearn.preprocessing import OneHotEncoder
 from sklearn.metrics import f1_score
 import time
-from sklearn.svm import LinearSVC, SVC
-from sklearn.linear_model import Perceptron,LogisticRegression
-from sklearn.linear_model import LogisticRegression,LinearRegression
-from sklearn.neighbors import KNeighborsClassifier,KNeighborsRegressor
-from sklearn.tree import DecisionTreeClassifier,DecisionTreeRegressor
-from sklearn.ensemble import RandomForestClassifier,RandomForestRegressor
 #1.데이터
 datasets= fetch_covtype()
 x= datasets.data
@@ -34,8 +24,7 @@ scaler.fit(x_train)
 x_train = scaler.transform(x_train)
 x_test = scaler.transform(x_test)
 
-from sklearn.model_selection import KFold, cross_val_score
-from sklearn.model_selection import StratifiedKFold,cross_val_predict
+from sklearn.model_selection import KFold, cross_val_score,StratifiedKFold,cross_val_predict
 
 allAlgorithms = all_estimators(type_filter='classifier')
 # allAlgorithms = all_estimators(type_filter='regressor')

@@ -102,13 +102,13 @@ model.fit(x_train, y_train)
 
 # 모델 저장
 # booster = model.booster_
-model.booster_.save_model("c:/_data/_save/비만31.h5")
+model.booster_.save_model("c:/_data/_save/비만45.h5")
 
 # 테스트 데이터 예측 및 저장
 y_pred = model.predict(x_test)
 y_submit = model.predict(test)
 sample['NObeyesdad'] = y_submit
-sample.to_csv(path + "비만31.csv", index=False)
+sample.to_csv(path + "비만45.csv", index=False)
 
 # 정확도 평가
 accuracy = accuracy_score(y_test, y_pred)
