@@ -41,9 +41,9 @@ for column in columns_to_encode:
     lb.fit(test[column])
     test[column] = lb.transform(test[column])
 
-# z= train[ '총상환원금']
+# z= train['총연체금액']
 # print(pd.value_counts(z))
-# # print(np.unique(z,return_counts=True))
+# print(np.unique(z,return_counts=True))
 # def outliers(data_out):
 #     quartile_1,q2,quartile_3 = np.percentile(data_out,[25,50,75])
 #     print("1사분위 :", quartile_1)
@@ -58,6 +58,26 @@ for column in columns_to_encode:
 
 # outliers_loc = outliers(z)
 # print("이상치의 위치 :",outliers_loc)
+# 총연체금액
+# 0.0        96113
+# 18000.0       65
+# 20124.0        3
+# 36000.0        3
+# 31308.0        2
+#            ...
+# 19620.0        1
+# 24300.0        1
+# 44496.0        1
+# 27900.0        1
+# 38292.0        1
+# Name: count, Length: 109, dtype: int64
+# 연체계좌수
+# 0.0    95762
+# 1.0      507
+# 2.0       24
+# 4.0        1
+# Name: count, dtype: int64
+
 
 # print(x.columns)Index(['대출금액', '대출기간', '근로기간', '주택소유상태', '연간소득', '부채_대비_소득_비율', '총계좌수', '대출목적',
     #    '최근_2년간_연체_횟수', '총상환원금', '총상환이자', '총연체금액', '연체계좌수']
@@ -111,7 +131,7 @@ model.fit(x_train, y_train)
 # 테스트 데이터 예측 및 저장
 y_pred = model.predict(x_test)
 y_submit = model.predict(test)
-sample['NObeyesdad'] = y_submit
+sample['대출등급'] = y_submit
 sample.to_csv(path + "대출1.csv", index=False)
 
 # 정확도 평가
@@ -119,7 +139,12 @@ accuracy = accuracy_score(y_test, y_pred)
 print("Accuracy:", accuracy)
 print("r",r)
 
+import matplotlib.pyplot as plt
+plt.boxplot(x)
+plt.show()
+
 '''
+
 f1 0.9143798222511382
 로스: 0.2211541086435318
 acc 0.9261682033538818

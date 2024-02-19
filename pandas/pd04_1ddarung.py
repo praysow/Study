@@ -134,3 +134,7 @@ R2 score: 0.7865920770848444
 10/10 [==============================] - 0s 0s/step
 R2 score 0.5969105620875779
 '''
+
+import matplotlib.pyplot as plt
+plt.boxplot(x)
+plt.show()

@@ -117,8 +117,6 @@ model = load_model("c:\_data\_save\MCP\k26\\dacon_dechul_01-17_15-16_0100-0.4638
 #4.결과예측
 loss = model.evaluate(x_test, y_test)
 y_submit = model.predict(test_csv)
-y_test_indices = np.argmax(y_test, axis=1)
-y_submit_indices = np.argmax(y_submit, axis=1)
 
 # 할당 전에 길이 확인
 # print(len(y_test_indices), len(y_submit_indices), len(sample_csv))
@@ -144,7 +142,7 @@ print("acc", loss[1])
 
 '''
 f1 0.7961885559394487
-로스: 0.4505821764469147
+로스: 0.4505821764469147M
 acc 0.845171332359314       save
 
 f1 0.7961885559394487       load
