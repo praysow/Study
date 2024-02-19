@@ -98,6 +98,10 @@ submission_csv['count'] = y_submit
 submission_csv.to_csv(path + "submission_21.csv", index=False)
 print("로스 :",loss)
 
+from sklearn.metrics import r2_score,accuracy_score
+y_pred = model.predict(x_test)
+r2=r2_score(y_test,y_pred)
+print("R2 score",r2)
 '''
 로스 : 2618.900634765625
 
