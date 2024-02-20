@@ -2,12 +2,8 @@ import numpy as np
 import pandas as pd
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
-from sklearn.svm import LinearSVC, SVC
 from sklearn.linear_model import Perceptron,LogisticRegression,SGDClassifier
-from sklearn.linear_model import LogisticRegression,LinearRegression
-from sklearn.neighbors import KNeighborsClassifier,KNeighborsRegressor
-from sklearn.tree import DecisionTreeClassifier,DecisionTreeRegressor
-from sklearn.ensemble import RandomForestClassifier,RandomForestRegressor
+
 from sklearn.utils import all_estimators
 import warnings
 warnings.filterwarnings('ignore')
@@ -21,7 +17,6 @@ from sklearn.model_selection import KFold, cross_val_score
 from sklearn.model_selection import StratifiedKFold
 n_split = 5
 # kfold = KFold(n_splits=n_split,shuffle=True, random_state=123)
-from sklearn.model_selection import StratifiedKFold
 kfold = StratifiedKFold(n_splits=n_split,shuffle=True, random_state=123)
 
 #2.모델
