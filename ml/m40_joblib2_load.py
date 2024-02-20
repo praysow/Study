@@ -16,11 +16,9 @@ scaler.fit(x_train)
 x_train = scaler.transform(x_train)
 x_test = scaler.transform(x_test)
 
-n_splits = 5
-kfold = StratifiedKFold(n_splits=n_splits,shuffle=True,random_state=123)
 path = 'c:/_data/_save/_pickle_test/'
-model = pk.load(open(path + 'm39_pickle1_save.dat','rb'))
-# model = joblib.load(open(path + 'm39_pickle1_save.dat2','rb'))
+# model = pk.load(open(path + 'm39_pickle1_save.dat','rb'))
+model = joblib.load(open(path + 'm40_joblib1_save.dat','rb'))
 
 from sklearn.metrics import r2_score,accuracy_score,f1_score,roc_auc_score,mean_absolute_error
 result = model.score(x_test,y_test)

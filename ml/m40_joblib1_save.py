@@ -3,8 +3,7 @@ from sklearn.datasets import load_digits,load_breast_cancer
 from sklearn.experimental import enable_halving_search_cv
 from sklearn.model_selection import train_test_split,KFold, StratifiedKFold,GridSearchCV,RandomizedSearchCV,HalvingRandomSearchCV,HalvingGridSearchCV
 from sklearn.preprocessing import StandardScaler,MinMaxScaler
-import pickle as pk
-import joblib
+
 #1. 데이터
 x,y = load_digits(return_X_y=True)
 
@@ -18,9 +17,30 @@ x_test = scaler.transform(x_test)
 
 n_splits = 5
 kfold = StratifiedKFold(n_splits=n_splits,shuffle=True,random_state=123)
-path = 'c:/_data/_save/_pickle_test/'
-model = pk.load(open(path + 'm39_pickle1_save.dat','rb'))
-# model = joblib.load(open(path + 'm39_pickle1_save.dat2','rb'))
+
+parameters = {
+    'n_estimators' : 4000,
+    'learning_rate' : 0.2,
+    'max_depth' : 3,
+    'gamma' : 4,
+    'min_child_weight' : 0.01,
+    'subsample' : 0.1,
+    'colsample_bytree' : 1,
+    'colsample_bylevel' : 1,
+    'colsample_bynode' : 1,
+    'reg_alpha' : 1,
+    'reg_lambda' : 1,
+    }
+#2. 모델
+# model = XGBRegressor(**parameters)
+model = XGBClassifier(**parameters)
+
+#3. 훈련
+model.fit(x_train,y_train,
+          eval_set=[(x_test,y_test)],
+          early_stopping_rounds=5,
+          verbose =10
+          )
 
 from sklearn.metrics import r2_score,accuracy_score,f1_score,roc_auc_score,mean_absolute_error
 result = model.score(x_test,y_test)
@@ -35,6 +55,12 @@ print('r2:',r2_score(y_test,y_pred))
 print('acc',accuracy_score(y_test,y_pred))
 # print('f1',f1_score(y_test,y_pred))
 # print('auc',roc_auc_score(y_test,y_pred))
+
+#########################################
+import pickle
+import joblib
+path = 'c:/_data/_save/_pickle_test/'
+joblib.dump(model, open(path + 'm40_joblib1_save.dat','wb'))
 
 '''
 r2: 0.6374505025890953
