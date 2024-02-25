@@ -10,9 +10,9 @@ from sklearn.tree import DecisionTreeClassifier,DecisionTreeRegressor
 from sklearn.ensemble import RandomForestClassifier,RandomForestRegressor
 from sklearn.utils import all_estimators
 import warnings
+warnings.filterwarnings('ignore')
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import GridSearchCV
-warnings.filterwarnings('ignore')
 import time
 from sklearn.preprocessing import LabelEncoder
 #1.데이터

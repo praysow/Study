@@ -87,7 +87,7 @@ x1_train,x1_test,x2_train,x2_test,y_train,y_test=train_test_split(x1,x2,y,train_
 print(x1_train.shape,x2_train.shape,y_train.shape)
 
 
-
+'''
 #모델1
 input1 = Input(shape= (30,16,))
 dense1= Dense(100,activation='swish')(input1)
@@ -174,3 +174,4 @@ print("MAE:",result[1])
 print("예측값:",predict[0,0],predict[1,0])
 # print("예측값:",predict)cc
 
+'''

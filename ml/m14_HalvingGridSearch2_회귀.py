@@ -9,10 +9,10 @@ from sklearn.neighbors import KNeighborsClassifier,KNeighborsRegressor
 from sklearn.tree import DecisionTreeClassifier,DecisionTreeRegressor
 from sklearn.ensemble import RandomForestClassifier,RandomForestRegressor
 from sklearn.utils import all_estimators
-import warnings
 from sklearn.metrics import accuracy_score
 from sklearn.experimental import enable_halving_search_cv
 from sklearn.model_selection import GridSearchCV,RandomizedSearchCV,HalvingGridSearchCV
+import warnings
 warnings.filterwarnings('ignore')
 import time
 

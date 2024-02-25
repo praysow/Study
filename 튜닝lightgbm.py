@@ -69,4 +69,4 @@ study.optimize(objective, n_trials=100)
 print("Best parameters found: ", study.best_params)
 print("Best value found: ", study.best_value)
 
-best_params = study.best_p
+# best_params = study.best_p

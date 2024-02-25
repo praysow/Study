@@ -32,7 +32,9 @@ x, y = split_xy(datasets, size, 'T (degC)', pred_step)
 
 
 x_train,x_test,y_train,y_test=train_test_split(x,y,train_size=0.1,random_state=333)
+print(x_train.shape,x_train.shape,y_train.shape)
 
+'''
 #2.모델구성
 model=Sequential()
 # model.add(Bidirectional(LSTM(units=1),input_shape=(72,14)))
@@ -60,7 +62,7 @@ print(y_pred.shape)
 # print("결과",y_pred)
 print(("loss",result))
 #145번 24시간
-
+'''
 '''
 Bidirectional.GRU   ('loss', 0.27828383445739746)
 Bidirectional.LSTM  ('loss', 0.18857364356517792)
