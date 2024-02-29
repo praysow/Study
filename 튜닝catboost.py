@@ -55,11 +55,11 @@ def objective(trial):
     
     # 정확도 계산
     accuracy = accuracy_score(y_valid, y_pred)
-    
+    print("acc",accuracy)
     return accuracy  # 정확도를 최대화하기 위해 1-accuracy를 반환
 
 # Study 생성 및 최적화 수행
-study = optuna.create_study(direction='minimize')
+study = optuna.create_study(direction='maximize')
 study.optimize(objective, n_trials=100)
 
 # 최적의 하이퍼파라미터 출력
@@ -74,7 +74,7 @@ best_model = CatBoostClassifier(**best_params,devices = 'gpu')
 best_model.fit(X_train, y_train, eval_set=(X_valid, y_valid), verbose=False)
 
 # 모델 저장
-best_model.save_model('catboost_model.bin')
+best_model.save_model('c:/_data/_save/비만58(cat).bin')
 
 # 테스트 데이터 예측
 # 테스트 데이터 예측
