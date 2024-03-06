@@ -1,43 +1,52 @@
+from xgboost import XGBClassifier,XGBRegressor
+from sklearn.datasets import load_digits
+from sklearn.experimental import enable_halving_search_cv
+from sklearn.model_selection import train_test_split,KFold, StratifiedKFold,GridSearchCV,RandomizedSearchCV,HalvingRandomSearchCV,HalvingGridSearchCV
+from sklearn.preprocessing import StandardScaler,MinMaxScaler
 import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.datasets import load_breast_cancer
-from sklearn.preprocessing import MinMaxScaler
-from xgboost import XGBClassifier
-from sklearn.metrics import accuracy_score, log_loss
+from sklearn.metrics import accuracy_score,log_loss
+#1. 데이터
+x,y = load_digits(return_X_y=True)
 
-# 데이터 로드 및 전처리
-x, y = load_breast_cancer(return_X_y=True)
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.9, random_state=1)
-scaler = MinMaxScaler()
+x_train,x_test,y_train,y_test=train_test_split(x,y, train_size=0.8, random_state=3)
+
+scaler=MinMaxScaler()
+# scaler=StandardScaler()
 scaler.fit(x_train)
 x_train = scaler.transform(x_train)
 x_test = scaler.transform(x_test)
 
-# XGBClassifier 모델 및 하이퍼파라미터 설정
 parameters = {
-    'n_estimators': 4000,
-    'learning_rate': 0.2,
-    'max_depth': 3,
-    'gamma': 4,
-    'min_child_weight': 0.01,
-    'subsample': 0.1,
-    'colsample_bytree': 1,
-    'colsample_bylevel': 1,
-    'colsample_bynode': 1,
-    'reg_alpha': 1,
-    'reg_lambda': 1,
-}
+    'n_estimators' : 4000,
+    'learning_rate' : 0.2,  #훈련량
+    'max_depth' : 3,        #트리 노드의 깊이
+    'gamma' : 4,
+    'min_child_weight' : 0.01,
+    'subsample' : 0.1,      # = dropout
+    'colsample_bytree' : 1,
+    'colsample_bylevel' : 1,
+    'colsample_bynode' : 1,
+    'reg_alpha' : 1,        # L1,L2 가중치 규제
+    'reg_lambda' : 1,
+    }
+#2. 모델
 model = XGBClassifier()
-model.set_params(early_stopping_rounds=10, **parameters)
-
-# 모델 훈련
-model.fit(x_train, y_train,
-          eval_set=[(x_train, y_train), (x_test, y_test)],
-          verbose=10,
-          eval_metric='logloss'
+model.set_params(**parameters)
+# #3. 훈련
+model.fit(x_train,y_train,
+          eval_set=[(x_train,y_train),(x_test,y_test)],
+          verbose =1000,
+          eval_metric='mlogloss'
           )
+#4. 평가,예측
+result = model.score(x_test,y_test)
+print("최종점수:",result)
+y_pred = model.predict(x_test)
+acc = accuracy_score(y_test,y_pred)
+print("acc:",acc)
 
-# 초기 평가
+############
+#############
 initial_loss = log_loss(y_test, model.predict_proba(x_test))
 initial_accuracy = accuracy_score(y_test, model.predict(x_test))
 print(f"Initial Log Loss: {initial_loss}, Initial Accuracy: {initial_accuracy}")
@@ -61,8 +70,8 @@ for i in range(len(sorted_indices)):
     # 모델 훈련
     model.fit(reduced_x_train, y_train,
               eval_set=[(reduced_x_train, y_train), (reduced_x_test, y_test)],
-              verbose=10,
-              eval_metric='logloss'
+              verbose=1000,
+              eval_metric='mlogloss'
               )
     
     # 피처 제거 후 모델 평가
@@ -73,3 +82,7 @@ for i in range(len(sorted_indices)):
 # 결과 출력
 for result in results:
     print(f"After removing top {result[0]} features, Log Loss: {result[1]}, Accuracy: {result[2]}")
+    
+'''
+
+'''

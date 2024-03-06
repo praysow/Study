@@ -1,19 +1,31 @@
 import numpy as np
+import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.datasets import load_breast_cancer
-from sklearn.preprocessing import MinMaxScaler
-from xgboost import XGBClassifier
-from sklearn.metrics import accuracy_score, log_loss
+import warnings
+from sklearn.metrics import f1_score
+from sklearn.preprocessing import StandardScaler
+from xgboost import XGBRegressor
+from sklearn.datasets import fetch_california_housing
 
-# 데이터 로드 및 전처리
-x, y = load_breast_cancer(return_X_y=True)
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.9, random_state=1)
-scaler = MinMaxScaler()
+# 데이터 로드
+datasets = fetch_california_housing()
+x = datasets.data
+y = datasets.target
+
+# 타겟 변수를 이진 분류로 변환
+median_y = np.median(y)
+y_binary = np.where(y > median_y, 1, 0)
+
+# 데이터 분할
+x_train, x_test, y_train, y_test = train_test_split(x, y_binary, train_size=0.7, random_state=130)
+
+# 데이터 스케일링
+scaler = StandardScaler()
 scaler.fit(x_train)
 x_train = scaler.transform(x_train)
 x_test = scaler.transform(x_test)
 
-# XGBClassifier 모델 및 하이퍼파라미터 설정
+# XGBRegressor 모델 정의
 parameters = {
     'n_estimators': 4000,
     'learning_rate': 0.2,
@@ -27,20 +39,21 @@ parameters = {
     'reg_alpha': 1,
     'reg_lambda': 1,
 }
-model = XGBClassifier()
+model = XGBRegressor()
 model.set_params(early_stopping_rounds=10, **parameters)
 
 # 모델 훈련
 model.fit(x_train, y_train,
           eval_set=[(x_train, y_train), (x_test, y_test)],
-          verbose=10,
-          eval_metric='logloss'
+          verbose=500,
+          eval_metric='auc'
           )
 
-# 초기 평가
-initial_loss = log_loss(y_test, model.predict_proba(x_test))
-initial_accuracy = accuracy_score(y_test, model.predict(x_test))
-print(f"Initial Log Loss: {initial_loss}, Initial Accuracy: {initial_accuracy}")
+# 테스트 세트에 대한 예측 및 평가
+y_pred = model.predict(x_test)
+f1 = f1_score(y_test, np.where(y_pred > np.median(y_train), 1, 0))
+print("f1_score:", f1)
+
 
 # Feature Importance를 이용한 피처 제거 및 평가
 feature_importances = model.feature_importances_
@@ -61,15 +74,14 @@ for i in range(len(sorted_indices)):
     # 모델 훈련
     model.fit(reduced_x_train, y_train,
               eval_set=[(reduced_x_train, y_train), (reduced_x_test, y_test)],
-              verbose=10,
-              eval_metric='logloss'
+              verbose=500,
+              eval_metric='auc'
               )
     
     # 피처 제거 후 모델 평가
-    logloss = log_loss(y_test, model.predict_proba(reduced_x_test))
-    accuracy = accuracy_score(y_test, model.predict(reduced_x_test))
-    results.append((i+1, logloss, accuracy))
+    f1 = f1_score(y_test, np.where(model.predict(reduced_x_test) > np.median(y_train), 1, 0))
+    results.append((i+1, f1))
 
 # 결과 출력
 for result in results:
-    print(f"After removing top {result[0]} features, Log Loss: {result[1]}, Accuracy: {result[2]}")
+    print(f"After removing top {result[0]} features, f1: {result[1]}")
