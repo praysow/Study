@@ -62,3 +62,6 @@ y_pred = model.predict(x_test)
 
 r2 = r2_score(y_test, y_pred)
 print("R2 Score:", r2)
+'''
+R2 Score: 0.8192496215173689
+'''

@@ -38,14 +38,14 @@ from sklearn.preprocessing import PolynomialFeatures,StandardScaler
 from xgboost import XGBClassifier
 pf = PolynomialFeatures(degree=2,include_bias=False)
 x_poly = pf.fit_transform(x)
-print(x_poly)
+# print(x_poly)
 
 #2.모델
 model = XGBClassifier()
 model2= XGBClassifier()
 #3.훈련
-print('s',x.shape)
-print('s',y.shape)
+# print('s',x.shape)
+# print('s',y.shape)
 
 model.fit(x,y)
 model2.fit(x_poly,y)
@@ -76,3 +76,6 @@ y_pred = model.predict(x_test)
 
 r2 = accuracy_score(y_test, y_pred)
 print("R2 Score:", r2)
+'''
+R2 Score: 0.8557632398753894
+'''

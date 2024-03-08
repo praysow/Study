@@ -4,10 +4,9 @@ from keras.models import Sequential, load_model
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler, MinMaxScaler, Normalizer, RobustScaler
 from sklearn.metrics import accuracy_score, f1_score ,log_loss
-from sklearn.ensemble import RandomForestClassifier,RandomForestRegressor
 from xgboost import XGBClassifier
-from sklearn.experimental import enable_halving_search_cv
-from sklearn.model_selection import train_test_split,KFold, StratifiedKFold,GridSearchCV,RandomizedSearchCV,HalvingRandomSearchCV,HalvingGridSearchCV
+from sklearn.model_selection import train_test_split
+from sklearn.decomposition import PCA
 
 path= "c:/_data/kaggle/비만/"
 train=pd.read_csv(path+"train.csv",index_col=0)
@@ -37,14 +36,14 @@ from sklearn.preprocessing import PolynomialFeatures,StandardScaler
 from xgboost import XGBClassifier
 pf = PolynomialFeatures(degree=2,include_bias=False)
 x_poly = pf.fit_transform(x)
-print(x_poly)
+# print(x_poly)
 
 #2.모델
 model = XGBClassifier()
 model2= XGBClassifier()
 #3.훈련
-print('s',x.shape)
-print('s',y.shape)
+# print('s',x.shape)
+# print('s',y.shape)
 
 model.fit(x,y)
 model2.fit(x_poly,y)
@@ -62,8 +61,9 @@ model2.fit(x_poly,y)
 # plt.plot(x_plot,y_plot2,color = 'blue',label = '기냥')
 # plt.legend()
 # plt.show()
-
-x_train,x_test,y_train,y_test = train_test_split(x_poly,y,train_size=0.9,random_state=1)
+pca = PCA(n_components='152')
+x = pca.fit_transform(x_poly)
+x_train,x_test,y_train,y_test = train_test_split(x,y,train_size=0.9,random_state=1)
 scaler = StandardScaler()
 scaler.fit(x_train)
 x_train = scaler.transform(x_train)
@@ -75,3 +75,6 @@ y_pred = model.predict(x_test)
 
 r2 = accuracy_score(y_test, y_pred)
 print("R2 Score:", r2)
+'''
+R2 Score: 0.9046242774566474
+'''

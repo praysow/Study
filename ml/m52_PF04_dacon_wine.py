@@ -33,8 +33,8 @@ print(x_poly)
 model = XGBClassifier()
 model2= XGBClassifier()
 #3.훈련
-print('s',x.shape)
-print('s',y.shape)
+# print('s',x.shape)
+# print('s',y.shape)
 
 model.fit(x,y)
 model2.fit(x_poly,y)
@@ -65,3 +65,6 @@ y_pred = model.predict(x_test)
 
 r2 = accuracy_score(y_test, y_pred)
 print("R2 Score:", r2)
+'''
+R2 Score: 0.6836363636363636
+'''
