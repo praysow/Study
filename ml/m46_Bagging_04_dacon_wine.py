@@ -4,8 +4,8 @@ from sklearn.model_selection import train_test_split
 import warnings
 from sklearn.metrics import accuracy_score,log_loss
 warnings.filterwarnings('ignore')
-from xgboost import XGBClassifier
-from sklearn.preprocessing import LabelEncoder,MinMaxScaler
+import time
+from sklearn.preprocessing import LabelEncoder
 #1. 데이터
 path= "c:\_data\dacon\wine\\"
 train_csv = pd.read_csv(path+"train.csv",index_col=0)
@@ -21,26 +21,29 @@ lb.fit(x['type'])
 x['type'] =lb.transform(x['type'])
 test_csv['type'] =lb.transform(test_csv['type'])
 
-x_train, x_test, y_train, y_test = train_test_split(
-    x, y, random_state=333, train_size=0.8,
-    stratify=y
-)
-
+x_train,x_test,y_train,y_test=train_test_split(x,y, train_size= 0.9193904973982694, random_state=1909,
+                                            stratify=y)
+from sklearn.preprocessing import StandardScaler,MinMaxScaler
 sclaer = MinMaxScaler().fit(x_train)
 x_train = sclaer.transform(x_train)
 x_test = sclaer.transform(x_test)
+from sklearn.ensemble import BaggingClassifier
+from sklearn.linear_model import LogisticRegression
 
 # model 
-from sklearn.ensemble import BaggingClassifier, VotingClassifier, RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-model = VotingClassifier([
-    ('LR',LogisticRegression()),
-    ('RF',RandomForestClassifier()),
-    ('XGB',XGBClassifier()),
-    ], voting='hard')
+model = BaggingClassifier(LogisticRegression(),
+                          n_estimators=100,
+                          n_jobs=-1,
+                          random_state=47,
+                          bootstrap=True,   # default 중복허용
+                          )
 
 # fit & pred
-model.fit(x_train,y_train,)
+model.fit(x_train,y_train,
+        #   eval_set=[(x_train,y_train), (x_test,y_test)],
+        #   verbose=1,
+        #   eval_metric='logloss',
+          )
 
 result = model.score(x_test,y_test)
 print("Score: ",result)
@@ -48,12 +51,3 @@ print("Score: ",result)
 pred = model.predict(x_test)
 acc = accuracy_score(y_test,pred)
 print("ACC: ",acc)
-
-# Score:  0.5454545454545454
-# ACC:  0.5454545454545454
-
-# VotingClassifier hard
-# ACC:  0.6763636363636364
-
-# VotingClassifier soft
-# ACC:  0.6754545454545454

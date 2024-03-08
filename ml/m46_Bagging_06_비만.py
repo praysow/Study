@@ -33,23 +33,28 @@ for column in columns_to_encode:
     lb.fit(test[column])
     test[column] = lb.transform(test[column])
 
-x_train,x_test,y_train,y_test = train_test_split(x,y,train_size=0.9,random_state=1)
-from sklearn.preprocessing import MinMaxScaler
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.9, random_state=367, stratify=y,shuffle=True)
+from sklearn.preprocessing import StandardScaler,MinMaxScaler
 sclaer = MinMaxScaler().fit(x_train)
 x_train = sclaer.transform(x_train)
 x_test = sclaer.transform(x_test)
-from xgboost import XGBClassifier
-# model 
-from sklearn.ensemble import BaggingClassifier, VotingClassifier, RandomForestClassifier
+from sklearn.ensemble import BaggingClassifier
 from sklearn.linear_model import LogisticRegression
-model = VotingClassifier([
-    ('LR',LogisticRegression()),
-    ('RF',RandomForestClassifier()),
-    ('XGB',XGBClassifier()),
-    ], voting='hard')
+
+# model 
+model = BaggingClassifier(LogisticRegression(),
+                          n_estimators=100,
+                          n_jobs=-1,
+                          random_state=47,
+                          bootstrap=True,   # default 중복허용
+                          )
 
 # fit & pred
-model.fit(x_train,y_train,)
+model.fit(x_train,y_train,
+        #   eval_set=[(x_train,y_train), (x_test,y_test)],
+        #   verbose=1,
+        #   eval_metric='logloss',
+          )
 
 result = model.score(x_test,y_test)
 print("Score: ",result)

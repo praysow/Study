@@ -34,23 +34,35 @@ for column in columns_to_encode:
     test[column] = lb.transform(test[column])
 
 y = lb.fit_transform(train['대출등급'])
-x_train,x_test,y_train,y_test = train_test_split(x,y,train_size=0.9,random_state=1)
-from sklearn.preprocessing import MinMaxScaler
+# 데이터 스케일링
+scaler = MinMaxScaler()
+scaler = StandardScaler()
+scaler.fit(x)
+x = scaler.transform(x)
+
+# 데이터 분할
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.85, random_state=100)
+from sklearn.preprocessing import StandardScaler,MinMaxScaler
 sclaer = MinMaxScaler().fit(x_train)
 x_train = sclaer.transform(x_train)
 x_test = sclaer.transform(x_test)
-from xgboost import XGBClassifier
-# model 
-from sklearn.ensemble import BaggingClassifier, VotingClassifier, RandomForestClassifier
+from sklearn.ensemble import BaggingClassifier
 from sklearn.linear_model import LogisticRegression
-model = VotingClassifier([
-    ('LR',LogisticRegression()),
-    ('RF',RandomForestClassifier()),
-    ('XGB',XGBClassifier()),
-    ], voting='hard')
+
+# model 
+model = BaggingClassifier(LogisticRegression(),
+                          n_estimators=100,
+                          n_jobs=-1,
+                          random_state=47,
+                          bootstrap=True,   # default 중복허용
+                          )
 
 # fit & pred
-model.fit(x_train,y_train,)
+model.fit(x_train,y_train,
+        #   eval_set=[(x_train,y_train), (x_test,y_test)],
+        #   verbose=1,
+        #   eval_metric='logloss',
+          )
 
 result = model.score(x_test,y_test)
 print("Score: ",result)
@@ -58,3 +70,6 @@ print("Score: ",result)
 pred = model.predict(x_test)
 acc = accuracy_score(y_test,pred)
 print("ACC: ",acc)
+'''
+
+'''
