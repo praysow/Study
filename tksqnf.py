@@ -277,11 +277,11 @@ print("저장된 가중치 명: {}".format(model_weights_output))
 - 학습한 모델 불러오기
 """
 
-# model = get_model(MODEL_NAME, input_height=IMAGE_SIZE[0], input_width=IMAGE_SIZE[1], n_filters=N_FILTERS, n_channels=N_CHANNELS)
-# model.compile(optimizer = Adam(), loss = 'binary_crossentropy', metrics = ['accuracy'])
-# model.summary()
+model = get_model(MODEL_NAME, input_height=IMAGE_SIZE[0], input_width=IMAGE_SIZE[1], n_filters=N_FILTERS, n_channels=N_CHANNELS)
+model.compile(optimizer = Adam(), loss = 'binary_crossentropy', metrics = ['accuracy'])
+model.summary()
 
-# model.load_weights('c:/_data/aifac/sanbul/model_unet_base_line_final_weights.h5')
+model.load_weights('c:/_data/aifac/sanbul/model_unet_base_line_final_weights.h5')
 
 """## 제출 Predict
 - numpy astype uint8로 지정

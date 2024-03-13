@@ -100,20 +100,20 @@ def FCN(nClasses, input_height=128, input_width=128, n_filters=16, dropout=0.1, 
     img_input = Input(shape=(input_height, input_width, n_channels))
 
     # Block 1
-    x = Conv2D(n_filters, (3, 3), activation='swish', padding='same', name='block1_conv1')(img_input)
-    x1 = Conv2D(n_filters, (3, 3), activation='swish', padding='same', name='block1_conv2')(x)
+    x = Conv2D(16, (3, 3), activation='swish', padding='same', name='block1_conv1')(img_input)
+    x1 = Conv2D(32, (3, 3), activation='swish', padding='same', name='block1_conv2')(x)
     # drop = Dropout(dropout)(x1)
-    x2 = Conv2D(n_filters, (3, 3), activation='swish', padding='same', name='block1_conv3')(x1)
+    x2 = Conv2D(64, (3, 3), activation='swish', padding='same', name='block1_conv3')(x1)
     
     # Block 2
-    x3 = Conv2D(n_filters, (3, 3), activation='swish', padding='same', name='block2_conv4')(x2)
-    x4 = Conv2D(n_filters, (3, 3), activation='swish', padding='same', name='block2_conv5')(x3)
-    x5 = Conv2D(n_filters, (3, 3), activation='swish', padding='same', name='block2_conv6')(x4)
-    x6 = Conv2D(n_filters, (3, 3), activation='swish', padding='same', name='block2_conv7')(x5)
+    x3 = Conv2D(128, (3, 3), activation='swish', padding='same', name='block2_conv4')(x2)
+    x4 = Conv2D(256, (3, 3), activation='swish', padding='same', name='block2_conv5')(x3)
+    x5 = Conv2D(128, (3, 3), activation='swish', padding='same', name='block2_conv6')(x4)
+    x6 = Conv2D(64, (3, 3), activation='swish', padding='same', name='block2_conv7')(x5)
     batch = BatchNormalization()(x6)
-    x7 = Conv2D(n_filters, (3, 3), activation='swish', padding='same', name='block2_conv8')(batch)
-    x8 = Conv2D(n_filters, (3, 3), activation='swish', padding='same', name='block2_conv9')(x7)
-    x9 = Conv2D(n_filters, (3, 3), activation='swish', padding='same', name='block2_conv10')(x8)
+    x7 = Conv2D(32, (3, 3), activation='swish', padding='same', name='block2_conv8')(batch)
+    x8 = Conv2D(16, (3, 3), activation='swish', padding='same', name='block2_conv9')(x7)
+    x9 = Conv2D(8, (3, 3), activation='swish', padding='same', name='block2_conv10')(x8)
     # Out
     o = (Conv2D(nClasses, (3, 3), activation='swish', padding='same', name="Out"))(x9)
     model = Model(img_input, o)
