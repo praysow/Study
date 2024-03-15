@@ -97,5 +97,5 @@ print("Validation RMSE:", rmse_val)
 '''
 Validation RMSE: 621.3231636678684 540점
 Best parameters: {'random_state': 863, 'learning_rate': 0.026448745357864258, 'n_estimators': 118, 'num_leaves': 132, 'feature_fraction': 0.9503237717724516, 'bagging_fraction': 0.22977512473974027, 'bagging_freq': 1, 'min_child_samples': 52, 'max_depth': 13, 'min_samples_leaf': 19}
-Validation RMSE: 612.8145250013354      money1_lgb_optuna
+Validation RMSE: 612.8145250013354      money1_lgb_optuna ???점
 '''
