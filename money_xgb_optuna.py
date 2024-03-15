@@ -12,14 +12,18 @@ train = pd.read_csv(path+'train.csv', index_col=0)
 test = pd.read_csv(path+'test.csv', index_col=0)
 sample = pd.read_csv(path+'sample_submission.csv')
 
-# 피처와 타겟 분리
-x = train.drop(['Income'], axis=1)
+x = train.drop(['Income','Gains','Losses','Dividends','Race','Hispanic_Origin','Birth_Country','Birth_Country (Father)','Birth_Country (Mother)'], axis=1)
 y = train['Income']
-
+test = test.drop(['Gains','Losses','Dividends','Dividends','Race','Hispanic_Origin','Birth_Country','Birth_Country (Father)','Birth_Country (Mother)'], axis=1)
 lb = LabelEncoder()
 
+# print(train.columns)
+# for column in train.columns:
+#     print(train[column].value_counts())
+
+
 # 라벨 인코딩할 열 목록
-columns_to_encode = ['Gender','Education_Status','Employment_Status','Industry_Status','Occupation_Status','Race','Hispanic_Origin','Martial_Status','Household_Status','Household_Summary','Citizenship','Birth_Country','Birth_Country (Father)','Birth_Country (Mother)','Tax_Status','Income_Status']
+columns_to_encode = ['Gender','Education_Status','Employment_Status','Industry_Status','Occupation_Status','Martial_Status','Household_Status','Household_Summary','Citizenship','Tax_Status','Income_Status']
 
 # 데이터프레임 x의 열에 대해 라벨 인코딩 수행
 for column in columns_to_encode:
@@ -30,7 +34,7 @@ for column in columns_to_encode:
 for column in columns_to_encode:
     lb.fit(test[column])
     test[column] = lb.transform(test[column])
-    
+
 # 데이터 스케일링
 scaler = StandardScaler()
 x = scaler.fit_transform(x)
@@ -76,15 +80,15 @@ study.optimize(objective, n_trials=1000)
 
 # 최적의 하이퍼파라미터 출력
 best_params = study.best_params
-
+import joblib
 # 최적의 하이퍼파라미터로 모델 생성 및 학습
 best_model = xgb.XGBRegressor(**best_params)
 best_model.fit(x_train, y_train)
-
+joblib.dump(best_model, "c:/_data/dacon/soduc/weight/money5_optuna_xgboost.pkl")
 # 테스트 데이터 예측 및 저장
 y_pred_test = best_model.predict(test)
 sample['Income'] = y_pred_test
-sample.to_csv("c:/_data/dacon/soduc/csv/money3_optuna_xgboost.csv", index=False)
+sample.to_csv("c:/_data/dacon/soduc/csv/money5_optuna_xgboost.csv", index=False)
 print('Best parameters:', best_params)
 
 y_pred_val = best_model.predict(x_val)
@@ -96,5 +100,8 @@ Validation RMSE: 617.3331620533075      1번
 Validation RMSE: 617.3522769437751      2번
 
 Best parameters: {'random_state': 589, 'learning_rate': 0.023765528985485895, 'n_estimators': 151, 'max_depth': 7, 'subsample': 0.9890237618912407, 'colsample_bytree': 0.7203459068696018, 'reg_alpha': 0.5062481644377009, 'reg_lambda': 0.9744913997224112, 'min_child_weight': 4, 'gamma': 0.7074286786435127}
-Validation RMSE: 616.0891829434779     money3_optuna_xgboost    544점
+Validation RMSE: 616.0891829434779     money4_optuna_xgboost    544점
+
+Best parameters: {'random_state': 596, 'learning_rate': 0.01727073006198615, 'n_estimators': 191, 'max_depth': 9, 'subsample': 0.5517418635798523, 'colsample_bytree': 0.6489366724855755, 'reg_alpha': 0.7730596255445736, 'reg_lambda': 0.3018239964507463, 'min_child_weight': 9, 'gamma': 0.6048670915268969}
+Validation RMSE: 615.7543318199334      money3_optuna_xgboost    542점
 '''

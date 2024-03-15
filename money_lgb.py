@@ -12,14 +12,13 @@ train = pd.read_csv(path+'train.csv', index_col=0)
 test = pd.read_csv(path+'test.csv', index_col=0)
 sample = pd.read_csv(path+'sample_submission.csv')
 
-# 피처와 타겟 분리
-x = train.drop(['Income'], axis=1)
+x = train.drop(['Income','Gains','Losses','Dividends','Race','Hispanic_Origin','Birth_Country','Birth_Country (Father)','Birth_Country (Mother)'], axis=1)
 y = train['Income']
-
+test = test.drop(['Gains','Losses','Dividends','Dividends','Race','Hispanic_Origin','Birth_Country','Birth_Country (Father)','Birth_Country (Mother)'], axis=1)
 lb = LabelEncoder()
 
 # 라벨 인코딩할 열 목록
-columns_to_encode = ['Gender','Education_Status','Employment_Status','Industry_Status','Occupation_Status','Race','Hispanic_Origin','Martial_Status','Household_Status','Household_Summary','Citizenship','Birth_Country','Birth_Country (Father)','Birth_Country (Mother)','Tax_Status','Income_Status']
+columns_to_encode = ['Gender','Education_Status','Employment_Status','Industry_Status','Occupation_Status','Martial_Status','Household_Status','Household_Summary','Citizenship','Tax_Status','Income_Status']
 
 # 데이터프레임 x의 열에 대해 라벨 인코딩 수행
 for column in columns_to_encode:
@@ -46,7 +45,7 @@ def objective(trial):
         "metric": "rmse",
         "verbosity": -1,
         "boosting_type": "gbdt",
-        "random_state": 42,
+        "random_state": trial.suggest_int("random_state", 1, 1000),
         "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.1),
         "n_estimators": trial.suggest_int("n_estimators", 100, 1000),
         "num_leaves": trial.suggest_int("num_leaves", 2, 256),
@@ -73,7 +72,7 @@ def objective(trial):
 
 # Optuna를 사용하여 하이퍼파라미터 최적화
 study = optuna.create_study(direction='minimize')
-study.optimize(objective, n_trials=100)
+study.optimize(objective, n_trials=1000)
 
 # 최적의 하이퍼파라미터 출력
 best_params = study.best_params
@@ -82,11 +81,12 @@ best_params = study.best_params
 # 최적의 하이퍼파라미터로 모델 생성 및 학습
 best_model = lgb.LGBMRegressor(**best_params)
 best_model.fit(x_train, y_train)
+best_model.booster_.save_model("c:/_data/dacon/soduc/weight/money2_lgb_optuna.csv")
 
 # 테스트 데이터 예측 및 저장
 y_pred_test = best_model.predict(test)
 sample['Income'] = y_pred_test
-sample.to_csv("c:/_data/dacon/soduc/csv/money2_optuna.csv", index=False)
+sample.to_csv("c:/_data/dacon/soduc/csv/money2_lgb_optuna.csv", index=False)
 print('Best parameters:', best_params)
 
 y_pred_val = best_model.predict(x_val)
@@ -96,6 +96,6 @@ print("Validation RMSE:", rmse_val)
 
 '''
 Validation RMSE: 621.3231636678684 540점
-
-
+Best parameters: {'random_state': 863, 'learning_rate': 0.026448745357864258, 'n_estimators': 118, 'num_leaves': 132, 'feature_fraction': 0.9503237717724516, 'bagging_fraction': 0.22977512473974027, 'bagging_freq': 1, 'min_child_samples': 52, 'max_depth': 13, 'min_samples_leaf': 19}
+Validation RMSE: 612.8145250013354      money1_lgb_optuna
 '''

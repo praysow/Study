@@ -12,13 +12,18 @@ test = pd.read_csv(path+'test.csv', index_col=0)
 sample = pd.read_csv(path+'sample_submission.csv')
 
 # 피처와 타겟 분리
-x = train.drop(['Income','Gains','Losses','Dividends'], axis=1)
+x = train.drop(['Income','Gains','Losses','Dividends','Race','Hispanic_Origin','Birth_Country','Birth_Country (Father)','Birth_Country (Mother)'], axis=1)
 y = train['Income']
-test = test.drop(['Gains','Losses','Dividends'], axis=1)
+test = test.drop(['Gains','Losses','Dividends','Dividends','Race','Hispanic_Origin','Birth_Country','Birth_Country (Father)','Birth_Country (Mother)'], axis=1)
 lb = LabelEncoder()
 
+# print(train.columns)
+# for column in train.columns:
+#     print(train[column].value_counts())
+
+
 # 라벨 인코딩할 열 목록
-columns_to_encode = ['Gender','Education_Status','Employment_Status','Industry_Status','Occupation_Status','Race','Hispanic_Origin','Martial_Status','Household_Status','Household_Summary','Citizenship','Birth_Country','Birth_Country (Father)','Birth_Country (Mother)','Tax_Status','Income_Status']
+columns_to_encode = ['Gender','Education_Status','Employment_Status','Industry_Status','Occupation_Status','Martial_Status','Household_Status','Household_Summary','Citizenship','Tax_Status','Income_Status']
 
 # 데이터프레임 x의 열에 대해 라벨 인코딩 수행
 for column in columns_to_encode:
@@ -29,7 +34,9 @@ for column in columns_to_encode:
 for column in columns_to_encode:
     lb.fit(test[column])
     test[column] = lb.transform(test[column])
-    
+
+# print(np.unique(x['Birth_Country (Mother)'],return_counts=True))
+
 # 데이터 스케일링
 scaler = StandardScaler()
 # scaler = MinMaxScaler()
