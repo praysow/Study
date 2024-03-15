@@ -81,6 +81,7 @@ for param, value in best_params.items():
 
 submit.to_csv('c:/_data/dacon/ranfo/rf_optuna_1.csv', index=False)
 
+
 '''
 Best parameters: {'n_estimators': 97, 'max_depth': 10, 'min_samples_split': 10, 'min_samples_leaf': 14, 'max_features': 'log2', 'bootstrap': True, 'ccp_alpha': 0.01951620025305444}
 Best AUC: 0.8540903540903542    optuna_1

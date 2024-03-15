@@ -3,35 +3,33 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier,RandomForestRegressor
 from sklearn.model_selection import train_test_split,GridSearchCV
 from sklearn.preprocessing import StandardScaler
-data = pd.read_csv('c:/_data/dacon/ranfo/train.csv')
-submit = pd.read_csv('c:/_data/dacon/ranfo/sample_submission.csv')
+data = pd.read_csv('c:/_data/dacon/ranfo/ts/train.csv')
+submit = pd.read_csv('c:/_data/dacon/ranfo/ts/sample_submission.csv')
 # person_id 컬럼 제거
 x = data.drop(['person_id', 'login'], axis=1)
 y = data['login']
 
-x_train,x_test,y_train,y_test=train_test_split(x,y, train_size=0.8, random_state=6)
-
-scaler = StandardScaler()
-scaler.fit(x_train)
-x_train = scaler.transform(x_train)
-x_test = scaler.transform(x_test)
-
 # GridSearchCV를 위한 하이퍼파라미터 설정
 param_search_space = {
-    'n_estimators': [10, 50, 100],
-    'max_depth': [None, 10, 30],
-    'min_samples_split': [2, 10],
-    'min_samples_leaf': [1, 4]
+    'n_estimators': [200, 250, 300],
+    'max_depth': [None, 10, 30,50],
+    'min_samples_split': [2,4,8,10,None],
+    'min_samples_leaf': [1,2,3, 4,None],
+    'min_weight_fraction_leaf' : [0,0.3,0.5,None],
+    'max_features' : ['sqrt', 'log2', None],
+    'max_leaf_nodes' : [None, 10, 30, 50],
+    'min_impurity_decrease' : [ 0.0, 0.5,None],
+    'bootstrap' : [True, False]
 }
 
 # RandomForestClassifier 객체 생성
 rf = RandomForestClassifier(random_state=42)
 
 # GridSearchCV 객체 생성
-model = GridSearchCV(estimator=rf, param_grid=param_search_space, cv=3, n_jobs=-1, verbose=2, scoring='roc_auc')
+model = GridSearchCV(estimator=rf, param_grid=param_search_space, n_jobs=-1, verbose=2, scoring='roc_auc')
 
 # GridSearchCV를 사용한 학습
-model.fit(x_train, y_train)
+model.fit(x, y)
 
 # 최적의 파라미터와 최고 점수 출력
 best_params = model.best_params_
@@ -46,5 +44,13 @@ for param, value in best_params.items():
     if param in submit.columns:
         submit[param] = value
 
-submit.to_csv('c:/_data/dacon/baseline_submit.csv', index=False)
+submit.to_csv('c:/_data/dacon/RF12.csv', index=False)
+'''
+0.84 10번
 
+params {'bootstrap': True, 'max_depth': None, 'max_features': 'sqrt', 'max_leaf_nodes': 10, 'min_impurity_decrease': 0.0, 'min_samples_leaf': 2, 'min_samples_split': 10, 'min_weight_fraction_leaf': 0, 'n_estimators': 100}
+score 0.8293217740138367 11번
+
+params {'bootstrap': True, 'max_depth': None, 'max_features': 'sqrt', 'max_leaf_nodes': 10, 'min_impurity_decrease': 0.0, 'min_samples_leaf': 4, 'min_samples_split': 2, 'min_weight_fraction_leaf': 0, 'n_estimators': 250}
+score 0.8173551055610273    12번
+'''

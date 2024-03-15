@@ -45,7 +45,7 @@ def objective(trial):
         "objective": "reg:squarederror",
         "eval_metric": "rmse",
         "verbosity": 0,
-        "random_state": 42,
+        "random_state": trial.suggest_int("random_state", 1, 1000),
         "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.1),
         "n_estimators": trial.suggest_int("n_estimators", 100, 1000),
         "max_depth": trial.suggest_int("max_depth", 3, 15),
@@ -94,4 +94,7 @@ print("Validation RMSE:", rmse_val)
 Validation RMSE: 617.3331620533075      1번
 
 Validation RMSE: 617.3522769437751      2번
+
+Best parameters: {'random_state': 589, 'learning_rate': 0.023765528985485895, 'n_estimators': 151, 'max_depth': 7, 'subsample': 0.9890237618912407, 'colsample_bytree': 0.7203459068696018, 'reg_alpha': 0.5062481644377009, 'reg_lambda': 0.9744913997224112, 'min_child_weight': 4, 'gamma': 0.7074286786435127}
+Validation RMSE: 616.0891829434779     money3_optuna_xgboost    544점
 '''
