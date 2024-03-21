@@ -5,7 +5,14 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import roc_auc_score
 import optuna
+import random
+import os
+def seed_everything(seed):
+    random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    np.random.seed(seed)
 
+seed_everything(42)
 # 데이터 불러오기
 data = pd.read_csv('c:/_data/dacon/ranfo/train.csv')
 submit = pd.read_csv('c:/_data/dacon/ranfo/sample_submission.csv')

@@ -5,7 +5,14 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.metrics import mean_squared_error
 import lightgbm as lgb
 import optuna
+import random
+import os
+def seed_everything(seed):
+    random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    np.random.seed(seed)
 
+seed_everything(42)
 # 데이터 불러오기
 path = "c:/_data/dacon/soduc/"
 train = pd.read_csv(path+'train.csv', index_col=0)
@@ -81,12 +88,12 @@ best_params = study.best_params
 # 최적의 하이퍼파라미터로 모델 생성 및 학습
 best_model = lgb.LGBMRegressor(**best_params)
 best_model.fit(x_train, y_train)
-best_model.booster_.save_model("c:/_data/dacon/soduc/weight/money2_lgb_optuna.csv")
+best_model.booster_.save_model("c:/_data/dacon/soduc/weight/money5_lgb_optuna.csv")
 
 # 테스트 데이터 예측 및 저장
 y_pred_test = best_model.predict(test)
 sample['Income'] = y_pred_test
-sample.to_csv("c:/_data/dacon/soduc/csv/money2_lgb_optuna.csv", index=False)
+sample.to_csv("c:/_data/dacon/soduc/csv/money5_lgb_optuna.csv", index=False)
 print('Best parameters:', best_params)
 
 y_pred_val = best_model.predict(x_val)
