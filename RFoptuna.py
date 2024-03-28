@@ -7,22 +7,22 @@ from sklearn.metrics import roc_auc_score
 import optuna
 import random
 import os
-def seed_everything(seed):
-    random.seed(seed)
-    os.environ['PYTHONHASHSEED'] = str(seed)
-    np.random.seed(seed)
+# def seed_everything(seed):
+#     random.seed(seed)
+#     os.environ['PYTHONHASHSEED'] = str(seed)
+#     np.random.seed(seed)
 
-seed_everything(42)
+# seed_everything(42)
 # 데이터 불러오기
-data = pd.read_csv('c:/_data/dacon/ranfo/train.csv')
-submit = pd.read_csv('c:/_data/dacon/ranfo/sample_submission.csv')
+data = pd.read_csv('c:/_data/dacon/ranfo/ts/train.csv')
+submit = pd.read_csv('c:/_data/dacon/ranfo/ts/sample_submission.csv')
 
 # person_id 컬럼 제거
 x = data.drop(['person_id', 'login'], axis=1)
 y = data['login']
-
+r = random.randint(1,5000)
 # 데이터 분할
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.9, random_state=6)
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.9, random_state=r)
 
 # 데이터 스케일링
 scaler = StandardScaler()
@@ -44,6 +44,7 @@ def objective(trial):
     max_features = trial.suggest_categorical('max_features', ['sqrt', 'log2', None])
     bootstrap = trial.suggest_categorical('bootstrap', [True, False])
     ccp_alpha = trial.suggest_float('ccp_alpha', 0.0, 1.0)
+    random_state = trial.suggest_int('random_state', 1, 5000)
     
     # 모델 생성
     model = RandomForestClassifier(
@@ -54,7 +55,7 @@ def objective(trial):
         max_features=max_features, 
         bootstrap=bootstrap,
         ccp_alpha=ccp_alpha,
-        random_state=8
+        random_state=random_state
     )
 
     # 모델 학습
@@ -80,16 +81,22 @@ best_params = study.best_params
 best_auc = study.best_value
 print('Best parameters:', best_params)
 print('Best AUC:', best_auc)
-
+print('r',r)
 # 찾은 최적의 파라미터들을 제출 양식에 맞게 제출
 for param, value in best_params.items():
     if param in submit.columns:
         submit[param] = value
 
-submit.to_csv('c:/_data/dacon/ranfo/rf_optuna_1.csv', index=False)
+submit.to_csv('c:/_data/dacon/ranfo/rf_optuna_34.csv', index=False)
 
 
 '''
 Best parameters: {'n_estimators': 97, 'max_depth': 10, 'min_samples_split': 10, 'min_samples_leaf': 14, 'max_features': 'log2', 'bootstrap': True, 'ccp_alpha': 0.01951620025305444}
 Best AUC: 0.8540903540903542    optuna_1
+
+Best AUC: 0.869815668202765
+r 4940 32번
+
+Best AUC: 0.9625162972620599
+r 3248  33번
 '''

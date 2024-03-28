@@ -39,25 +39,49 @@ scaler = StandardScaler()
 x = scaler.fit_transform(x)
 test = scaler.transform(test)
 
-x_train,x_test,y_train,y_test = train_test_split(x,y,train_size=0.9,random_state=15288)
+x_train,x_test,y_train,y_test = train_test_split(x,y,train_size=0.9,random_state=8)
 
 #2.모델구성
 model = Sequential()
-model.add(Dense(1,input_shape=(18,)))
-model.add(Dense(1,activation='swish'))
-model.add(Dense(1,activation='swish'))
-model.add(Dense(1,activation='swish'))
-model.add(Dense(1,activation='swish'))
-model.add(Dense(1,activation='swish'))
-model.add(Dense(1,activation='swish'))
+model.add(Dense(500,input_shape=(18,)))
+model.add(Dense(1000,activation='swish'))
+model.add(BatchNormalization())
+model.add(Dense(1500,activation='swish'))
+model.add(Dense(2000,activation='swish'))
+model.add(BatchNormalization())
+model.add(Dense(1500,activation='swish'))
+model.add(Dense(1000,activation='swish'))
+model.add(BatchNormalization())
+model.add(Dense(800,activation='swish'))
+model.add(Dense(600,activation='swish'))
+model.add(Dense(400,activation='swish'))
+model.add(Dense(500,activation='swish'))
 model.add(Dense(1))
-
+model.save( "c:/_data/dacon/soduc/")
 #3.컴파일,훈련
+from keras.callbacks import EarlyStopping,ModelCheckpoint,ReduceLROnPlateau
+path='c://_data//_save//MCP/'
+filename= "{epoch:04d}-{val_loss:.4f}.hdf5"                #epoch:04d는 4자리 숫자까지 표현 val_loss:.4f는 소수4자리까지 표현
+filepath = "".join([path,filename]) 
 
-lr = 0.1
+es= EarlyStopping(monitor='val_loss',mode='min',patience=1000,verbose=1,restore_best_weights=False)
+mcp = ModelCheckpoint(
+    monitor='val_loss',
+    mode='auto',
+    verbose=1,
+    save_best_only=True,
+    filepath=filepath,
+    period = 5
+    )
+rlr = ReduceLROnPlateau(monitor='val_loss',patience=1,mode='auto',verbose=1,factor=0.5)
+lr = 0.001
 model.compile(loss='mse',optimizer=Adam(learning_rate=lr))
-model.fit(x_train,y_train,epochs=10,validation_split=0.1,verbose=1)
+hist= model.fit(x_train, y_train, epochs=10000,batch_size=3000, validation_split=0.1,verbose=2, callbacks=[es,rlr])
 
 #4.결과
 loss = model.evaluate(x_test,y_test)
+y_pred = model.predict(x_test)
+rmse = mean_squared_error(y_test, y_pred,squared=False)
+
 print('loss',loss)
+print('rmse',rmse)
