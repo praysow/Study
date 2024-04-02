@@ -58,19 +58,19 @@ def objective(trial):
         "verbosity": 0,
         "random_state": trial.suggest_int("random_state", 1, 1000),
         "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.1),
-        "n_estimators": trial.suggest_int("n_estimators", 100, 1000),
+        "n_estimators": trial.suggest_int("n_estimators", 1, 500),
         "max_depth": trial.suggest_int("max_depth", 3, 15),
         "subsample": trial.suggest_float("subsample", 0.5, 1.0),
         "colsample_bytree": trial.suggest_float("colsample_bytree", 0.5, 1.0),
-        # "reg_alpha": trial.suggest_float("reg_alpha", 0.0, 1.0),
-        # "reg_lambda": trial.suggest_float("reg_lambda", 0.0, 1.0),
-        # "min_child_weight": trial.suggest_int("min_child_weight", 1, 10),
-        # "gamma": trial.suggest_float("gamma", 0.0, 1.0),
+        "reg_alpha": trial.suggest_float("reg_alpha", 0.0, 1.0),
+        "reg_lambda": trial.suggest_float("reg_lambda", 0.0, 1.0),
+        "min_child_weight": trial.suggest_int("min_child_weight", 1, 10),
+        "gamma": trial.suggest_float("gamma", 0.0, 1.0),
         'n_jobs': -1
     }
     
     # XGBoost 모델 생성
-    model = xgb.XGBRegressor(**xgb_params)
+    model = xgb.XGBRegressor(**xgb_params,device = 'gpu')
     
     # 모델 학습
     
@@ -84,7 +84,7 @@ def objective(trial):
 
 # Optuna를 사용하여 하이퍼파라미터 최적화
 study = optuna.create_study(direction='minimize')
-study.optimize(objective, n_trials=10000)
+study.optimize(objective, n_trials=3000)
 
 # 최적의 하이퍼파라미터 출력
 best_params = study.best_params
@@ -92,11 +92,11 @@ import joblib
 # 최적의 하이퍼파라미터로 모델 생성 및 학습
 best_model = xgb.XGBRegressor(**best_params)
 best_model.fit(x_train, y_train)
-joblib.dump(best_model, "c:/_data/dacon/soduc/weight/money12_optuna_xgboost.pkl")
+joblib.dump(best_model, "c:/_data/dacon/soduc/weight/money22_optuna_xgboost.pkl")
 # 테스트 데이터 예측 및 저장
 y_pred_test = best_model.predict(test)
 sample['Income'] = y_pred_test
-sample.to_csv("c:/_data/dacon/soduc/csv/money12_optuna_xgboost.csv", index=False)
+sample.to_csv("c:/_data/dacon/soduc/csv/money22_optuna_xgboost.csv", index=False)
 print('Best parameters:', best_params)
 
 y_pred_val = best_model.predict(x_val)

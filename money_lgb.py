@@ -79,7 +79,7 @@ def objective(trial):
 
 # Optuna를 사용하여 하이퍼파라미터 최적화
 study = optuna.create_study(direction='minimize')
-study.optimize(objective, n_trials=1000)
+study.optimize(objective, n_trials=100)
 
 # 최적의 하이퍼파라미터 출력
 best_params = study.best_params
@@ -88,12 +88,12 @@ best_params = study.best_params
 # 최적의 하이퍼파라미터로 모델 생성 및 학습
 best_model = lgb.LGBMRegressor(**best_params)
 best_model.fit(x_train, y_train)
-best_model.booster_.save_model("c:/_data/dacon/soduc/weight/money30_lgb_optuna.csv")
+best_model.booster_.save_model("c:/_data/dacon/soduc/weight/money39_lgb_optuna.csv")
 
 # 테스트 데이터 예측 및 저장
 y_pred_test = best_model.predict(test)
 sample['Income'] = y_pred_test
-sample.to_csv("c:/_data/dacon/soduc/csv/money30_lgb_optuna.csv", index=False)
+sample.to_csv("c:/_data/dacon/soduc/csv/money39_lgb_optuna.csv", index=False)
 print('Best parameters:', best_params)
 
 y_pred_val = best_model.predict(x_val)

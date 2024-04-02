@@ -87,7 +87,7 @@ for param, value in best_params.items():
     if param in submit.columns:
         submit[param] = value
 
-submit.to_csv('c:/_data/dacon/ranfo/rf_optuna_34.csv', index=False)
+submit.to_csv('c:/_data/dacon/ranfo/rf_optuna_37.csv', index=False)
 
 
 '''
