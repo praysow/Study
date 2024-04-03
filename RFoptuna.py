@@ -38,12 +38,12 @@ def objective(trial):
     
     # 하이퍼파라미터 탐색 공간 정의
     n_estimators = trial.suggest_int('n_estimators', 10, 1000)
-    max_depth = trial.suggest_int('max_depth', 3, 30)
+    criterion: trial.suggest_categorical['entropy']
+    max_depth = trial.suggest_int('max_depth', 1, 30)
     min_samples_split = trial.suggest_int('min_samples_split', 2, 20)
     min_samples_leaf = trial.suggest_int('min_samples_leaf', 1, 20)
-    max_features = trial.suggest_categorical('max_features', ['sqrt', 'log2', None])
-    bootstrap = trial.suggest_categorical('bootstrap', [True, False])
-    ccp_alpha = trial.suggest_float('ccp_alpha', 0.0, 1.0)
+    max_features = trial.suggest_categorical('max_features', [ None])
+    bootstrap = trial.suggest_categorical('bootstrap', [True])
     random_state = trial.suggest_int('random_state', 1, 5000)
     
     # 모델 생성
@@ -54,8 +54,10 @@ def objective(trial):
         min_samples_leaf=min_samples_leaf, 
         max_features=max_features, 
         bootstrap=bootstrap,
-        ccp_alpha=ccp_alpha,
-        random_state=random_state
+        criterion= 'gini',
+        min_weight_fraction_leaf = 0.0,
+        random_state=random_state,
+        n_jobs= -1
     )
 
     # 모델 학습
@@ -87,7 +89,7 @@ for param, value in best_params.items():
     if param in submit.columns:
         submit[param] = value
 
-submit.to_csv('c:/_data/dacon/ranfo/rf_optuna_37.csv', index=False)
+submit.to_csv('c:/_data/dacon/ranfo/rf_optuna_38.csv', index=False)
 
 
 '''

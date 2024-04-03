@@ -21,7 +21,7 @@ w2 = tf.compat.v1.Variable(tf.compat.v1.random_normal([3,10]),name='weight2')
 w3 = tf.compat.v1.Variable(tf.compat.v1.random_normal([10,20]),name='weight3')
 w4 = tf.compat.v1.Variable(tf.compat.v1.random_normal([20,10]),name='weight4')
 w5 = tf.compat.v1.Variable(tf.compat.v1.random_normal([10,1]),name='weight5')
-b1 = tf.compat.v1.Variable(tf.compat.v1.zeros([1]),name='bias1')
+b1 = tf.compat.v1.Variable(tf.compat.v1.zeros([3]),name='bias1')
 b2 = tf.compat.v1.Variable(tf.compat.v1.zeros([10]),name='bias2')
 b3 = tf.compat.v1.Variable(tf.compat.v1.zeros([20]),name='bias3')
 b4 = tf.compat.v1.Variable(tf.compat.v1.zeros([10]),name='bias4')
@@ -43,7 +43,7 @@ train = optimizer.minimize(loss_fn)
 sess = tf.compat.v1.Session()
 sess.run(tf.compat.v1.global_variables_initializer())
 
-epochs = 1010
+epochs = 10100
 import numpy as np
 y_train = np.reshape(y_train, (-1, 1))
 # 학습 루프
@@ -69,11 +69,11 @@ r2 = r2_score(y_test, predictions)
 # MAE 계산
 mae = mean_absolute_error(y_test, predictions)
 
-print("R-제곱:", r2)
+print("R-제곱:", -r2)
 print("MAE:", mae)
 
 sess.close()
 '''
-R-제곱: -1141.7608537085935
-MAE: 27.156998202975593
+R-제곱: 3.654946609342419
+MAE: 1.6374753583872752
 '''
