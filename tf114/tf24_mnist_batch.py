@@ -48,7 +48,7 @@ train = tf.compat.v1.train.GradientDescentOptimizer(learning_rate=0.75).minimize
 sess = tf.compat.v1.Session()
 sess.run(tf.compat.v1.global_variables_initializer())
 
-epochs = 21
+epochs = 1001
 batch_size = 100
 total_batch = int(len(x_train) / batch_size)
 
@@ -124,5 +124,5 @@ print("dropout rate 1.0:", final_accuracy)
 sess.close()
 
 '''
-dropout rate 1.0: 0.89159
+dropout rate 1.0: 0.90022
 '''
