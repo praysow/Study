@@ -193,7 +193,7 @@ scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', fa
 
 infer_model = train(model, optimizer, train_loader, val_loader, scheduler, device)
 
-test_dataset = CustomDataset(test[test_img].values, None, test_transform)
+test_dataset = CustomDataset([os.path.join(test_img, img_name) for img_name in test['img_path'].values], None, test_transform)
 test_loader = DataLoader(test_dataset, batch_size=CFG['BATCH_SIZE'], shuffle=False, num_workers=0)
 
 def inference(model, test_loader, device):

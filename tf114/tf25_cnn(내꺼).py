@@ -1,17 +1,18 @@
 import tensorflow as tf
 from tensorflow.keras.datasets import mnist
 from sklearn.metrics import accuracy_score
+from tensorflow.keras.utils import to_categorical
+tf.compat.v1.set_random_seed(6)
 
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
-from tensorflow.keras.utils import to_categorical
 y_train = to_categorical(y_train)
 y_test = to_categorical(y_test)
 
 print(x_train.shape, x_test.shape)
 print(y_train.shape, y_test.shape)
 
-x_train = x_train.reshape(-1, 28, 28, 1).astype('float32') / 255
+x_train = x_train.reshape(-1, 28, 28, 1).astype('float32') / 255    #127.5도 가능
 x_test = x_test.reshape(-1, 28, 28, 1).astype('float32') / 255
 
 # 입력 이미지 placeholder 정의

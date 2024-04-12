@@ -1,196 +1,61 @@
-import random
-import pandas as pd
 import numpy as np
+import pandas as pd
 import os
-import re
-import glob
 import cv2
-
-import torch
-import torch.nn as nn
-import torch.optim as optim
-import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler
-
-import albumentations as A
-from albumentations.pytorch.transforms import ToTensorV2
-import torchvision.models as models
-
 from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
 from sklearn.metrics import f1_score
-from sklearn.metrics import classification_report
-from tqdm import tqdm
+from lightgbm import LGBMClassifier
 
-import warnings
-warnings.filterwarnings(action='ignore') 
-device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+# 하이퍼파라미터 설정
+IMG_SIZE = 224
+SEED = 6
 
-df = pd.read_csv('c:/_data/dacon/bird/train.csv')
-test = pd.read_csv('c:/_data/dacon/bird/test.csv')
+# 시드 설정
+np.random.seed(SEED)
 
-CFG = {
-    'IMG_SIZE':224,
-    'EPOCHS':10,
-    'LEARNING_RATE':3e-4,
-    'BATCH_SIZE':32,
-    'SEED':42
-}
+# 데이터 경로
+path = 'c:/_data/dacon/bird'
 
-def seed_everything(seed):
-    random.seed(seed)
-    os.environ['PYTHONHASHSEED'] = str(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = True
+# 데이터 불러오기
+df = pd.read_csv(os.path.join(path, 'train.csv'))
 
-seed_everything(CFG['SEED']) # Seed 고정
-
-train, val, _, _ = train_test_split(df, df['label'], test_size=0.3, stratify=df['label'], random_state=CFG['SEED'])
-
+# 데이터 전처리
 le = preprocessing.LabelEncoder()
-train['label'] = le.fit_transform(train['label'])
-val['label'] = le.transform(val['label'])
+df['label'] = le.fit_transform(df['label'])
+train, val = train_test_split(df, test_size=0.3, stratify=df['label'], random_state=SEED)
 
-class CustomDataset(Dataset):
-    def __init__(self, img_path_list, label_list, transforms=None):
-        self.img_path_list = img_path_list
-        self.label_list = label_list
-        self.transforms = transforms
-        
-    def __getitem__(self, index):
-        img_path = self.img_path_list[index]
-        
-        image = cv2.imread(img_path)
-        
-        if self.transforms is not None:
-            image = self.transforms(image=image)['image']
-        
-        if self.label_list is not None:
-            label = self.label_list[index]
-            return image, label
-        else:
-            return image
-        
-    def __len__(self):
-        return len(self.img_path_list)
-    
-train_transform = A.Compose([
-                            A.Resize(CFG['IMG_SIZE'],CFG['IMG_SIZE']),
-                            A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=255.0, always_apply=False, p=1.0),
-                            ToTensorV2()
-                            ])
+# 이미지 데이터 로드 및 전처리
+def load_images(image_paths):
+    images = []
+    for path in image_paths:
+        image = cv2.imread(path)
+        if image is not None and image.size != 0:
+            image = cv2.resize(image, (IMG_SIZE, IMG_SIZE))
+            images.append(image)
+    return np.array(images)
 
-test_transform = A.Compose([
-                            A.Resize(CFG['IMG_SIZE'],CFG['IMG_SIZE']),
-                            A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=255.0, always_apply=False, p=1.0),
-                            ToTensorV2()
-                            ])
-train_dataset = CustomDataset(train['img_path'].values, train['label'].values, train_transform)
-train_loader = DataLoader(train_dataset, batch_size = CFG['BATCH_SIZE'], shuffle=False, num_workers=0)
 
-val_dataset = CustomDataset(val['img_path'].values, val['label'].values, test_transform)
-val_loader = DataLoader(val_dataset, batch_size=CFG['BATCH_SIZE'], shuffle=False, num_workers=0)
+X_train = load_images(train['img_path'])
+X_val = load_images(val['img_path'])
+y_train = train['label']
+y_val = val['label']
 
-class BaseModel(nn.Module):
-    def __init__(self, num_classes=len(le.classes_)):
-        super(BaseModel, self).__init__()
-        self.backbone = models.efficientnet_b0(pretrained=True)
-        self.classifier = nn.Linear(1000, num_classes)
-        
-    def forward(self, x):
-        x = self.backbone(x)
-        x = self.classifier(x)
-        return x
-    
-def train(model, optimizer, train_loader, val_loader, scheduler, device):
-    model.to(device)
-    criterion = nn.CrossEntropyLoss().to(device)
-    
-    best_score = 0
-    best_model = None
-    
-    for epoch in range(1, CFG['EPOCHS']+1):
-        model.train()
-        train_loss = []
-        for imgs, labels in tqdm(iter(train_loader)):
-            imgs = imgs.float().to(device)
-            labels = labels.long()
-            
-            optimizer.zero_grad()
-            
-            output = model(imgs)
-            loss = criterion(output, labels)
-            
-            loss.backward()
-            optimizer.step()
-            
-            train_loss.append(loss.item())
-                    
-        _val_loss, _val_score = validation(model, criterion, val_loader, device)
-        _train_loss = np.mean(train_loss)
-        print(f'Epoch [{epoch}], Train Loss : [{_train_loss:.5f}] Val Loss : [{_val_loss:.5f}] Val F1 Score : [{_val_score:.5f}]')
-       
-        if scheduler is not None:
-            scheduler.step(_val_score)
-            
-        if best_score < _val_score:
-            best_score = _val_score
-            best_model = model
-    
-    return best_model
-def validation(model, criterion, val_loader, device):
-    model.eval()
-    val_loss = []
-    preds, true_labels = [], []
+# LightGBM 모델 정의 및 학습
+model = LGBMClassifier()
+model.fit(X_train.reshape(-1, IMG_SIZE * IMG_SIZE * 3), y_train)
 
-    with torch.no_grad():
-        for imgs, labels in tqdm(iter(val_loader)):
-            imgs = imgs.float().to(device)
-            labels = labels.long()
-            
-            pred = model(imgs)
-            
-            loss = criterion(pred, labels)
-            
-            preds += pred.argmax(1).detach().cpu().numpy().tolist()
-            true_labels += labels.detach().cpu().numpy().tolist()
-            
-            val_loss.append(loss.item())
-        
-        _val_loss = np.mean(val_loss)
-        _val_score = f1_score(true_labels, preds, average='macro')
-    
-    return _val_loss, _val_score
+# 검증 데이터에 대한 예측 및 평가
+val_preds = model.predict(X_val.reshape(-1, IMG_SIZE * IMG_SIZE * 3))
+val_f1_score = f1_score(y_val, val_preds, average='macro')
+print("Validation F1 Score:", val_f1_score)
 
-model = BaseModel()
-model.eval()
-optimizer = torch.optim.Adam(params = model.parameters(), lr = CFG["LEARNING_RATE"])
-scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, patience=5, threshold_mode='abs', min_lr=1e-8, verbose=True)
+# 테스트 데이터 로드 및 예측
+test_df = pd.read_csv(os.path.join(path, 'test.csv'))
+X_test = load_images(test_df['img_path'])
+test_preds = model.predict(X_test.reshape(-1, IMG_SIZE * IMG_SIZE * 3))
 
-infer_model = train(model, optimizer, train_loader, val_loader, scheduler, device)
-
-test_dataset = CustomDataset(test['img_path'].values, None, test_transform)
-test_loader = DataLoader(test_dataset, batch_size=CFG['BATCH_SIZE'], shuffle=False, num_workers=0)
-
-def inference(model, test_loader, device):
-    model.eval()
-    preds = []
-    with torch.no_grad():
-        for imgs in tqdm(iter(test_loader)):
-            imgs = imgs.float().to(device)
-            
-            pred = model(imgs)
-            
-            preds += pred.argmax(1).detach().cpu().numpy().tolist()
-    
-    preds = le.inverse_transform(preds)
-    return preds
-
-preds = inference(infer_model, test_loader, device)
-
-submit = pd.read_csv('C:\\bird\\csv_file\\sample_submission.csv')
-submit['label'] = preds
-submit.to_csv('C:\\bird\\csv_file\\submit.csv', index=False)    
+# 결과 저장
+submit = pd.read_csv('c:/_data/dacon/bird/sample_submission.csv')
+submit['label'] = test_preds
+submit.to_csv('c:/_data/dacon/bird/csv/bird6.csv', index=False)

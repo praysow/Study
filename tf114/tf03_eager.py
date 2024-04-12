@@ -19,3 +19,18 @@ print(sess.run(hello))
 #1.14.0         enable           에러
 #2.9.0          disable          사용가능   ★★★★
 #2.9.0          enable(디폴트)   에러
+
+'''
+tensor 1 은 '그래프연산'모드
+tensor 2 는 '즉시실행' 모드
+
+tf.compat.v1.enble_eager_execution()    #즉시실행모드 켜
+                -> tnesor 2의 디폴트
+                
+tf.compat.v1.disable_eager_execution() # 즉시실행모드 꺼
+                            -> 그래프 연산모드로 돌아간다.
+                            -> tensor 1 코드를 쓸 수 있다.
+tf.executing_eagerly()  # True면 즉시실행모드 , -> tensor 2 코드만 써야한다.
+                        False면 그래프 연산모드 -> tensor 1 코드를 쓸 수 있다.
+                        
+'''

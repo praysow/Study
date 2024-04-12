@@ -309,7 +309,9 @@ def miou(y_true, y_pred, smooth=1e-6):
 
 model = get_model(MODEL_NAME, input_height=IMAGE_SIZE[0], input_width=IMAGE_SIZE[1], n_filters=N_FILTERS, n_channels=N_CHANNELS)
 lr = 0.01
-model.compile(optimizer = Adam(learning_rate=lr), loss = 'binary_crossentropy', metrics = [miou])
+# 모델 컴파일
+model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+
 model.summary()
 
 # checkpoint 및 조기종료 설정
