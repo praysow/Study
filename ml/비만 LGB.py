@@ -82,5 +82,3 @@ sample.to_csv(path + "비만31.csv", index=False)
 accuracy = accuracy_score(y_test, y_pred)
 print("Accuracy:", accuracy)
 print("r",r)
-
-

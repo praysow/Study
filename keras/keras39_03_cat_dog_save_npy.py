@@ -10,7 +10,7 @@ import time
 from sklearn.preprocessing import OneHotEncoder
 start_t = time.time()
 train_dategen=ImageDataGenerator(
-     rescale=1.255,                      #앞에 1.에서 .은 부동소수점 계산하겠다는 것이다
+     rescale=1./255,                      #앞에 1.에서 .은 부동소수점 계산하겠다는 것이다
      # horizontal_flip=True,           #수평 뒤집기
      # vertical_flip=True,             #수직 뒤집기
      # width_shift_range=0.1,           #평행이동 0.1=10%이동

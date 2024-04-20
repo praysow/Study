@@ -27,7 +27,7 @@ y_ohe1= y_ohe1[:,1:]
 # print(pd.value_counts(y))
 #1    71
 #0    59
-#2    48
+#2    4
 # #pandas
 y_ohe2 = pd.get_dummies(y)
 # print(y_ohe2.shape)       (581012, 7)
