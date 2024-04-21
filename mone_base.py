@@ -57,12 +57,12 @@ params = {'bootstrap': True, 'max_depth': 5, 'max_features': 'sqrt', 'max_leaf_n
 
 from catboost import CatBoostClassifier
 # model = RandomForestClassifier()
-model = CatBoostClassifier(iterations=100)
+model = CatBoostClassifier(iterations=300)
 model.fit(x_train, y_train)
 import joblib
 
 # 모델 저장
-joblib.dump(model, "c:/_data/dacon/soduc/weight/money_RF_1.pkl")
+joblib.dump(model, "c:/_data/dacon/soduc/weight/money_cat_2.pkl")
 
 # 저장된 모델 불러오기
 # loaded_model = joblib.load("c:/_data/_save/soduc_model.pkl")
@@ -75,7 +75,7 @@ print("Validation RMSE:", rmse_val,'r',r)
 # 테스트 데이터 예측 및 저장
 y_pred_test = model.predict(test)
 sample['Income'] = y_pred_test
-sample.to_csv("c:/_data/dacon/soduc/csv/money_RF_1.csv", index=False)
+sample.to_csv("c:/_data/dacon/soduc/csv/money_cat_2.csv", index=False)
 
 '''
 581 10번 standard random 6

@@ -5,7 +5,14 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.metrics import mean_squared_error
 import xgboost as xgb
 import optuna
+import random
+import os
+def seed_everything(seed):
+    random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    np.random.seed(seed)
 
+seed_everything(42)
 # 데이터 불러오기
 path = "c:/_data/dacon/soduc/"
 train = pd.read_csv(path+'train.csv', index_col=0)
@@ -51,7 +58,7 @@ def objective(trial):
         "verbosity": 0,
         "random_state": trial.suggest_int("random_state", 1, 1000),
         "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.1),
-        "n_estimators": trial.suggest_int("n_estimators", 100, 1000),
+        "n_estimators": trial.suggest_int("n_estimators", 1, 500),
         "max_depth": trial.suggest_int("max_depth", 3, 15),
         "subsample": trial.suggest_float("subsample", 0.5, 1.0),
         "colsample_bytree": trial.suggest_float("colsample_bytree", 0.5, 1.0),
@@ -63,9 +70,10 @@ def objective(trial):
     }
     
     # XGBoost 모델 생성
-    model = xgb.XGBRegressor(**xgb_params)
+    model = xgb.XGBRegressor(**xgb_params,device = 'gpu')
     
     # 모델 학습
+    
     model.fit(x_train, y_train)
     
     # 검증 데이터 예측 및 평가
@@ -76,7 +84,7 @@ def objective(trial):
 
 # Optuna를 사용하여 하이퍼파라미터 최적화
 study = optuna.create_study(direction='minimize')
-study.optimize(objective, n_trials=1000)
+study.optimize(objective, n_trials=3000)
 
 # 최적의 하이퍼파라미터 출력
 best_params = study.best_params
@@ -84,16 +92,17 @@ import joblib
 # 최적의 하이퍼파라미터로 모델 생성 및 학습
 best_model = xgb.XGBRegressor(**best_params)
 best_model.fit(x_train, y_train)
-joblib.dump(best_model, "c:/_data/dacon/soduc/weight/money5_optuna_xgboost.pkl")
+joblib.dump(best_model, "c:/_data/dacon/soduc/weight/money22_optuna_xgboost.pkl")
 # 테스트 데이터 예측 및 저장
 y_pred_test = best_model.predict(test)
 sample['Income'] = y_pred_test
-sample.to_csv("c:/_data/dacon/soduc/csv/money5_optuna_xgboost.csv", index=False)
+sample.to_csv("c:/_data/dacon/soduc/csv/money22_optuna_xgboost.csv", index=False)
 print('Best parameters:', best_params)
 
 y_pred_val = best_model.predict(x_val)
 rmse_val = mean_squared_error(y_val, y_pred_val, squared=False)
 print("Validation RMSE:", rmse_val)
+
 '''
 Validation RMSE: 617.3331620533075      1번
 
@@ -104,4 +113,5 @@ Validation RMSE: 616.0891829434779     money4_optuna_xgboost    544점
 
 Best parameters: {'random_state': 596, 'learning_rate': 0.01727073006198615, 'n_estimators': 191, 'max_depth': 9, 'subsample': 0.5517418635798523, 'colsample_bytree': 0.6489366724855755, 'reg_alpha': 0.7730596255445736, 'reg_lambda': 0.3018239964507463, 'min_child_weight': 9, 'gamma': 0.6048670915268969}
 Validation RMSE: 615.7543318199334      money3_optuna_xgboost    542점
+Validation RMSE: 614.603456139294
 '''
