@@ -33,7 +33,7 @@ def seed_everything(seed):
     os.environ['PYTHONHASHSEED'] = str(seed)
     np.random.seed(seed)
 
-seed_everything(8)
+seed_everything(65535)
 s_t = time.time()
 MAX_PIXEL_VALUE = 65535 # 이미지 정규화를 위한 픽셀 최대값
 
@@ -90,7 +90,7 @@ def generator_from_lists(images_path, masks_path, batch_size=32, shuffle = True,
     if image_mode == '762':
         fopen_image = get_img_762bands
 
-    i = 10000
+    i = 0
     # 데이터 shuffle
     while True:
 
@@ -166,46 +166,78 @@ def attention_gate(F_g, F_l, inter_channel):
     # Apply the attention coefficients to the feature map from the skip connection
     return multiply([F_l, psi])
 
-from keras.applications import VGG16
-def get_pretrained_attention_unet(input_height=256, input_width=256, nClasses=1, n_filters=32, dropout=0.5, batchnorm=True, n_channels=3):
-    base_model = VGG16(weights='imagenet', include_top=False, input_shape=(input_height, input_width, n_channels))
+import tensorflow as tf
+from keras.applications import EfficientNetB0
+# def get_EfficientNet(input_height=256, input_width=256, nClasses=1, n_filters=16, dropout=0.5, batchnorm=True, n_channels=3):
+#     base_model = EfficientNetB0(weights='imagenet', include_top=False, input_shape=(input_height, input_width, n_channels))
+
+#     # Define the inputs
+#     inputs = base_model.input
     
+#     # Use specific layers from the EfficientNetB0 model for skip connections
+#     s1 = base_model.get_layer("block1a_activation").output
+#     s2 = base_model.get_layer("block2a_activation").output
+#     s3 = base_model.get_layer("block3a_activation").output
+#     s4 = base_model.get_layer("block4a_activation").output
+#     bridge = base_model.get_layer("top_activation").output  # Updated to use the last activation before the top
+    
+#     # Decoder with attention gates
+#     d1 = UpSampling2D((2, 2), interpolation='bilinear')(bridge)  # Use bilinear interpolation for smoother upsampling
+#     d1 = concatenate([d1, attention_gate(d1, s4, n_filters*8)])
+#     d1 = conv2d_block(d1, n_filters*8, kernel_size=3, batchnorm=batchnorm)
+    
+#     d2 = UpSampling2D((2, 2), interpolation='bilinear')(d1)
+#     d2 = concatenate([d2, attention_gate(d2, s3, n_filters*4)])
+#     d2 = conv2d_block(d2, n_filters*4, kernel_size=3, batchnorm=batchnorm)
+    
+#     d3 = UpSampling2D((2, 2), interpolation='bilinear')(d2)
+#     d3 = concatenate([d3, attention_gate(d3, s2, n_filters*2)])
+#     d3 = conv2d_block(d3, n_filters*2, kernel_size=3, batchnorm=batchnorm)
+    
+#     d4 = UpSampling2D((2, 2), interpolation='bilinear')(d3)
+#     d4 = concatenate([d4, attention_gate(d4, s1, n_filters)])
+#     d4 = conv2d_block(d4, n_filters, kernel_size=3, batchnorm=batchnorm)
+    
+#     # Additional UpSampling2D to reach the target size of 256x256
+#     d5 = UpSampling2D((2, 2), interpolation='bilinear')(d4)
+#     d5 = conv2d_block(d5, n_filters, kernel_size=3, batchnorm=batchnorm)
+
+#     # Adjusting the output layer to have the desired size
+#     outputs = Conv2D(nClasses, (1, 1), activation='sigmoid')(d5)
+
+#     # Creating the model
+#     model = Model(inputs=[inputs], outputs=[outputs])
+#     return model
+
+def get_EfficientNet(input_height=256, input_width=256, nClasses=1, n_filters=16, dropout=0.5, batchnorm=True, n_channels=3):
+    base_model = EfficientNetB0(weights='imagenet', include_top=False, input_shape=(input_height, input_width, n_channels))
+
     # Define the inputs
     inputs = base_model.input
     
-    # Use specific layers from the VGG16 model for skip connections
-    s1 = base_model.get_layer("block1_conv2").output
-    s2 = base_model.get_layer("block2_conv2").output
-    s3 = base_model.get_layer("block3_conv3").output
-    s4 = base_model.get_layer("block4_conv3").output
-    bridge = base_model.get_layer("block5_conv3").output
-    
-    # Decoder with attention gates
-    d1 = UpSampling2D((2, 2))(bridge)
-    d1 = concatenate([d1, attention_gate(d1, s4, n_filters*8)])
+    bridge = base_model.get_layer("top_activation").output
+    d1 = UpSampling2D((2, 2), interpolation='bilinear')(bridge)
     d1 = conv2d_block(d1, n_filters*8, kernel_size=3, batchnorm=batchnorm)
-    
-    d2 = UpSampling2D((2, 2))(d1)
-    d2 = concatenate([d2, attention_gate(d2, s3, n_filters*4)])
+    d2 = UpSampling2D((2, 2), interpolation='bilinear')(d1)
     d2 = conv2d_block(d2, n_filters*4, kernel_size=3, batchnorm=batchnorm)
-    
-    d3 = UpSampling2D((2, 2))(d2)
-    d3 = concatenate([d3, attention_gate(d3, s2, n_filters*2)])
+    d3 = UpSampling2D((2, 2), interpolation='bilinear')(d2)
     d3 = conv2d_block(d3, n_filters*2, kernel_size=3, batchnorm=batchnorm)
-    
-    d4 = UpSampling3D((2, 2, 1))(d3)
-    d4 = concatenate([d4, attention_gate(d4, s1, n_filters)])
+    d4 = UpSampling2D((2, 2), interpolation='bilinear')(d3)
     d4 = conv2d_block(d4, n_filters, kernel_size=3, batchnorm=batchnorm)
-    
-    outputs = Conv2D(nClasses, (1, 1), activation='sigmoid')(d4)
+    d5 = UpSampling2D((2, 2), interpolation='bilinear')(d4)    
+
+
+    # Adjusting the output layer to have the desired size
+    outputs = Conv2D(nClasses, (1, 1), activation='sigmoid')(d5)
+
+    # Creating the model
     model = Model(inputs=[inputs], outputs=[outputs])
     return model
 
 def get_model(model_name, nClasses=1, input_height=128, input_width=128, n_filters = 16, dropout = 0.1, batchnorm = True, n_channels=10):
     
     if model_name == 'pretrained_attention_unet':
-        model = get_pretrained_attention_unet
-        
+        model = get_EfficientNet
         
     return model(
             nClasses      = nClasses,
@@ -229,7 +261,7 @@ save_name = 'base_line'
 N_FILTERS = 16 # 필터수 지정
 N_CHANNELS = 3 # channel 지정
 EPOCHS = 30 # 훈련 epoch 지정
-BATCH_SIZE =15 # batch size 지정
+BATCH_SIZE =6 # batch size 지정
 IMAGE_SIZE = (256, 256) # 이미지 크기 지정
 MODEL_NAME = 'pretrained_attention_unet' # 모델 이름
 RANDOM_STATE = 8 # seed 고정
@@ -241,17 +273,17 @@ MASKS_PATH = 'c:/_data/aifac/sanbul/train_mask/'
 
 # 가중치 저장 위치
 OUTPUT_DIR = 'c:/_data/aifac/sanbul/'
-WORKERS = 16         #코어수
+WORKERS = 12         #코어수
 
 # 조기종료
 EARLY_STOP_PATIENCE = 5
 
 # 중간 가중치 저장 이름
 CHECKPOINT_PERIOD = 1
-CHECKPOINT_MODEL_NAME = 'checkpoint-{}-{}-epoch_{{epoch:02d}}.hdf5'.format(MODEL_NAME, save_name)
+CHECKPOINT_MODEL_NAME = 'check-{}-{}-epoch_{{epoch:02d}}.hdf5'.format(MODEL_NAME, save_name)
 
 # 최종 가중치 저장 이름
-FINAL_WEIGHTS_OUTPUT = 'model_{}_{}_bull26.h5'.format(MODEL_NAME, save_name)
+FINAL_WEIGHTS_OUTPUT = 'model_{}_{}_bull30.h5'.format(MODEL_NAME, save_name)
 
 # 사용할 GPU 이름
 CUDA_DEVICE = 0
@@ -312,9 +344,13 @@ lr = 0.001
 model.compile(optimizer = Adam(learning_rate=lr), loss = 'binary_crossentropy', metrics = ['accuracy',miou])
 model.summary()
 
+
+
+
+
 # checkpoint 및 조기종료 설정
-es = EarlyStopping(monitor='val_loss', mode='min', verbose=2, patience=EARLY_STOP_PATIENCE)
-checkpoint = ModelCheckpoint(os.path.join(OUTPUT_DIR, CHECKPOINT_MODEL_NAME), monitor='loss', verbose=2,
+es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=EARLY_STOP_PATIENCE)
+checkpoint = ModelCheckpoint(os.path.join(OUTPUT_DIR, CHECKPOINT_MODEL_NAME), monitor='loss', verbose=1,
 save_best_only=False, mode='auto', period=CHECKPOINT_PERIOD)
 rlr = ReduceLROnPlateau(monitor='val_loss',patience=1,mode='auto',verbose=1,factor=0.5)
 
@@ -322,7 +358,7 @@ rlr = ReduceLROnPlateau(monitor='val_loss',patience=1,mode='auto',verbose=1,fact
 
 ## model 훈련
 """
-model.load_weights('c:/_data/aifac/sanbul/attention/bull22.hdf5')
+# model.load_weights('c:/_data/aifac/sanbul/attention/bull22.hdf5')
 print('---model 훈련 시작---')
 history = model.fit_generator(
     train_generator,
@@ -375,7 +411,7 @@ for i in test_meta['test_img']:
     y_pred = y_pred.astype(np.uint8)
     y_pred_dict[i] = y_pred
 
-joblib.dump(y_pred_dict, 'c:/_data/aifac/bull26.pkl')
+joblib.dump(y_pred_dict, 'c:/_data/aifac/bull30.pkl')
 
 loss = model.evaluate_generator(validation_generator, steps=len(images_validation) // BATCH_SIZE)
 print("Validation Loss:", loss)
@@ -392,10 +428,3 @@ print("Training Accuracy:", accuracy)
 print(r)
 e_t = time.time()
 print('time:',e_t-s_t)
-
-'''
-저장된 가중치 명: c:/_data/aifac/sanbul/model_pretrained_attention_unet_base_line_bull25.h5
-Validation Loss: [4.995628842152655e-05, 0.9999810457229614, 0.9308266043663025]
-Training Loss: [4.618302045855671e-05]
-Training Accuracy: [0.999990701675415]
-'''

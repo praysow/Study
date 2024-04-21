@@ -33,7 +33,7 @@ def seed_everything(seed):
     os.environ['PYTHONHASHSEED'] = str(seed)
     np.random.seed(seed)
 
-seed_everything(42)
+seed_everything(65535)
 s_t = time.time()
 MAX_PIXEL_VALUE = 65535 # 이미지 정규화를 위한 픽셀 최대값
 
@@ -229,29 +229,29 @@ save_name = 'base_line'
 N_FILTERS = 16 # 필터수 지정
 N_CHANNELS = 3 # channel 지정
 EPOCHS = 30 # 훈련 epoch 지정
-BATCH_SIZE = 6 # batch size 지정
+BATCH_SIZE =15 # batch size 지정
 IMAGE_SIZE = (256, 256) # 이미지 크기 지정
 MODEL_NAME = 'pretrained_attention_unet' # 모델 이름
-RANDOM_STATE = 6 # seed 고정
+RANDOM_STATE = 8 # seed 고정
 INITIAL_EPOCH = 0 # 초기 epoch
 
 # 데이터 위치
-IMAGES_PATH = 'c:/_data/aifac/sanbul/train_img/train_img/'
-MASKS_PATH = 'c:/_data/aifac/sanbul/train_mask/train_mask/'
+IMAGES_PATH = 'c:/_data/aifac/sanbul/train_img/'
+MASKS_PATH = 'c:/_data/aifac/sanbul/train_mask/'
 
 # 가중치 저장 위치
 OUTPUT_DIR = 'c:/_data/aifac/sanbul/'
-WORKERS = 18         #코어수
+WORKERS = 12         #코어수
 
 # 조기종료
 EARLY_STOP_PATIENCE = 5
 
 # 중간 가중치 저장 이름
-CHECKPOINT_PERIOD = 5
+CHECKPOINT_PERIOD = 1
 CHECKPOINT_MODEL_NAME = 'checkpoint-{}-{}-epoch_{{epoch:02d}}.hdf5'.format(MODEL_NAME, save_name)
 
 # 최종 가중치 저장 이름
-FINAL_WEIGHTS_OUTPUT = 'model_{}_{}_bull21.h5'.format(MODEL_NAME, save_name)
+FINAL_WEIGHTS_OUTPUT = 'model_{}_{}_bull25.h5'.format(MODEL_NAME, save_name)
 
 # 사용할 GPU 이름
 CUDA_DEVICE = 0
@@ -294,7 +294,7 @@ validation_generator = generator_from_lists(images_validation, masks_validation,
 
 #miou metric
 def miou(y_true, y_pred, smooth=1e-6):
-    THESHOLDS=0.25 # 임계치 기준으로 이진화
+    THESHOLDS=0.5 # 임계치 기준으로 이진화
     y_pred = tf.cast(y_pred > THESHOLDS, tf.float32)
     
     intersection = tf.reduce_sum(y_true * y_pred, axis=[1, 2, 3])
@@ -308,21 +308,21 @@ def miou(y_true, y_pred, smooth=1e-6):
 # model 불러오기
 
 model = get_model(MODEL_NAME, input_height=IMAGE_SIZE[0], input_width=IMAGE_SIZE[1], n_filters=N_FILTERS, n_channels=N_CHANNELS)
-lr = 0.01
-model.compile(optimizer = Adam(learning_rate=lr), loss = 'binary_crossentropy', metrics = [miou])
+lr = 0.001
+model.compile(optimizer = Adam(learning_rate=lr), loss = 'binary_crossentropy', metrics = ['accuracy',miou])
 model.summary()
 
 # checkpoint 및 조기종료 설정
-es = EarlyStopping(monitor='val_loss', mode='min', verbose=2, patience=EARLY_STOP_PATIENCE)
+es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=EARLY_STOP_PATIENCE)
 checkpoint = ModelCheckpoint(os.path.join(OUTPUT_DIR, CHECKPOINT_MODEL_NAME), monitor='loss', verbose=1,
-save_best_only=True, mode='auto', period=CHECKPOINT_PERIOD)
-rlr = ReduceLROnPlateau(monitor='val_loss',patience=10,mode='auto',verbose=1,factor=0.5)
+save_best_only=False, mode='auto', period=CHECKPOINT_PERIOD)
+rlr = ReduceLROnPlateau(monitor='val_loss',patience=1,mode='auto',verbose=1,factor=0.5)
 
 """&nbsp;
 
 ## model 훈련
 """
-model.load_weights('c:/_data/aifac/sanbul/attention/bull20.hdf5')
+model.load_weights('c:/_data/aifac/sanbul/attention/bull22.hdf5')
 print('---model 훈련 시작---')
 history = model.fit_generator(
     train_generator,
@@ -353,10 +353,11 @@ print("저장된 가중치 명: {}".format(model_weights_output))
 """
 
 # model = get_model(MODEL_NAME, input_height=IMAGE_SIZE[0], input_width=IMAGE_SIZE[1], n_filters=N_FILTERS, n_channels=N_CHANNELS)
-# model.compile(optimizer = Adam(), loss = 'binary_crossentropy', metrics = ['accuracy'])
-# model.summary()
+# lr = 0.01
+# model.compile(optimizer = Adam(learning_rate=lr), loss = 'binary_crossentropy', metrics = ['accuracy',miou])
+# # model.summary()
 
-# model.load_weights('c:/_data/aifac/sanbul/jj/bull5.h5')
+# model.load_weights('c:/_data/aifac/sanbul/bull22.h5')
 
 """## 제출 Predict
 - numpy astype uint8로 지정
@@ -370,26 +371,29 @@ for i in test_meta['test_img']:
     img = get_img_762bands(f'c:/_data/aifac/sanbul/test_img/test_img/{i}')
     y_pred = model.predict(np.array([img]), batch_size=1,verbose=0)
 
-    y_pred = np.where(y_pred[0, :, :, 0] > 0.25, 1, 0) # 임계값 처리
+    y_pred = np.where(y_pred[0, :, :, 0] > 0.5, 1, 0) # 임계값 처리
     y_pred = y_pred.astype(np.uint8)
     y_pred_dict[i] = y_pred
 
-joblib.dump(y_pred_dict, 'c:/_data/aifac/bull21.pkl')
+joblib.dump(y_pred_dict, 'c:/_data/aifac/bull25.pkl')
+
+loss = model.evaluate_generator(validation_generator, steps=len(images_validation) // BATCH_SIZE)
+print("Validation Loss:", loss)
 
 # 모델 훈련 후에 history 객체에서 손실 및 정확도 값을 가져와서 출력
 loss = history.history['loss']
-# val_loss = history.history['val_loss']
+
 accuracy = history.history['accuracy']
-val_accuracy = history.history['val_accuracy']
+
 
 # 손실과 정확도 값을 출력
 print("Training Loss:", loss)
-# print("Validation Loss:", val_loss)
 print("Training Accuracy:", accuracy)
-# print("Validation Accuracy:", val_accuracy)
 print(r)
 e_t = time.time()
 print('time:',e_t-s_t)
+
+
 
 '''
 Training Loss: [6.810005288571119e-05]
@@ -412,6 +416,215 @@ Training Accuracy: [0.9999852180480957, 0.9999852180480957, 0.9999854564666748, 
 loss: 6.3969e-05 - accuracy: 1.0000 - val_loss: 7.3512e-05 - val_accuracy: 1.0000 - lr: 9.0000e-04
 20번   30에포 배치6 랜덤 6 0.922
 loss: 4.8133e-05 - accuracy: 1.0000 - val_loss: 5.5089e-05 - val_accuracy: 1.0000 - lr: 9.0000e-04
-21번
+23번
+Validation Loss: [4.93808402097784e-05, 0.9999816417694092, 0.9324949383735657]
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Epoch 1/30
+2024-03-23 14:40:46.203191: I tensorflow/stream_executor/cuda/cuda_dnn.cc:384] Loaded cuDNN version 8100
+1918/1918 [==============================] - ETA: 0s - loss: 5.0863e-05 - miou: 0.9260  
+Epoch 1: loss improved from inf to 0.00005, saving model to c:/_data/aifac/sanbul\checkpoint-pretrained_attention_unet-base_line-epoch_01.hdf5
+1918/1918 [==============================] - 662s 342ms/step - loss: 5.0863e-05 - miou: 0.9260 - val_loss: 5.9499e-05 - val_miou: 0.9144 - lr: 0.0100
+Epoch 2/30
+1918/1918 [==============================] - ETA: 0s - loss: 5.1013e-05 - miou: 0.9244  
+Epoch 2: loss did not improve from 0.00005
+
+Epoch 2: ReduceLROnPlateau reducing learning rate to 0.004999999888241291.
+1918/1918 [==============================] - 663s 346ms/step - loss: 5.1013e-05 - miou: 0.9244 - val_loss: 5.8382e-05 - val_miou: 0.9258 - lr: 0.0100
+Epoch 3/30
+1918/1918 [==============================] - ETA: 0s - loss: 4.9047e-05 - miou: 0.9288  
+Epoch 3: loss improved from 0.00005 to 0.00005, saving model to c:/_data/aifac/sanbul\checkpoint-pretrained_attention_unet-base_line-epoch_03.hdf5
+
+Epoch 3: ReduceLROnPlateau reducing learning rate to 0.0024999999441206455.
+1918/1918 [==============================] - 5246s 3s/step - loss: 4.9047e-05 - miou: 0.9288 - val_loss: 9.3990e-05 - val_miou: 0.8667 - lr: 0.0050
+Epoch 4/30
+1918/1918 [==============================] - ETA: 0s - loss: 4.7693e-05 - miou: 0.9308  
+Epoch 4: loss improved from 0.00005 to 0.00005, saving model to c:/_data/aifac/sanbul\checkpoint-pretrained_attention_unet-base_line-epoch_04.hdf5
+
+Epoch 4: ReduceLROnPlateau reducing learning rate to 0.0012499999720603228.
+1918/1918 [==============================] - 622s 324ms/step - loss: 4.7693e-05 - miou: 0.9308 - val_loss: 5.4212e-05 - val_miou: 0.9265 - lr: 0.0025
+Epoch 5/30
+1918/1918 [==============================] - ETA: 0s - loss: 4.6870e-05 - miou: 0.9322  
+Epoch 5: loss improved from 0.00005 to 0.00005, saving model to c:/_data/aifac/sanbul\checkpoint-pretrained_attention_unet-base_line-epoch_05.hdf5
+
+Epoch 5: ReduceLROnPlateau reducing learning rate to 0.0006249999860301614.
+1918/1918 [==============================] - 632s 330ms/step - loss: 4.6870e-05 - miou: 0.9322 - val_loss: 5.2332e-05 - val_miou: 0.9312 - lr: 0.0012
+Epoch 6/30
+1918/1918 [==============================] - ETA: 0s - loss: 4.6496e-05 - miou: 0.9322
+Epoch 6: loss improved from 0.00005 to 0.00005, saving model to c:/_data/aifac/sanbul\checkpoint-pretrained_attention_unet-base_line-epoch_06.hdf5
+
+Epoch 6: ReduceLROnPlateau reducing learning rate to 0.0003124999930150807.
+1918/1918 [==============================] - 1492s 778ms/step - loss: 4.6496e-05 - miou: 0.9322 - val_loss: 5.3034e-05 - val_miou: 0.9298 - lr: 6.2500e-04
+Epoch 7/30
+1918/1918 [==============================] - ETA: 0s - loss: 4.6226e-05 - miou: 0.9326
+Epoch 7: loss improved from 0.00005 to 0.00005, saving model to c:/_data/aifac/sanbul\checkpoint-pretrained_attention_unet-base_line-epoch_07.hdf5
+
+Epoch 7: ReduceLROnPlateau reducing learning rate to 0.00015624999650754035.
+1918/1918 [==============================] - 657s 342ms/step - loss: 4.6226e-05 - miou: 0.9326 - val_loss: 5.3230e-05 - val_miou: 0.9286 - lr: 3.1250e-04
+1918/1918 [==============================] - ETA: 0s - loss: 4.6249e-05 - miou: 0.9330
+Epoch 8: loss did not improve from 0.00005
+
+Epoch 8: ReduceLROnPlateau reducing learning rate to 7.812499825377017e-05.        
+1918/1918 [==============================] - 585s 305ms/step - loss: 4.6249e-05 - miou: 0.9330 - val_loss: 5.1389e-05 - val_miou: 0.9318 - lr: 1.5625e-04
+Epoch 9/30
+ul\checkpoint-pretrained_attention_unet-base_line-epoch_09.hdf5
+
+Epoch 9: ReduceLROnPlateau reducing learning rate to 3.9062499126885086e-05.
+1918/1918 [==============================] - 601s 313ms/step - loss: 4.6008e-05 - miou: 0.9330 - val_loss: 5.2211e-05 - val_miou: 0.9316 - lr: 7.8125e-05
+Epoch 10/30
+ 103/1918 [>.............................] - ETA: 8:38 - loss: 3.7484e-05 - miou: 0 104/1918 [>.............................] - ETA: 8:36 - loss: 3.7405e-05 - miou: 0 105/1918 [>.............................] - ETA: 8:35 - loss: 3.7345e-05 - miou: 0 106/1918 [>.............................] - ETA: 8:36 - loss: 3.7385e-05 - miou: 0 107/1918 [>.............................] - ETA: 8:36 - loss: 3.7271e-05 - miou: 0 108/1918 [>.............................] - ETA: 8:36 - loss: 3.7707e-05 - miou: 0 109/1918 [>.............................] - ETA: 8:36 - loss: 3.7637e-05 - miou: 0 110/1918 [>.............................] - ETA: 8:35 - loss: 3.7554e-05 - miou: 0 111/1918 [>.............................] - ETA: 8:35 - loss: 3.7525e-05 - miou: 0 112/1918 [>.............................] - ETA: 8:35 - loss: 3.7539e-05 - miou: 0 113/1918  1201918/1918 [==============================] - ETA: 0s - loss: 4.6245e-05 - miou: 0.9330  ......................] - ETA: 8:35 - loss: 3.7412e-05 - miou: 0.9349
+Epoch 10: loss did not improve from 0.00005
+
+Epoch 10: ReduceLROnPlateau reducing learning rate to 1.9531249563442543e-05.
+1918/1918 [==============================] - 728s 380ms/step - loss: 4.6245e-05 - miou: 0.9330 - val_loss: 5.3577e-05 - val_miou: 0.9310 - lr: 3.9062e-05
+Epoch 11/30
+1918/1918 [==============================] - ETA: 0s - loss: 4.6061e-05 - miou: 0.9331  
+Epoch 11: loss did not improve from 0.00005
+
+Epoch 11: ReduceLROnPlateau reducing learning rate to 9.765624781721272e-06.
+1918/1918 [==============================] - 735s 383ms/step - loss: 4.6061e-05 - miou: 0.9331 - val_loss: 5.3625e-05 - val_miou: 0.9300 - lr: 1.9531e-05
+Epoch 12/30
+1918/1918 [==============================] - ETA: 0s - loss: 4.6292e-05 - miou: 0.9327  
+Epoch 12: loss did not improve from 0.00005
+
+Epoch 12: ReduceLROnPlateau reducing learning rate to 4.882812390860636e-06.
+1918/1918 [==============================] - 734s 383ms/step - loss: 4.6292e-05 - miou: 0.9327 - val_loss: 5.1254e-05 - val_miou: 0.9318 - lr: 9.7656e-06
+Epoch 13/30
+1918/1918 [==============================] - ETA: 0s - loss: 4.6046e-05 - miou: 0.9330  
+Epoch 13: loss did not improve from 0.00005
+
+Epoch 13: ReduceLROnPlateau reducing learning rate to 2.441406195430318e-06.
+1918/1918 [==============================] - 753s 393ms/step - loss: 4.6046e-05 - miou: 0.9330 - val_loss: 6.0403e-05 - val_miou: 0.9306 - lr: 4.8828e-06
+Epoch 14/30
+1918/1918 [==============================] - ETA: 0s - loss: 4.6239e-05 - miou: 0.9334
+Epoch 14: loss did not improve from 0.00005
+
+Epoch 14: ReduceLROnPlateau reducing learning rate to 1.220703097715159e-06.
+1918/1918 [==============================] - 759s 396ms/step - loss: 4.6239e-05 - miou: 0.9334 - val_loss: 4.5632e-05 - val_miou: 0.9301 - lr: 2.4414e-06
+Epoch 15/30
+1918/1918 [==============================] - ETA: 0s - loss: 4.6106e-05 - miou: 0.9331
+Epoch 15: loss did not improve from 0.00005
+
+Epoch 15: ReduceLROnPlateau reducing learning rate to 6.103515488575795e-07.
+1918/1918 [==============================] - 763s 398ms/step - loss: 4.6106e-05 - miou: 0.9331 - val_loss: 5.6218e-05 - val_miou: 0.9291 - lr: 1.2207e-06
+Epoch 16/30
+1918/1918 [==============================] - ETA: 0s - loss: 4.6228e-05 - miou: 0.9325
+Epoch 16: loss did not improve from 0.00005
+
+Epoch 16: ReduceLROnPlateau reducing learning rate to 3.0517577442878974e-07.
+1918/1918 [==============================] - 741s 386ms/step - loss: 4.6228e-05 - miou: 0.9325 - val_loss: 5.8644e-05 - val_miou: 0.9330 - lr: 6.1035e-07
+Epoch 17/30
+1918/1918 [==============================] - ETA: 0s - loss: 4.6157e-05 - miou: 0.9330  
+Epoch 17: loss did not improve from 0.00005
+
+1918/1918 [==============================] - 632s 330ms/step - loss: 4.6157e-05 - miou: 0.9330 - val_loss: 4.6871e-05 - val_miou: 0.9300 - lr: 3.0518e-07
+Epoch 18/30
+1918/1918 [==============================] - ETA: 0s - loss: 4.6174e-05 - miou: 0.9330
+Epoch 18: loss did not improve from 0.00005
+
+Epoch 18: ReduceLROnPlateau reducing learning rate to 7.629394360719743e-08.       
+1918/1918 [==============================] - 633s 330ms/step - loss: 4.6174e-05 - miou: 0.9330 - val_loss: 5.1949e-05 - val_miou: 0.9298 - lr: 1.5259e-07
+Epoch 19/30
+1918/1918 [==============================] - ETA: 0s - loss: 4.6147e-05 - miou: 0.9330
+Epoch 19: loss did not improve from 0.00005
+
+Epoch 19: ReduceLROnPlateau reducing learning rate to 3.814697180359872e-08.       
+1918/1918 [==============================] - 633s 330ms/step - loss: 4.6147e-05 - miou: 0.9330 - val_loss: 5.2839e-05 - val_miou: 0.9315 - lr: 7.6294e-08
+Epoch 20/30
+1918/1918 [==============================] - ETA: 0s - loss: 4.6254e-05 - miou: 0.9328
+Epoch 20: loss did not improve from 0.00005
+
+Epoch 20: ReduceLROnPlateau reducing learning rate to 1.907348590179936e-08.       
+1918/1918 [==============================] - 642s 335ms/step - loss: 4.6254e-05 - miou: 0.9328 - val_loss: 5.4389e-05 - val_miou: 0.9310 - lr: 3.8147e-08
+Epoch 21/30
+
+ETA: 8:20 - loss: 4.4725e-05 - miou: 0 270/1918 [===>..........................] - ETA: 8:19 - loss: 4.5985e-05 - miou: 0 271/1918 [===>..........................] - ETA: 8:20 - loss: 4.5868e-05 - miou: 0 272/1918 [===>..........................] - ETA: 8:19 - loss: 4.5880e-05 - miou: 0 273/1918 [===>..........................] - ETA: 8:19 - loss: 4.5784e-05 - miou: 0 274/1918 [===>..........................] - ETA: 8:18 - loss: 4.5691e-05 - miou: 0 275/1918 [===>..........................] - ETA: 8:18 - loss: 4.5599e-05 - miou: 0 276/1918 [===>..........................] - ETA: 8:17 - loss: 4.5567e-05 - miou: 0 277/1918 [===>..........................] - ETA: 8:17 - loss: 4.6163e-05 - miou: 0 278/1918 [===>..........................] - ETA: 8:17 - loss: 4.6103e-05 - miou: 0 279/1918 [===>..........................] - ETA: 8:16 - loss: 4.6196e-05 - miou: 0 280/1918 [===>..........................] - ETA: 8:16 - loss: 4.6201e-05 - miou: 0 281/1918 [===>..........................] - ETA: 8:16 - loss: 4.6162e-05 - miou: 0 282/1918 [===>..........................] - ETA: 8:16 - loss: 4.6138e-05 - miou: 0 283/1918 [===>..........................] - ETA: 8:15 - loss: 4.6078e-05 - miou: 0 284/1918 [===>..........................] - ETA: 8:15 - loss: 4.61918/1918 [==============================] - ETA: 0s - loss: 4.6118e-05 - miou: 0.9330  9 - loss: 4.5777e-05 - miou: 0.9345..................] - ETA: 8:14 - loss: 4.6379e-05 - miou: 0.9349
+Epoch 21: loss did not improve from 0.00005
+
+Epoch 21: ReduceLROnPlateau reducing learning rate to 9.53674295089968e-09.
+1918/1918 [==============================] - 687s 358ms/step - loss: 4.6118e-05 - miou: 0.9330 - val_loss: 5.9938e-05 - val_miou: 0.9313 - lr: 1.9073e-08
+Epoch 22/30
+1918/1918 [==============================] - ETA: 0s - loss: 4.6104e-05 - miou: 0.9330  
+Epoch 22: loss did not improve from 0.00005
+
+Epoch 22: ReduceLROnPlateau reducing learning rate to 4.76837147544984e-09.
+1918/1918 [==============================] - 659s 344ms/step - loss: 4.6104e-05 - miou: 0.9330 - val_loss: 5.2682e-05 - val_miou: 0.9307 - lr: 9.5367e-09
+Epoch 23/30
+1918/1918 [==============================] - ETA: 0s - loss: 4.6286e-05 - miou: 0.9330
+Epoch 23: loss did not improve from 0.00005
+
+Epoch 23: ReduceLROnPlateau reducing learning rate to 2.38418573772492e-09.
+1918/1918 [==============================] - 743s 387ms/step - loss: 4.6286e-05 - miou: 0.9330 - val_loss: 5.2778e-05 - val_miou: 0.9303 - lr: 4.7684e-09
+Epoch 24/30
+1918/1918 [==============================] - ETA: 0s - loss: 4.6043e-05 - miou: 0.9332  
+Epoch 24: loss did not improve from 0.00005
+
+Epoch 24: ReduceLROnPlateau reducing learning rate to 1.19209286886246e-09.
+1918/1918 [==============================] - 690s 360ms/step - loss: 4.6043e-05 - miou: 0.9332 - val_loss: 4.4219e-05 - val_miou: 0.9310 - lr: 2.3842e-09
+Epoch 25/30
+1918/1918 [==============================] - ETA: 0s - loss: 4.6200e-05 - miou: 0.9329  
+Epoch 25: loss did not improve from 0.00005
+
+Epoch 25: ReduceLROnPlateau reducing learning rate to 5.9604643443123e-10.
+1918/1918 [==============================] - 712s 371ms/step - loss: 4.6200e-05 - miou: 0.9329 - val_loss: 5.2993e-05 - val_miou: 0.9334 - lr: 1.1921e-09
+Epoch 26/30
+1918/1918 [==============================] - ETA: 0s - loss: 4.6043e-05 - miou: 0.9333  
+Epoch 26: loss did not improve from 0.00005
+
+Epoch 26: ReduceLROnPlateau reducing learning rate to 2.98023217215615e-10.
+1918/1918 [==============================] - 1171s 611ms/step - loss: 4.6043e-05 - miou: 0.9333 - val_loss: 6.2367e-05 - val_miou: 0.9289 - lr: 5.9605e-10
+Epoch 27/30
+1918/1918 [==============================] - ETA: 0s - loss: 4.6052e-05 - miou: 0.9335
+Epoch 27: loss did not improve from 0.00005
+
+Epoch 27: ReduceLROnPlateau reducing learning rate to 1.490116086078075e-10.
+1918/1918 [==============================] - 731s 381ms/step - loss: 4.6052e-05 - miou: 0.9335 - val_loss: 4.2595e-05 - val_miou: 0.9316 - lr: 2.9802e-10
+Epoch 28/30
+1918/1918 [==============================] - ETA: 0s - loss: 4.6340e-05 - miou: 0.9328
+Epoch 28: loss did not improve from 0.00005
+
+Epoch 28: ReduceLROnPlateau reducing learning rate to 7.450580430390374e-11.
+1918/1918 [==============================] - 863s 450ms/step - loss: 4.6340e-05 - miou: 0.9328 - val_loss: 5.5047e-05 - val_miou: 0.9308 - lr: 1.4901e-10
+Epoch 29/30
+1918/1918 [==============================] - ETA: 0s - loss: 4.6067e-05 - miou: 0.9333  
+Epoch 29: loss did not improve from 0.00005
+
+Epoch 29: ReduceLROnPlateau reducing learning rate to 3.725290215195187e-11.
+1918/1918 [==============================] - 705s 368ms/step - loss: 4.6067e-05 - miou: 0.9333 - val_loss: 5.4124e-05 - val_miou: 0.9322 - lr: 7.4506e-11
+Epoch 30/30
+1918/1918 [==============================] - ETA: 0s - loss: 4.6379e-05 - miou: 0.9330  
+Epoch 30: loss did not improve from 0.00005
+
+Epoch 30: ReduceLROnPlateau reducing learning rate to 1.8626451075975936e-11.
+1918/1918 [==============================] - 738s 385ms/step - loss: 4.6379e-05 - miou: 0.9330 - val_loss: 6.0695e-05 - val_miou: 0.9290 - lr: 3.7253e-11
+---model 훈련 종료---
+가중치 저장
+저장된 가중치 명: c:/_data/aifac/sanbul/model_pretrained_attention_unet_base_line_bull22.h5
+Traceback (most recent call last):
+File "c:\study\bull.py", line 395, in <module>
 '''
