@@ -8,21 +8,21 @@ import torch.nn.functional as F
 x = np.array([1,2,3])
 y = np.array([1,2,3])
 
-x = torch.FloatTensor(x)
-y = torch.FloatTensor(y)
+x = torch.FloatTensor(x).unsqueeze(1)   #(3,) -> (3,1)
+y = torch.FloatTensor(y).unsqueeze(1)   #(3,) -> (3,1)
 
-print(x,y)
-
+print(x.shape,y.shape)
+# torch.Size([3, 1]) torch.Size([3])
 #2.모델구성
 # model = Sequential()
 # model.add(Dense(1,input_dim=1))
-model = nn.Linear(3,1) #input,output    y = xw + b
+model = nn.Linear(1,1) #input,output    y = xw + b
 
 
 #3.컴파일,훈련
 # model.compile(loss='mse',optimizer='adam')
 criterion = nn.MSELoss()    #criterion:표준
-optimizer = optim.Adam(model.parameters(),lr=0.01)
+optimizer = optim.Adam(model.parameters(),lr=0.1)
 #model.fit(x,y,epochs=100,batch_size=1)
 
 #평가모드에서는 batch normal,drop out 사용x
@@ -38,13 +38,23 @@ def train(model,criterion, optimizer, x, y):
     #여기까지 역전파
     return loss.item()  #loss만 사용하면 torch데이터로 나온다(item을 사용해야 numpy데이터로 나옴)
 
-epochs = 200
+epochs = 2000
 for epoch in range(1, epochs+1):
     loss = train(model,criterion,optimizer,x,y)
     print('epochL{},loss{}'.format(epoch,loss))
     
 #평가 예측
 # loss = model.evaluate(x,y)
-def evaluate(model,criterion,optimizer,x,y):
+def evaluate(model,criterion,x,y):
     model.eval()    #평가모드
+    with torch.no_grad():
+        y_pred = model(x)
+        loss2 = criterion(y, y_pred)
+        return loss2.item()
     
+loss2 = evaluate(model,criterion,x,y)
+print("duck loss",loss2)
+
+#result = model.predict([4])
+result = model(torch.Tensor([4]))
+print('4의 예측값',result.item())
