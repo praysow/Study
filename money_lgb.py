@@ -43,7 +43,7 @@ x = scaler.fit_transform(x)
 test = scaler.transform(test)
 
 # 훈련 데이터와 검증 데이터 분리
-x_train, x_val, y_train, y_val = train_test_split(x, y, train_size=0.8, random_state=6)
+x_train, x_val, y_train, y_val = train_test_split(x, y, train_size=0.9, random_state=367)
 
 def objective(trial):
     # 하이퍼파라미터 탐색 공간 정의
@@ -88,12 +88,12 @@ best_params = study.best_params
 # 최적의 하이퍼파라미터로 모델 생성 및 학습
 best_model = lgb.LGBMRegressor(**best_params)
 best_model.fit(x_train, y_train)
-best_model.booster_.save_model("c:/_data/dacon/soduc/weight/money43_lgb_optuna.csv")
+best_model.booster_.save_model("c:/_data/dacon/soduc/weight/money5_lgb_optuna.csv")
 
 # 테스트 데이터 예측 및 저장
 y_pred_test = best_model.predict(test)
 sample['Income'] = y_pred_test
-sample.to_csv("c:/_data/dacon/soduc/csv/money43_lgb_optuna.csv", index=False)
+sample.to_csv("c:/_data/dacon/soduc/csv/money5_lgb_optuna.csv", index=False)
 print('Best parameters:', best_params)
 
 y_pred_val = best_model.predict(x_val)
@@ -105,10 +105,4 @@ print("Validation RMSE:", rmse_val)
 Validation RMSE: 621.3231636678684 540점
 Best parameters: {'random_state': 863, 'learning_rate': 0.026448745357864258, 'n_estimators': 118, 'num_leaves': 132, 'feature_fraction': 0.9503237717724516, 'bagging_fraction': 0.22977512473974027, 'bagging_freq': 1, 'min_child_samples': 52, 'max_depth': 13, 'min_samples_leaf': 19}
 Validation RMSE: 612.8145250013354      money1_lgb_optuna ???점
-
-Validation RMSE: 569.23674823378    41번 가중치 40번
-Best parameters: {'random_state': 739, 'learning_rate': 0.01777884727675763, 'n_estimators': 172, 'num_leaves': 53, 'feature_fraction': 0.8233395153123231, 'bagging_fraction': 0.2690298697724745, 'bagging_freq': 2, 'min_child_samples': 94, 'max_depth': 13, 'min_samples_leaf': 16}
-
-Validation RMSE: 569.091668697738   43번
-Best parameters: {'random_state': 86, 'learning_rate': 0.01294002740985389, 'n_estimators': 319, 'num_leaves': 67, 'feature_fraction': 0.6483893999836882, 'bagging_fraction': 0.4592561937354819, 'bagging_freq': 4, 'min_child_samples': 32, 'max_depth': 10, 'min_samples_leaf': 19}
 '''
