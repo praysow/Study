@@ -114,7 +114,7 @@ def solution_model():
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
     # 모델 훈련
-    history = model.fit(training_sentences, training_labels, epochs=10, validation_data=(testing_sentences, testing_labels), verbose=1)
+    history = model.fit(training_sentences, training_labels, epochs=100, validation_data=(testing_sentences, testing_labels), verbose=1)
 
     # 훈련 과정에서의 정확도 확인
     train_accuracy = history.history['accuracy']
@@ -126,7 +126,7 @@ def solution_model():
 
 if __name__ == '__main__':
     model = solution_model()
-    # model.save("mymodel.h5")
+    model.save("sarcasm.h5")
 '''
 훈련 정확도: [0.5687999725341797, 0.761900007724762, 0.8147000074386597, 0.8240500092506409, 0.8326500058174133, 0.8342999815940857, 0.8358500003814697, 0.8385499715805054, 0.8392000198364258, 0.8397499918937683]
 검증 정확도: [0.6299001574516296, 0.785362958908081, 0.8123416304588318, 0.8023550510406494, 0.819049060344696, 0.8191980719566345, 0.81293785572052, 0.8191980719566345, 0.8186019062995911, 0.8187509179115295]

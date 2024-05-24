@@ -403,7 +403,7 @@ def solution_model():
     # Code to train and compile the model
     optimizer = tf.keras.optimizers.Adam()  # YOUR CODE HERE
     model.compile(loss='mse', optimizer=optimizer, metrics=['mae'])
-    model.fit(train_set, epochs=50, validation_data=valid_set)
+    model.fit(train_set, epochs=100, validation_data=valid_set)
 
     return model
 
@@ -415,7 +415,7 @@ def solution_model():
 
 if __name__ == '__main__':
     model = solution_model()
-    # model.save("mymodel.h5")
+    model.save("house.h5")
 '''
 
 '''

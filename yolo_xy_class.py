@@ -36,6 +36,9 @@ from utils.general import (
 )
 
 from utils.torch_utils import select_device, smart_inference_mode
+
+
+
 def text_to_speech(text):
     if text:  # 텍스트가 비어있지 않을 경우에만 TTS 모듈 호출
         tts = gTTS(text=text, lang='en')

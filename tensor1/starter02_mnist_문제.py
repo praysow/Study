@@ -64,7 +64,7 @@ def solution_model():
                   metrics=['accuracy'])
 
     # Train the model
-    model.fit(x_train, y_train, epochs=5, validation_data=(x_test, y_test))
+    model.fit(x_train, y_train, epochs=100, validation_data=(x_test, y_test))
     loss, accuracy = model.evaluate(x_test, y_test)
     print('loss:', loss)
     print('accuracy:', accuracy)
@@ -73,7 +73,7 @@ def solution_model():
 # Save the model
 if __name__ == '__main__':
     model = solution_model()
-    # model.save("mymodel.h5")
+    model.save("mnist.h5")
 '''
 loss: 0.08358493447303772
 accuracy: 0.9753000140190125
