@@ -3,32 +3,34 @@ import numpy as np
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
-
+from sklearn.model_selection import train_test_split
 USE_CUDA = torch.cuda.is_available()
 DEVICE = torch.device('cuda' if USE_CUDA else 'cpu')
 print(torch.__version__,'device',DEVICE)
 
 #1.데이터
-x=np.array([range(10),range(21,31), range(201,211)])
+x = np.array(range(100))
+y = np.array(range(1,101))
 
-                            #range는 파이썬에서 기본으로 제공하는 함수
-x= x.transpose()
-y= np.array([[1,2,3,4,5,6,7,8,9,10],[1,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9]])  #[]두개 이상이면 리스트라고 한다
-y=y.transpose()
-x = torch.FloatTensor(x).to(DEVICE)
-y = torch.FloatTensor(y).to(DEVICE)
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.8, random_state=8)
 
-print(x.shape,y.shape)
+x_train = torch.FloatTensor(x_train).unsqueeze(1).to(DEVICE)
+y_train = torch.FloatTensor(y_train).unsqueeze(1).to(DEVICE)
+x_test = torch.FloatTensor(x_test).unsqueeze(1).to(DEVICE)
+y_test = torch.FloatTensor(y_test).unsqueeze(1).to(DEVICE)
+
+# print(x.shape,y.shape)
 # torch.Size([3, 1]) torch.Size([3])
 #2.모델구성
 # model = Sequential()
 # model.add(Dense(1,input_dim=1))
 model = nn.Sequential(
-    nn.Linear(3,10), #input,output    y = xw + b
-    nn.Linear(10,4),
+    nn.Linear(1,5), #input,output    y = xw + b
+    nn.Linear(5,4),
+    nn.ReLU(),
     nn.Linear(4,3),
     nn.Linear(3,2),
-    nn.Linear(2,2),
+    nn.Linear(2,1),
     ).to(DEVICE)
 #3.컴파일,훈련
 # model.compile(loss='mse',optimizer='adam')
@@ -51,7 +53,7 @@ def train(model,criterion, optimizer, x, y):
 
 epochs = 2000
 for epoch in range(1, epochs+1):
-    loss = train(model,criterion,optimizer,x,y)
+    loss = train(model,criterion,optimizer,x_train,y_train)
     print('epochL{},loss{}'.format(epoch,loss))
     
 #평가 예측
@@ -63,15 +65,9 @@ def evaluate(model,criterion,x,y):
         loss2 = criterion(y, y_pred)
         return loss2.item()
     
-loss2 = evaluate(model,criterion,x,y)
+loss2 = evaluate(model,criterion,x_test,y_test)
 print("duck loss",loss2)
 
 #result = model.predict([4])
-result = model(torch.Tensor([[10,31,211]]).to(DEVICE))
-print('예측값',result.tolist())     #결과가 여러개일때는 tolist 사용
-
-
-'''
-duck loss 7.15105863413612e-10
-예측값 [[10.999957084655762, 1.999997854232788]]
-'''
+result = model(torch.Tensor([[100]]).to(DEVICE))
+print('101의 예측값',result.item())
