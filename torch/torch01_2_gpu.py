@@ -42,7 +42,7 @@ def train(model,criterion, optimizer, x, y):
     #여기까지 역전파
     return loss.item()  #loss만 사용하면 torch데이터로 나온다(item을 사용해야 numpy데이터로 나옴)
 
-epochs = 2000
+epochs = 2
 for epoch in range(1, epochs+1):
     loss = train(model,criterion,optimizer,x,y)
     print('epochL{},loss{}'.format(epoch,loss))

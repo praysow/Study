@@ -13,7 +13,7 @@ DEVICE = torch.device('cuda' if USE_CUDA else 'cpu')
 print(torch.__version__, 'device', DEVICE)
 
 # 1. 데이터 로드 및 전처리
-path = "c:\\_data\\dacon\\dechul\\"
+path= "c:\_data\dacon\dechul\\"
 train_csv = pd.read_csv(path + "train.csv", index_col=0)
 test_csv = pd.read_csv(path + "test.csv", index_col=0)
 sample_csv = pd.read_csv(path + "sample_submission.csv")
@@ -21,54 +21,65 @@ sample_csv = pd.read_csv(path + "sample_submission.csv")
 x = train_csv.drop(['대출등급'], axis=1)
 y = train_csv['대출등급']
 
+y = pd.get_dummies(y)
 # LabelEncoder를 사용하여 문자열 라벨을 숫자로 인코딩
 lb = LabelEncoder()
-lb.fit(x['대출기간'])
-x['대출기간'] = lb.transform(x['대출기간'])
-lb.fit(x['근로기간'])
-x['근로기간'] = lb.transform(x['근로기간'])
-lb.fit(x['주택소유상태'])
-x['주택소유상태'] = lb.transform(x['주택소유상태'])
-lb.fit(x['대출목적'])
-x['대출목적'] = lb.transform(x['대출목적'])
+all_data = pd.concat([x, test_csv])  # 학습 데이터와 테스트 데이터를 합침
+for column in x.columns:
+    if all_data[column].dtype == 'object':
+        all_data[column] = lb.fit_transform(all_data[column])
 
-lb.fit(test_csv['대출기간'])
-test_csv['대출기간'] = lb.transform(test_csv['대출기간'])
+# 다시 학습 데이터와 테스트 데이터로 나눔
+x_encoded = all_data.iloc[:len(x)]
+test_csv_encoded = all_data.iloc[len(x):]
 
-lb.fit(test_csv['근로기간'])
-test_csv['근로기간'] = lb.transform(test_csv['근로기간'])
-
-lb.fit(test_csv['주택소유상태'])
-test_csv['주택소유상태'] = lb.transform(test_csv['주택소유상태'])
-
-lb.fit(test_csv['대출목적'])
-test_csv['대출목적'] = lb.transform(test_csv['대출목적'])
-
-# y 데이터도 LabelEncoder로 변환
-y = lb.fit_transform(y)
-
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.9, random_state=333, stratify=y)
+x_train, x_test, y_train, y_test = train_test_split(x_encoded, y, train_size=0.9, random_state=333, stratify=y)
 
 # 데이터 표준화
 scaler = StandardScaler()
 x_train = scaler.fit_transform(x_train)
 x_test = scaler.transform(x_test)
 
+# 데이터를 텐서로 변환
 x_train = torch.FloatTensor(x_train).to(DEVICE)
 x_test = torch.FloatTensor(x_test).to(DEVICE)
-y_train = torch.LongTensor(y_train).to(DEVICE)
-y_test = torch.LongTensor(y_test).to(DEVICE)
+
+# y_train을 정수로 변환하여 텐서로 변환
+y_train = torch.FloatTensor(y_train.values).to(DEVICE)
+y_test = torch.FloatTensor(y_test.values).to(DEVICE)
+
 
 # 2. 모델 구성
-model = nn.Sequential(
-    nn.Linear(13, 32),
-    nn.ReLU(),
-    nn.Linear(32, 16),
-    nn.ReLU(),
-    nn.Linear(16, 7)
-).to(DEVICE)
 
-# 3. 컴파일 및 훈련
+class Model(nn.Module):
+    #함수에 들어갈 레이어들의 정의를 넣는곳
+    def __init__(self,input_dim,output_dim):
+        # super().__init__()가 저장되어있다(아빠)
+        super(Model,self).__init__()
+        self.linear1 = nn.Linear(input_dim,64)
+        self.linear2 = nn.Linear(64,32)
+        self.linear3 = nn.Linear(32,16)
+        self.linear4 = nn.Linear(16,8)
+        self.linear5 = nn.Linear(8,output_dim)
+        self.softmax = nn.Softmax()
+        self.relu = nn.ReLU()
+        return
+    #모델구성의 레이어를 만들어주는 곳, 순전파
+    def forward(self,input_size):
+        x1 = self.linear1(input_size)
+        x2 = self.linear2(x1)
+        x2 = self.relu(x2)
+        x3 = self.linear3(x2)
+        x4 = self.linear4(x3)
+        x4 = self.relu(x4)
+        x5 = self.linear5(x4)
+        x6 = self.softmax(x5)
+        return x6
+
+#model = Model(인풋레이어, 아웃풋레이어) -> 함수형모델과 비슷
+model = Model(13,7).to(DEVICE)
+
+# 3. 컴파일, 훈련
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.01)
 
@@ -103,13 +114,13 @@ with torch.no_grad():
     y_pred = model(x_test)
     y_pred = torch.argmax(y_pred, dim=1).detach().cpu().numpy()
 
-acc = accuracy_score(y_test.cpu().numpy(), y_pred)
+y_test = torch.argmax(y_test, dim=1).cpu().numpy()
+
+acc = accuracy_score(y_test, y_pred)
 
 print("정확도: {:.4f}".format(acc))
 
-
 '''
-최종 Loss: 0.5003501176834106
-정확도: 0.8296
-
+최종 Loss: 1.5465037822723389
+정확도: 0.6189
 '''

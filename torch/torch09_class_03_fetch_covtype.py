@@ -17,8 +17,7 @@ print(torch.__version__, 'device', DEVICE)
 datasets = fetch_covtype()
 x = datasets.data
 y = datasets.target
-# y = pd.DataFrame(y)
-# y = pd.get_dummies(y)
+
 print(np.unique(y))
 
 x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.8, random_state=8)
@@ -31,7 +30,7 @@ x_test = scaler.transform(x_test)
 # 데이터를 텐서로 변환
 x_train = torch.FloatTensor(x_train).to(DEVICE)
 x_test = torch.FloatTensor(x_test).to(DEVICE)
-y_train = torch.LongTensor(y_train).to(DEVICE)  # 라벨 범위 조정 longtensor는 정수의 확장형태
+y_train = torch.LongTensor(y_train).to(DEVICE)  # 라벨 범위 조정
 y_test = torch.LongTensor(y_test).to(DEVICE)    # 라벨 범위 조정
 
 print("x_train shape:", x_train.shape)
@@ -40,14 +39,41 @@ print("y_train shape:", y_train.shape)
 print("y_test shape:", y_test.shape)
 
 # 2. 모델 구성
-model = nn.Sequential(
-    nn.Linear(54, 32),
-    nn.ReLU(),
-    nn.Linear(32, 16),
-    nn.ReLU(),
-    nn.Linear(16, 8),
-    # nn.Softmax()
-).to(DEVICE)
+# model = nn.Sequential(
+#     nn.Linear(54, 32),
+#     nn.ReLU(),
+#     nn.Linear(32, 16),
+#     nn.ReLU(),
+#     nn.Linear(16, 8)
+# ).to(DEVICE)
+
+class Model(nn.Module):
+    #함수에 들어갈 레이어들의 정의를 넣는곳
+    def __init__(self,input_dim,output_dim):
+        # super().__init__()가 저장되어있다(아빠)
+        super(Model,self).__init__()
+        self.linear1 = nn.Linear(input_dim,64)
+        self.linear2 = nn.Linear(64,32)
+        self.linear3 = nn.Linear(32,16)
+        self.linear4 = nn.Linear(16,8)
+        self.linear5 = nn.Linear(8,output_dim)
+        self.softmax = nn.Softmax()
+        self.relu = nn.ReLU()
+        return
+    #모델구성의 레이어를 만들어주는 곳, 순전파
+    def forward(self,input_size):
+        x1 = self.linear1(input_size)
+        x2 = self.linear2(x1)
+        x2 = self.relu(x2)
+        x3 = self.linear3(x2)
+        x4 = self.linear4(x3)
+        x4 = self.relu(x4)
+        x5 = self.linear5(x4)
+        x6 = self.softmax(x5)
+        return x6
+
+#model = Model(인풋레이어, 아웃풋레이어) -> 함수형모델과 비슷
+model = Model(54,8).to(DEVICE)
 
 # 3. 컴파일, 훈련
 criterion = nn.CrossEntropyLoss()
@@ -89,6 +115,6 @@ acc = accuracy_score(y_test.cpu().numpy(), y_pred)
 print("정확도: {:.4f}".format(acc))
 
 '''
-최종 Loss: 0.41664499044418335
-정확도: 0.8274
+최종 Loss: 1.4970407485961914
+정확도: 0.7770
 '''

@@ -20,6 +20,13 @@ sample=pd.read_csv(path+"sample_submission.csv")
 x= train.drop(['NObeyesdad'],axis=1)
 y= train['NObeyesdad']
 
+y=y.values.reshape(-1,1)
+
+# ohe = OneHotEncoder(sparse=False)
+ohe = OneHotEncoder()
+y_ohe3= ohe.fit_transform(y).toarray()
+# print(train.shape,test.shape)   #(20758, 17) (13840, 16)    NObeyesdad
+# print(x.shape,y.shape)  #(20758, 16) (20758,)
 lb = LabelEncoder()
 
 # 라벨 인코딩할 열 목록
@@ -56,13 +63,40 @@ y_test = torch.LongTensor(y_test).to(DEVICE)
 
 
 # 2. 모델 구성
-model = nn.Sequential(
-    nn.Linear(16, 32),
-    nn.ReLU(),
-    nn.Linear(32, 16),
-    nn.ReLU(),
-    nn.Linear(16, 7)
-).to(DEVICE)
+# model = nn.Sequential(
+#     nn.Linear(16, 32),
+#     nn.ReLU(),
+#     nn.Linear(32, 16),
+#     nn.ReLU(),
+#     nn.Linear(16, 7)
+# ).to(DEVICE)
+class Model(nn.Module):
+    #함수에 들어갈 레이어들의 정의를 넣는곳
+    def __init__(self,input_dim,output_dim):
+        # super().__init__()가 저장되어있다(아빠)
+        super(Model,self).__init__()
+        self.linear1 = nn.Linear(input_dim,64)
+        self.linear2 = nn.Linear(64,32)
+        self.linear3 = nn.Linear(32,16)
+        self.linear4 = nn.Linear(16,8)
+        self.linear5 = nn.Linear(8,output_dim)
+        self.softmax = nn.Softmax()
+        self.relu = nn.ReLU()
+        return
+    #모델구성의 레이어를 만들어주는 곳, 순전파
+    def forward(self,input_size):
+        x1 = self.linear1(input_size)
+        x2 = self.linear2(x1)
+        x2 = self.relu(x2)
+        x3 = self.linear3(x2)
+        x4 = self.linear4(x3)
+        x4 = self.relu(x4)
+        x5 = self.linear5(x4)
+        x6 = self.softmax(x5)
+        return x6
+
+#model = Model(인풋레이어, 아웃풋레이어) -> 함수형모델과 비슷
+model = Model(16,7).to(DEVICE)
 
 # 3. 컴파일, 훈련
 criterion = nn.CrossEntropyLoss()
@@ -107,6 +141,6 @@ acc = accuracy_score(y_test, y_pred)
 print("정확도: {:.4f}".format(acc))
 
 '''
-최종 Loss: 0.3311653137207031
-정확도: 0.8834
+최종 Loss: 1.2803685665130615
+정확도: 0.8863
 '''

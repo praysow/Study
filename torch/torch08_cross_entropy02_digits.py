@@ -2,25 +2,23 @@ import torch
 import numpy as np
 import torch.nn as nn
 import torch.optim as optim
-from sklearn.datasets import load_breast_cancer, load_diabetes
+from sklearn.datasets import load_digits
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import r2_score
-import pandas as pd
+from sklearn.metrics import accuracy_score
+
 USE_CUDA = torch.cuda.is_available()
 DEVICE = torch.device('cuda' if USE_CUDA else 'cpu')
 print(torch.__version__, 'device', DEVICE)
 
 # 1. 데이터
-path= "c:\_data\kaggle\\bike\\"
-train_csv = pd.read_csv(path+"train.csv",index_col=0)
-test_csv = pd.read_csv(path+"test.csv",index_col=0)
-sampleSubmission_csv = pd.read_csv(path+"sampleSubmission.csv")
+datasets = load_digits()
+x = datasets.data
+y = datasets.target
 
-x= train_csv.drop(['count','casual','registered'], axis=1)
-y= train_csv['count']
+print(np.unique(y))
 
-x_train,x_test,y_train,y_test=train_test_split(x,y, train_size=0.8, random_state=3)
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.8, random_state=8)
 
 # StandardScaler는 numpy 배열을 필요로 하므로 변환 전 numpy 배열로 유지
 scaler = StandardScaler()
@@ -30,25 +28,23 @@ x_test = scaler.transform(x_test)
 # numpy 배열을 torch 텐서로 변환
 x_train = torch.FloatTensor(x_train).to(DEVICE)
 x_test = torch.FloatTensor(x_test).to(DEVICE)
-y_train = torch.FloatTensor(y_train).unsqueeze(1).to(DEVICE)  # unsqueeze로 차원 추가
-y_test = torch.FloatTensor(y_test).unsqueeze(1).to(DEVICE)    # unsqueeze로 차원 추가
+y_train = torch.LongTensor(y_train).to(DEVICE)  # LongTensor로 변환 longtensor는 정수로 변환해주기때문에 onehotencoding을 할 필요가 없다
+y_test = torch.LongTensor(y_test).to(DEVICE)    # LongTensor로 변환
 
 print(x_train.shape, x_test.shape)
 print(y_train.shape, y_test.shape)
 
 # 2. 모델구성
 model = nn.Sequential(
-    nn.Linear(8, 5),  # input 크기를 10으로 설정
+    nn.Linear(64, 32),  # input 크기를 64로 설정 (피처 개수)
     nn.ReLU(),
-    nn.Linear(5, 4),
+    nn.Linear(32, 16),
     nn.ReLU(),
-    nn.Linear(4, 3),
-    nn.ReLU(),
-    nn.Linear(3, 1)    # 최종 출력 노드를 1로 설정
+    nn.Linear(16, 10)   # 최종 출력 노드를 10으로 설정 (클래스 개수)
 ).to(DEVICE)
 
 # 3. 컴파일, 훈련
-criterion = nn.MSELoss()  # 회귀 문제를 위한 Mean Squared Error Loss
+criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.01)
 
 def train(model, criterion, optimizer, x, y):
@@ -60,7 +56,7 @@ def train(model, criterion, optimizer, x, y):
     optimizer.step()  # 가중치 수정
     return loss.item()  # loss를 numpy 데이터로 반환
 
-epochs = 2000
+epochs = 200
 for epoch in range(1, epochs + 1):
     loss = train(model, criterion, optimizer, x_train, y_train)
     if epoch % 10 == 0:  # 10 에포크마다 로그 출력
@@ -75,19 +71,19 @@ def evaluate(model, criterion, x, y):
         return loss.item()
 
 loss2 = evaluate(model, criterion, x_test, y_test)
-rmse = np.sqrt(loss2)
-print("Final RMSE:", rmse)
+print("Final Loss:", loss2)
 
 # 예측
 with torch.no_grad():
-    y_pred = model(x_test).detach().cpu().numpy()
+    y_pred = model(x_test)
+    y_pred = torch.argmax(y_pred, dim=1).detach().cpu().numpy()
 
 # 성능 평가
-r2 = r2_score(y_test.cpu().numpy(), y_pred)
+acc = accuracy_score(y_test.cpu().numpy(), y_pred)
 
-print("R2 score: {:.4f}".format(r2))
+print("Accuracy score: {:.4f}".format(acc))
 
 '''
-Final RMSE: 150.80178292836925
-R2 score: 0.2982
+Final Loss: 0.1931007206439972
+Accuracy score: 0.9667
 '''

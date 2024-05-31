@@ -37,15 +37,47 @@ print(x_train.shape, x_test.shape)
 print(y_train.shape, y_test.shape)
 
 # 2. 모델구성
-model = nn.Sequential(
-    nn.Linear(8, 5),  # input 크기를 10으로 설정
-    nn.ReLU(),
-    nn.Linear(5, 4),
-    nn.ReLU(),
-    nn.Linear(4, 3),
-    nn.ReLU(),
-    nn.Linear(3, 1)    # 최종 출력 노드를 1로 설정
-).to(DEVICE)
+# model = nn.Sequential(
+#     nn.Linear(8, 5),  # input 크기를 10으로 설정
+#     nn.ReLU(),
+#     nn.Linear(5, 4),
+#     nn.ReLU(),
+#     nn.Linear(4, 3),
+#     nn.ReLU(),
+#     nn.Linear(3, 1)    # 최종 출력 노드를 1로 설정
+# ).to(DEVICE)
+class Model(nn.Module):
+    #함수에 들어갈 레이어들의 정의를 넣는곳
+    def __init__(self,input_dim,output_dim):
+        # super().__init__()가 저장되어있다(아빠)
+        super(Model,self).__init__()
+        self.linear1 = nn.Linear(input_dim,64)
+        self.linear2 = nn.Linear(64,32)
+        self.linear3 = nn.Linear(32,16)
+        self.linear4 = nn.Linear(16,8)
+        self.linear5 = nn.Linear(8,16)
+        self.linear6 = nn.Linear(16,32)
+        self.linear7 = nn.Linear(32,64)
+        self.linearout = nn.Linear(64,output_dim)
+        self.sigmoid = nn.Sigmoid()
+        self.relu = nn.ReLU()
+        return
+    #모델구성의 레이어를 만들어주는 곳, 순전파
+    def forward(self,input_size):
+        x1 = self.linear1(input_size)
+        x2 = self.linear2(x1)
+        x3 = self.linear3(x2)
+        x4 = self.linear4(x3)
+        x5 = self.linear5(x4)
+        x6 = self.linear6(x5)
+        x7 = self.linear7(x6)
+        x7 = self.relu(x7)
+        out = self.linearout(x7)
+        
+        return out
+
+#model = Model(인풋레이어, 아웃풋레이어) -> 함수형모델과 비슷
+model = Model(8,1).to(DEVICE)
 
 # 3. 컴파일, 훈련
 criterion = nn.MSELoss()  # 회귀 문제를 위한 Mean Squared Error Loss
@@ -88,6 +120,6 @@ r2 = r2_score(y_test.cpu().numpy(), y_pred)
 print("R2 score: {:.4f}".format(r2))
 
 '''
-Final RMSE: 150.80178292836925
-R2 score: 0.2982
+Final RMSE: 149.3598841724243
+R2 score: 0.3116
 '''
