@@ -12,18 +12,6 @@ import scipy.stats as stats
 from keras.optimizers import Adam
 # 데이터프레임 불러오기
 # 데이터프레임 불러오기
-df = pd.read_csv(r'C:\Users\Administrator\Desktop\data/alst.csv')
-
-# 필요한 열만 선택
-df = df[["HR", "HRV", 'LOG_HRV','RR_INTERVAL','SDNN','RMSSD', 'PNN100', 'PNN90', 'PNN80', 'PNN70', 'PNN60', 'PNN50', 'PNN40', 'PNN30', 'PNN20', 'PNN10','VLF', 'LF', 'HF', 'LOGVLF', 'LOGLF', 'LOGHF', 'Frequency_Ratio', 'LOG_Fre', 'SDSD', 'CVSD', 'CVNNI', 'RANGE_RRI','GENDER','AGE', 'TOTALPOWER', 'LOG_TOTAL', 'GLUCOS']]
-result_df = df.dropna()
-df1 = pd.read_csv('c:/data/new_data/fasting/TOTAL5.csv')
-df1 = df1[["HR", "HRV", 'LOG_HRV','RR_INTERVAL','SDNN','RMSSD', 'PNN100', 'PNN90', 'PNN80', 'PNN70', 'PNN60', 'PNN50', 'PNN40', 'PNN30', 'PNN20', 'PNN10','VLF', 'LF', 'HF', 'LOGVLF', 'LOGLF', 'LOGHF', 'Frequency_Ratio', 'LOG_Fre', 'SDSD', 'CVSD', 'CVNNI', 'RANGE_RRI','GENDER','AGE', 'TOTALPOWER', 'LOG_TOTAL']]
-
-X = result_df[["HR", "HRV", 'LOG_HRV','RR_INTERVAL','SDNN','RMSSD', 'PNN100', 'PNN90', 'PNN80', 'PNN70', 'PNN60', 'PNN50', 'PNN40', 'PNN30', 'PNN20', 'PNN10','VLF', 'LF', 'HF', 'LOGVLF', 'LOGLF', 'LOGHF', 'Frequency_Ratio', 'LOG_Fre', 'SDSD', 'CVSD', 'CVNNI', 'RANGE_RRI','GENDER','AGE', 'TOTALPOWER', 'LOG_TOTAL']]
-y = result_df['GLUCOS']
-X1 = result_df.drop('GLUCOS',axis=1)
-y1 = result_df['GLUCOS']
 
 X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2,random_state=42)
 # X_train2, X_test2, y_train2, y_test2 = train_test_split(X1,y1,test_size=0.2,random_state=42)
